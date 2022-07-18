@@ -10,4 +10,5 @@ fn main() {
     println!("{:?}", x.cross(y));
     println!("{:?}", p);
     println!("{:?}", p + x);
+
 }
