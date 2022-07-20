@@ -1,4 +1,7 @@
+use std::mem::swap;
+
 use cgmath::*;
+use super::ray::Ray;
 
 pub struct Bound3 
 {   p_min: Point3<f64>,
@@ -6,7 +9,6 @@ pub struct Bound3
 }
 
 impl Bound3
-where
 {
     pub fn new(p: &Point3<f64>, q: &Point3<f64>) -> Bound3 {
         Bound3 {
@@ -126,9 +128,7 @@ where
         else if dia.y >= dia.x && dia.y >= dia.z { 1 }
         else { 2 }
     }
-}
 
-impl Bound3 {
     pub fn lerp(&self, t: f64) -> Point3<f64> {
         Point3::new(
             self.p_min.x * t + self.p_max.x * (1.0 - t),
@@ -149,4 +149,23 @@ impl Bound3 {
         *center = self.p_min.midpoint(self.p_max);
         *radius = (self.p_max - *center).magnitude();
     }
+
+    pub fn intersect_p(&self, r: &Ray) -> Option<(f64, f64)> {
+        let mut t0 = 0.0;
+        let mut t1 = r.t_max;
+        for i in 0..3{
+            let inv_dir = 1.0 / r.d[i];
+            let mut t_near = (self.p_min[i] - r.o[i]) * inv_dir;
+            let mut t_far = (self.p_max[i] - r.o[i]) * inv_dir;
+            
+            if t_near > t_far { swap(&mut t_near, &mut t_far); }
+
+            if t_near > t0  { t0 = t_near; }
+            if t_far < t1  { t1 = t_far; }
+
+            if t0 > t1 { return None }
+        }
+
+        Some((t0, t1))
+   }
 }

@@ -8,6 +8,7 @@ pub struct Ray {
     pub o: Point3<f64>,
     pub d: Vector3<f64>,
     pub time: f64,
+    pub t_max: f64,
     // pub medium: 
 }
 

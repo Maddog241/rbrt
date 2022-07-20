@@ -37,7 +37,8 @@ impl Transform {
         Ray {
             o: self.transform_point3(&r.o),
             d: self.transform_vector3(&r.d),
-            time: r.time
+            time: r.time,
+            t_max: r.t_max,
         } 
     }
 
