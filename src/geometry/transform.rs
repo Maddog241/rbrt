@@ -1,4 +1,7 @@
 use cgmath::*;
+use super::ray::Ray;
+use super::bound3::Bound3;
+use std::ops::Mul;
 
 pub struct Transform {
     m: Matrix4<f64>,
@@ -6,15 +9,52 @@ pub struct Transform {
 }
 
 impl Transform {
-    pub fn new(m: Matrix4<f64>, m_inv: Matrix4<f64>) -> Transform {
-        Transform { m, m_inv }
-    }
-
     pub fn inverse(&self) -> Transform {
         Transform {
             m: self.m_inv,
             m_inv: self.m,
         }
+    }
+
+    pub fn transform_point3(&self, p: &Point3<f64>) -> Point3<f64> {
+        let np = self.m * Vector4::new(p.x, p.y, p.z, 1.0);
+        if np.w == 1.0 {
+            Point3::new(np.x, np.y, np.z)
+        } else {
+            Point3::new(np.x/np.w, np.y/np.w, np.z/np.w)
+        }
+    }
+
+    pub fn transform_vector3(&self, v: &Vector3<f64>) -> Vector3<f64> {
+        Vector3::new(
+            self.m[0][0] * v.x + self.m[0][1] * v.y + self.m[0][2] * v.z,
+            self.m[1][0] * v.x + self.m[1][1] * v.y + self.m[1][2] * v.z,
+            self.m[2][0] * v.x + self.m[2][1] * v.y + self.m[2][2] * v.z
+        )
+    }
+
+    pub fn transform_ray(&self, r: &Ray) -> Ray {
+        Ray {
+            o: self.transform_point3(&r.o),
+            d: self.transform_vector3(&r.d),
+            time: r.time
+        } 
+    }
+
+    pub fn transform_bound3(&self, b: &Bound3) -> Bound3 {
+        let p0 = self.transform_point3(&b.corner(0));
+        let p1 = self.transform_point3(&b.corner(1));
+        let mut new_bound = Bound3::new(&p0, &p1);
+        for i in 2..8 {
+            new_bound = new_bound.union_point3(&self.transform_point3(&b.corner(i)));
+        }
+        new_bound
+    }
+}
+
+impl Transform {
+    pub fn new(m: Matrix4<f64>, m_inv: Matrix4<f64>) -> Transform {
+        Transform { m, m_inv }
     }
 
     pub fn translate(delta: Vector3<f64>) -> Transform {
@@ -152,5 +192,16 @@ impl Transform {
             m: SquareMatrix::invert(&camera_to_world).unwrap(),
             m_inv: camera_to_world,
         }
+    }
+}
+
+
+impl Mul<Transform> for Transform {
+    type Output = Self;
+    fn mul(self, rhs: Transform) -> Self::Output {
+        Transform {
+            m: self.m * rhs.m,
+            m_inv: rhs.m_inv * self.m_inv,
+        } 
     }
 }
