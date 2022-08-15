@@ -3,9 +3,9 @@ use std::mem::swap;
 use cgmath::*;
 use super::ray::Ray;
 
-pub struct Bound3 
-{   p_min: Point3<f64>,
-    p_max: Point3<f64>,
+pub struct Bound3 {   
+    pub p_min: Point3<f64>,
+    pub p_max: Point3<f64>,
 }
 
 impl Bound3

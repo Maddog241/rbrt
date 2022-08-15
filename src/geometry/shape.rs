@@ -1,7 +1,6 @@
 use super::bound3::Bound3;
 use super::ray::Ray;
 use super::interaction::SurfaceInteraction;
-use cgmath::*;
 
 pub trait Shape {
     fn object_bound(&self) -> Bound3;

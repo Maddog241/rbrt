@@ -1,4 +1,5 @@
 use cgmath::*;
+use super::interaction::*;
 use super::ray::Ray;
 use super::bound3::Bound3;
 use std::ops::Mul;
@@ -33,6 +34,17 @@ impl Transform {
         )
     }
 
+    pub fn transform_normal(&self, n: &Vector3<f64>) -> Vector3<f64> {
+        // n must be normalized, which is different from that in pbrt
+        // do not transpose the inverse matrix explicitly (change iteration method instead). 
+        // just multiplying the matrix may result in a non-normalized vector, so normalize it in the end.
+        Vector3::new(
+            self.m_inv[0][0] * n.x + self.m_inv[1][0] * n.y + self.m_inv[2][0] * n.z,
+            self.m_inv[0][1] * n.x + self.m_inv[1][1] * n.y + self.m_inv[2][1] * n.z,
+            self.m_inv[0][2] * n.x + self.m_inv[1][2] * n.y + self.m_inv[2][2] * n.z,
+        ).normalize()
+    }
+
     pub fn transform_ray(&self, r: &Ray) -> Ray {
         Ray {
             o: self.transform_point3(&r.o),
@@ -50,6 +62,16 @@ impl Transform {
             new_bound = new_bound.union_point3(&self.transform_point3(&b.corner(i)));
         }
         new_bound
+    }
+
+    pub fn transform_surface_interaction(&self, si: &SurfaceInteraction) -> SurfaceInteraction {
+        SurfaceInteraction {
+            p: self.transform_point3(&si.p),
+            n: self.transform_normal(&si.n),
+            t: si.t,
+            time: si.time,
+            wo: self.transform_vector3(&si.wo),
+        }
     }
 }
 
@@ -93,6 +115,7 @@ impl Transform {
     }
 
     pub fn rotate_x(theta: f64) -> Transform {
+        // theta in degree
         // rotate in the counter-clockwise direction
         let theta = theta.to_radians();
         let cos_theta = theta.cos();
@@ -180,7 +203,7 @@ impl Transform {
     pub fn look_at(pos: Vector3<f64>, look: Vector3<f64>, up: Vector3<f64>) -> Transform {
         // m is the world-to-camera transformation matrix
         let new_z = (look - pos).normalize();
-        let new_x = new_z.cross(up.normalize());
+        let new_x = new_z.cross(up).normalize();
         let new_y = new_x.cross(new_z);
         let camera_to_world = Matrix4::new(
             new_x.x, new_y.x, new_z.x, 0.0,
@@ -197,9 +220,9 @@ impl Transform {
 }
 
 
-impl Mul<Transform> for Transform {
+impl Mul<&Transform> for Transform {
     type Output = Self;
-    fn mul(self, rhs: Transform) -> Self::Output {
+    fn mul(self, rhs: &Transform) -> Self::Output {
         Transform {
             m: self.m * rhs.m,
             m_inv: rhs.m_inv * self.m_inv,
