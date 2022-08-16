@@ -217,12 +217,29 @@ impl Transform {
             m_inv: camera_to_world,
         }
     }
+
+    pub fn orthographic(n: f64, f: f64) -> Transform {
+        Transform::scale(1.0, 1.0, 1.0/(f-n)) * Transform::translate(Vector3::new(0.0, 0.0, -n))
+    }
+
+    pub fn perspective(fov: f64, n: f64, f: f64) -> Transform {
+        let persp = Matrix4::new(
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, f/(f-n), -f*n/(f-n),
+            0.0, 0.0, 1.0, 0.0
+        );
+
+        let fov = fov.to_radians();
+        let inv_tan = 1.0 / (fov/2.0).tan();
+        Transform::scale(inv_tan, inv_tan, 1.0) * Transform::new(persp, persp.invert().unwrap())
+    }
 }
 
 
-impl Mul<&Transform> for Transform {
+impl Mul<Transform> for Transform {
     type Output = Self;
-    fn mul(self, rhs: &Transform) -> Self::Output {
+    fn mul(self, rhs: Transform) -> Self::Output {
         Transform {
             m: self.m * rhs.m,
             m_inv: rhs.m_inv * self.m_inv,
