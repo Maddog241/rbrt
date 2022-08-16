@@ -49,14 +49,11 @@ impl PerspectiveCamera {
 
 impl Camera for PerspectiveCamera {
     fn generate_ray(&self, sample: CameraSample) -> crate::geometry::ray::Ray {
-        println!("p_film: {:?}", sample.p_film);
-        println!("raster_to_camera: {:?}", self.raster_to_camera.m);
         let p_camera = self.raster_to_camera.transform_point3(&Point3::new(
             sample.p_film.x,
             sample.p_film.y,
             0.0,
         ));
-        println!("p_camera: {:?}", p_camera);
         // cast ray in the camera space
         let r = Ray {
             o: Point3::new(0.0, 0.0, 0.0),

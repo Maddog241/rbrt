@@ -84,12 +84,16 @@ impl Transform {
     pub fn translate(delta: Vector3<f64>) -> Transform {
         Transform {
             m: Matrix4::new(
-                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, delta.x, delta.y,
-                delta.z, 1.0,
+                1.0, 0.0, 0.0, 0.0, 
+                0.0, 1.0, 0.0, 0.0, 
+                0.0, 0.0, 1.0, 0.0, 
+                delta.x, delta.y, delta.z, 1.0,
             ),
             m_inv: Matrix4::new(
-                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -delta.x, -delta.y,
-                -delta.z, 1.0,
+                1.0, 0.0, 0.0, 0.0, 
+                0.0, 1.0, 0.0, 0.0, 
+                0.0, 0.0, 1.0, 0.0, 
+                -delta.x, -delta.y, -delta.z, 1.0,
             ),
         }
     }
@@ -97,25 +101,16 @@ impl Transform {
     pub fn scale(x: f64, y: f64, z: f64) -> Transform {
         Transform {
             m: Matrix4::new(
-                x, 0.0, 0.0, 0.0, 0.0, y, 0.0, 0.0, 0.0, 0.0, z, 0.0, 0.0, 0.0, 0.0, 1.0,
+                x, 0.0, 0.0, 0.0,
+                0.0, y, 0.0, 0.0, 
+                0.0, 0.0, z, 0.0, 
+                0.0, 0.0, 0.0, 1.0,
             ),
             m_inv: Matrix4::new(
-                1.0 / x,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                1.0 / y,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                1.0 / z,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                1.0,
+                1.0 / x, 0.0, 0.0, 0.0,
+                0.0, 1.0 / y, 0.0, 0.0,
+                0.0, 0.0, 1.0 / z, 0.0,
+                0.0, 0.0, 0.0, 1.0,
             ),
         }
     }
@@ -128,12 +123,16 @@ impl Transform {
         let sin_theta = theta.sin();
         Transform {
             m: Matrix4::new(
-                1.0, 0.0, 0.0, 0.0, 0.0, cos_theta, -sin_theta, 0.0, 0.0, sin_theta, cos_theta,
-                0.0, 0.0, 0.0, 0.0, 1.0,
+                1.0, 0.0, 0.0, 0.0, 
+                0.0, cos_theta, -sin_theta, 0.0, 
+                0.0, sin_theta, cos_theta, 0.0, 
+                0.0, 0.0, 0.0, 1.0,
             ),
             m_inv: Matrix4::new(
-                1.0, 0.0, 0.0, 0.0, 0.0, cos_theta, sin_theta, 0.0, 0.0, -sin_theta, cos_theta,
-                0.0, 0.0, 0.0, 0.0, 1.0,
+                1.0, 0.0, 0.0, 0.0, 
+                0.0, cos_theta, sin_theta, 0.0, 
+                0.0, -sin_theta, cos_theta, 0.0, 
+                0.0, 0.0, 0.0, 1.0,
             ),
         }
     }
@@ -145,12 +144,16 @@ impl Transform {
         let sin_theta = theta.sin();
         Transform {
             m: Matrix4::new(
-                cos_theta, 0.0, sin_theta, 0.0, 0.0, 1.0, 0.0, 0.0, -sin_theta, 0.0, cos_theta,
-                0.0, 0.0, 0.0, 0.0, 1.0,
+                cos_theta, 0.0, sin_theta, 0.0, 
+                0.0, 1.0, 0.0, 0.0, 
+                -sin_theta, 0.0, cos_theta, 0.0, 
+                0.0, 0.0, 0.0, 1.0,
             ),
             m_inv: Matrix4::new(
-                cos_theta, 0.0, -sin_theta, 0.0, 0.0, 1.0, 0.0, 0.0, sin_theta, 0.0, cos_theta,
-                0.0, 0.0, 0.0, 0.0, 1.0,
+                cos_theta, 0.0, -sin_theta, 0.0, 
+                0.0, 1.0, 0.0, 0.0, 
+                sin_theta, 0.0, cos_theta, 0.0, 
+                0.0, 0.0, 0.0, 1.0,
             ),
         }
     }
@@ -162,12 +165,16 @@ impl Transform {
         let sin_theta = theta.sin();
         Transform {
             m: Matrix4::new(
-                cos_theta, -sin_theta, 0.0, 0.0, sin_theta, cos_theta, 0.0, 0.0, 0.0, 0.0, 1.0,
-                0.0, 0.0, 0.0, 0.0, 1.0,
+                cos_theta, -sin_theta, 0.0, 0.0, 
+                sin_theta, cos_theta, 0.0, 0.0, 
+                0.0, 0.0, 1.0, 0.0, 
+                0.0, 0.0, 0.0, 1.0,
             ),
             m_inv: Matrix4::new(
-                cos_theta, sin_theta, 0.0, 0.0, -sin_theta, cos_theta, 0.0, 0.0, 0.0, 0.0, 1.0,
-                0.0, 0.0, 0.0, 0.0, 1.0,
+                cos_theta, sin_theta, 0.0, 0.0, 
+                -sin_theta, cos_theta, 0.0, 0.0, 
+                0.0, 0.0, 1.0, 0.0, 
+                0.0, 0.0, 0.0, 1.0,
             ),
         }
     }
@@ -180,40 +187,16 @@ impl Transform {
         let (x, y, z) = (axis.x, axis.y, axis.z);
 
         let m = Matrix4::new(
-            x * x * k + cos_theta,
-            x * y * k + z * sin_theta,
-            x * z * k - y * sin_theta,
-            0.0,
-            x * y * k - z * sin_theta,
-            y * y * k + cos_theta,
-            y * z * k + x * sin_theta,
-            0.0,
-            x * z * k + y * sin_theta,
-            y * z * k - x * sin_theta,
-            z * z * k + cos_theta,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
+            x * x * k + cos_theta, x * y * k + z * sin_theta, x * z * k - y * sin_theta, 0.0,
+            x * y * k - z * sin_theta, y * y * k + cos_theta, y * z * k + x * sin_theta, 0.0,
+            x * z * k + y * sin_theta, y * z * k - x * sin_theta, z * z * k + cos_theta, 0.0,
+            0.0, 0.0, 0.0, 1.0,
         );
         let m_inv = Matrix4::new(
-            x * x * k + cos_theta,
-            x * y * k - z * sin_theta,
-            x * z * k + y * sin_theta,
-            0.0,
-            x * y * k + z * sin_theta,
-            y * y * k + cos_theta,
-            y * z * k - x * sin_theta,
-            0.0,
-            x * z * k - y * sin_theta,
-            y * z * k + x * sin_theta,
-            z * z * k + cos_theta,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
+            x * x * k + cos_theta, x * y * k - z * sin_theta, x * z * k + y * sin_theta, 0.0,
+            x * y * k + z * sin_theta, y * y * k + cos_theta, y * z * k - x * sin_theta, 0.0,
+            x * z * k - y * sin_theta, y * z * k + x * sin_theta, z * z * k + cos_theta, 0.0,
+            0.0, 0.0, 0.0, 1.0,
         );
         Transform { m, m_inv }
     }
@@ -221,11 +204,13 @@ impl Transform {
     pub fn look_at(pos: Vector3<f64>, look: Vector3<f64>, up: Vector3<f64>) -> Transform {
         // m is the world-to-camera transformation matrix
         let new_z = (look - pos).normalize();
-        let new_x = new_z.cross(up).normalize();
-        let new_y = new_x.cross(new_z);
+        let new_x = up.cross(new_z).normalize();
+        let new_y = new_z.cross(new_x);
         let camera_to_world = Matrix4::new(
-            new_x.x, new_x.y, new_x.z, 0.0, new_y.x, new_y.y, new_y.z, 0.0, new_z.x, new_z.y,
-            new_z.z, 0.0, pos.x, pos.y, pos.z, 1.0,
+            new_x.x, new_x.y, new_x.z, 0.0, 
+            new_y.x, new_y.y, new_y.z, 0.0, 
+            new_z.x, new_z.y, new_z.z, 0.0, 
+            pos.x, pos.y, pos.z, 1.0,
         );
 
         Transform {
@@ -240,22 +225,10 @@ impl Transform {
 
     pub fn perspective(fov: f64, n: f64, f: f64) -> Transform {
         let persp = Matrix4::new(
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            f / (f - n),
-            1.0,
-            0.0,
-            0.0,
-            -f * n / (f - n),
-            0.0,
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, f / (f - n), 1.0,
+            0.0, 0.0, -f * n / (f - n), 0.0,
         );
 
         let fov = fov.to_radians();
