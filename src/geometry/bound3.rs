@@ -9,7 +9,7 @@ pub struct Bound3 {
 }
 
 impl Bound3 {
-    pub fn new(p: &Point3<f64>, q: &Point3<f64>) -> Bound3 {
+    pub fn new(p: Point3<f64>, q: Point3<f64>) -> Bound3 {
         Bound3 {
             p_min: Point3::new(p.x.min(q.x), p.y.min(q.y), p.z.min(q.z)),
             p_max: Point3::new(p.x.max(q.x), p.y.max(q.y), p.z.max(q.z)),

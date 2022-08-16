@@ -37,7 +37,6 @@ impl Shape for Sphere {
 
     fn intersect(&self, r: &Ray) -> Option<SurfaceInteraction> {
         // the incoming ray is in world space
-
         // transform the ray to object space
         let r = self.world_to_object.transform_ray(r);
         // compute the quadric coefficients
