@@ -1,4 +1,4 @@
-use cgmath::*;
+use cgmath::{Point3, Vector3};
 
 pub trait Beam {
     fn at(&self, t: f64) -> Point3<f64>;
@@ -9,7 +9,7 @@ pub struct Ray {
     pub d: Vector3<f64>,
     pub time: f64,
     pub t_max: f64,
-    // pub medium: 
+    // pub medium:
 }
 
 impl Beam for Ray {
@@ -21,4 +21,3 @@ impl Beam for Ray {
 // pub struct RayDifferential {
 //     pub o: Point3<f64>
 // }
-

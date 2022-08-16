@@ -1,34 +1,45 @@
 use std::f64::INFINITY;
 
-use cgmath::{Vector3, Point2, Point3, EuclideanSpace, InnerSpace};
+use cgmath::{EuclideanSpace, InnerSpace, Point2, Point3, Vector3};
 
-use super::{Camera, CameraSample};
-use super::film::Film;
-use super::super::geometry::transform::Transform;
 use super::super::geometry::ray::Ray;
+use super::super::geometry::transform::Transform;
+use super::film::Film;
+use super::{Camera, CameraSample};
 
 pub struct PerspectiveCamera {
-    world_to_camera: Transform, // view matrix
+    camera_to_world: Transform, // view matrix
     raster_to_camera: Transform,
     shutter_open: f64,
     shutter_close: f64,
-    film: Film,
+    pub film: Film,
 }
 
 impl PerspectiveCamera {
-    pub fn new(world_to_camera: Transform, screen_window: (Point2<f64>, Point2<f64>), shutter_open: f64, shutter_close: f64, fov: f64, film: Film) -> Self {
+    pub fn new(
+        camera_to_world: Transform,
+        screen_window: (Point2<f64>, Point2<f64>),
+        shutter_open: f64,
+        shutter_close: f64,
+        fov: f64,
+        film: Film,
+    ) -> Self {
         // first compute screen to raster
-        let res  = film.resolution;
-        let screen_to_raster = 
-            Transform::scale(res.x as f64, res.y as f64, 1.0) * 
-            Transform::scale(1.0/(screen_window.1.x - screen_window.0.x), 1.0/(screen_window.1.y-screen_window.0.y), 1.0) * 
-            Transform::translate(Vector3::new(-screen_window.0.x, -screen_window.0.y, 1.0));
+        let res = film.resolution;
+        let screen_to_raster = Transform::scale(res.x as f64, res.y as f64, 1.0)
+            * Transform::scale(
+                1.0 / (screen_window.1.x - screen_window.0.x),
+                -1.0 / (screen_window.1.y - screen_window.0.y),
+                1.0,
+            )
+            * Transform::translate(Vector3::new(-screen_window.0.x, -screen_window.1.y, 0.0));
 
-        let camera_to_screen = Transform::perspective(fov, 0.01, 1e6); // the near and far plane are set arbitrarily
+        let camera_to_screen = Transform::perspective(fov, 1.0, 1e6); // the near and far plane are set arbitrarily
+        println!("perspective: {:?}", camera_to_screen.m);
 
         PerspectiveCamera {
-            world_to_camera,
-            raster_to_camera: (camera_to_screen * screen_to_raster).inverse(), // to be implelmented,
+            camera_to_world,
+            raster_to_camera: (screen_to_raster * camera_to_screen).inverse(), // to be implelmented,
             shutter_open,
             shutter_close,
             film,
@@ -38,7 +49,14 @@ impl PerspectiveCamera {
 
 impl Camera for PerspectiveCamera {
     fn generate_ray(&self, sample: CameraSample) -> crate::geometry::ray::Ray {
-        let p_camera = self.raster_to_camera.transform_point3(&sample.p_film);
+        println!("p_film: {:?}", sample.p_film);
+        println!("raster_to_camera: {:?}", self.raster_to_camera.m);
+        let p_camera = self.raster_to_camera.transform_point3(&Point3::new(
+            sample.p_film.x,
+            sample.p_film.y,
+            0.0,
+        ));
+        println!("p_camera: {:?}", p_camera);
         // cast ray in the camera space
         let r = Ray {
             o: Point3::new(0.0, 0.0, 0.0),
@@ -47,6 +65,6 @@ impl Camera for PerspectiveCamera {
             t_max: INFINITY,
         };
 
-        self.world_to_camera.inverse().transform_ray(&r)
+        self.camera_to_world.transform_ray(&r)
     }
 }

@@ -1,11 +1,11 @@
 use std::f64::consts::PI;
 
-use super::shape::Shape;
 use super::bound3::Bound3;
-use super::ray::*;
 use super::interaction::*;
+use super::ray::*;
+use super::shape::Shape;
 use super::transform::Transform;
-use cgmath::*;
+use cgmath::{EuclideanSpace, InnerSpace, Point3};
 
 pub struct Sphere {
     radius: f64,
@@ -13,11 +13,21 @@ pub struct Sphere {
     world_to_object: Transform,
 }
 
+impl Sphere {
+    pub fn new(radius: f64, object_to_world: Transform, world_to_object: Transform) -> Self {
+        Sphere {
+            radius,
+            object_to_world,
+            world_to_object,
+        }
+    }
+}
+
 impl Shape for Sphere {
     fn object_bound(&self) -> Bound3 {
         Bound3 {
             p_min: Point3::new(-self.radius, -self.radius, -self.radius),
-            p_max: Point3::new(self.radius, self.radius, self.radius)
+            p_max: Point3::new(self.radius, self.radius, self.radius),
         }
     }
 
@@ -34,7 +44,7 @@ impl Shape for Sphere {
         let a = r.d.dot(r.d);
         let b = 2.0 * r.o.dot(r.d);
         let c = r.o.dot(r.o.to_vec()) - self.radius * self.radius;
-        let discriminant = b*b - 4.0*a*c;
+        let discriminant = b * b - 4.0 * a * c;
         // check the solution for t
         if discriminant <= 0.0 {
             // there's no intersection or only one(considered none)
@@ -43,7 +53,7 @@ impl Shape for Sphere {
 
         let sqrt_discriminant = discriminant.sqrt();
         let mut t = (-b - sqrt_discriminant) / (2.0 * a);
-        if t < 0.0001 || t > r.t_max{
+        if t < 0.0001 || t > r.t_max {
             // the smaller solution is invalid
             t = (-b + sqrt_discriminant) / (2.0 * a);
             if t < 0.0001 || t > r.t_max {
@@ -73,7 +83,7 @@ impl Shape for Sphere {
         let a = r.d.dot(r.d);
         let b = 2.0 * r.o.dot(r.d);
         let c = r.o.dot(r.o.to_vec()) - self.radius * self.radius;
-        let discriminant = b*b - 4.0*a*c;
+        let discriminant = b * b - 4.0 * a * c;
 
         if discriminant <= 0.0 {
             return None;
@@ -81,7 +91,7 @@ impl Shape for Sphere {
 
         let sqrt_discriminant = discriminant.sqrt();
         let mut t = (-b - sqrt_discriminant) / (2.0 * a);
-        if t < 0.0001 || t > r.t_max{
+        if t < 0.0001 || t > r.t_max {
             // the smaller solution is invalid
             t = (-b + sqrt_discriminant) / (2.0 * a);
             if t < 0.0001 || t > r.t_max {
@@ -89,7 +99,7 @@ impl Shape for Sphere {
                 return None;
             }
         }
-                
+
         Some(t)
     }
 
