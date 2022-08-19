@@ -15,7 +15,7 @@ pub struct Cylinder {
 impl Cylinder {
     pub fn new(object_to_world: Transform, world_to_object: Transform, radius: f64, z_max: f64, z_min: f64) -> Self {
         if z_max < z_min {
-            eprintln!("[cyliner initialization]: z_max smaller than z_min, switched automatically");
+            eprintln!("[cylinder initialization]: z_max smaller than z_min, switched automatically");
             Cylinder {object_to_world, world_to_object, radius, z_min: z_max, z_max: z_min}
         } else {
             Cylinder {object_to_world, world_to_object, radius, z_max, z_min}
@@ -42,7 +42,7 @@ impl Shape for Cylinder {
 
         // compute the quadric coefficients
         let a = r.d.x * r.d.x + r.d.y * r.d.y;
-        let b = 2.0 * (r.o.x * r.d.x + r.o.y + r.d.y);
+        let b = 2.0 * (r.o.x * r.d.x + r.o.y * r.d.y);
         let c = r.o.x * r.o.x + r.o.y * r.o.y - self.radius * self.radius;
         let discriminant = b * b - 4.0 * a * c;
         // check solutions
@@ -63,14 +63,13 @@ impl Shape for Cylinder {
         // get the solution t
         let p = r.at(t);
         let n = Vector3::new(p.x, p.y, 0.0);
-        let wo = -r.d;
         
         let inter = SurfaceInteraction {
             p,
             n,
             t,
             time: r.time,
-            wo,
+            wo: -r.d,
         };
 
         // transform the interation back to the world coordinate
@@ -83,7 +82,7 @@ impl Shape for Cylinder {
 
         // compute the quadric coefficients
         let a = r.d.x * r.d.x + r.d.y * r.d.y;
-        let b = 2.0 * (r.o.x * r.d.x + r.o.y + r.d.y);
+        let b = 2.0 * (r.o.x * r.d.x + r.o.y * r.d.y);
         let c = r.o.x * r.o.x + r.o.y * r.o.y - self.radius * self.radius;
         let discriminant = b * b - 4.0 * a * c;
         // check solutions
