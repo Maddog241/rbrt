@@ -12,6 +12,7 @@ const WIDTH: usize = 600;
 const HEIGHT: usize = 500;
 const FRAME: f64 = (WIDTH as f64) / (HEIGHT as f64);
 
+
 fn main() {
     // create camera
     let pos = Vector3::new(-5.0, 0.0, 0.0);
@@ -32,11 +33,6 @@ fn main() {
     let world_to_object = object_to_world.inverse();
     let sphere = Sphere::new(1.0, object_to_world, world_to_object);
 
-    // create cylinder
-    // let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 3.0));
-    // let world_to_object = object_to_world.inverse();
-    // let cylinder = Cylinder::new(object_to_world, world_to_object, 1.0, 1.0, -1.0);
-
     // render
     let now = std::time::Instant::now();
     for i in 0..HEIGHT {
@@ -55,7 +51,7 @@ fn main() {
     println!("render cost: {} secs", (cost as f64) / 1000.0);
 
     // write the film to the file
-    camera.film.write_to_image("./images/move_camera.ppm");
+    camera.film.write_to_image("./images/cylinder.ppm");
     let cost2 = now.elapsed().as_millis();
     println!("writing cost: {} secs", ((cost2 - cost) as f64) / 1000.0);
 }
