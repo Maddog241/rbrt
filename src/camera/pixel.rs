@@ -7,6 +7,9 @@ pub struct Pixel {
 
 impl Pixel {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
+        assert!(0.0 <= x);
+        assert!(0.0 <= y);
+        assert!(0.0 <= z);
         Pixel {
             rgb: Vector3::new(x, y, z),
         }

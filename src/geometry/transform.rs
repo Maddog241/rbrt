@@ -28,9 +28,9 @@ impl Transform {
 
     pub fn transform_vector3(&self, v: &Vector3<f64>) -> Vector3<f64> {
         Vector3::new(
-            self.m[0][0] * v.x + self.m[0][1] * v.y + self.m[0][2] * v.z,
-            self.m[1][0] * v.x + self.m[1][1] * v.y + self.m[1][2] * v.z,
-            self.m[2][0] * v.x + self.m[2][1] * v.y + self.m[2][2] * v.z,
+            self.m[0][0] * v.x + self.m[1][0] * v.y + self.m[2][0] * v.z,
+            self.m[0][1] * v.x + self.m[1][1] * v.y + self.m[2][1] * v.z,
+            self.m[0][2] * v.x + self.m[1][2] * v.y + self.m[2][2] * v.z,
         )
     }
 
@@ -39,9 +39,9 @@ impl Transform {
         // do not transpose the inverse matrix explicitly (change iteration method instead).
         // just multiplying the matrix may result in a non-normalized vector, so normalize it in the end.
         Vector3::new(
-            self.m_inv[0][0] * n.x + self.m_inv[1][0] * n.y + self.m_inv[2][0] * n.z,
-            self.m_inv[0][1] * n.x + self.m_inv[1][1] * n.y + self.m_inv[2][1] * n.z,
-            self.m_inv[0][2] * n.x + self.m_inv[1][2] * n.y + self.m_inv[2][2] * n.z,
+            self.m_inv[0][0] * n.x + self.m_inv[0][1] * n.y + self.m_inv[0][2] * n.z,
+            self.m_inv[1][0] * n.x + self.m_inv[1][1] * n.y + self.m_inv[1][2] * n.z,
+            self.m_inv[2][0] * n.x + self.m_inv[2][1] * n.y + self.m_inv[2][2] * n.z,
         )
         .normalize()
     }
