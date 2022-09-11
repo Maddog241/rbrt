@@ -1,6 +1,8 @@
 mod camera;
 mod geometry;
 mod utils;
+mod bxdf;
+mod spectrum;
 
 use camera::{film::Film, perspective::PerspectiveCamera, pixel::Pixel, Camera, CameraSample};
 use cgmath::{Matrix4, Point2, Point3, Vector2, Vector3, Vector4};
