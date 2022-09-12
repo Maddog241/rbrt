@@ -1,4 +1,4 @@
-use super::Bxdf;
+use super::{Bxdf, BxdfType};
 use super::Spectrum;
 use cgmath::{Vector3, Point2};
 use std::f64::consts::PI;
@@ -7,6 +7,16 @@ const INV_PI: f64 = 1.0 / PI;
 
 pub struct LambertianReflection {
     reflectance: Spectrum,    
+    types: i32,
+}
+
+impl LambertianReflection {
+    pub fn new(reflectance: Spectrum) -> Self {
+        LambertianReflection  {
+            reflectance,
+            types: BxdfType::Reflection | BxdfType::Diffuse,
+        }
+    }
 }
 
 impl Bxdf for LambertianReflection {
@@ -21,5 +31,9 @@ impl Bxdf for LambertianReflection {
         *wi = Vector3::new(phi.cos(), phi.sin(), theta.sin());
 
         self.reflectance *  INV_PI
+    }
+
+    fn types(&self) -> i32 {
+        self.types
     }
 }

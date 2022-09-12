@@ -1,6 +1,5 @@
 use cgmath::Vector3;
 
-
 // w here are supposed to be in the local coordinate system
 pub fn cos_theta(w: Vector3<f64>) -> f64 {
     w.z

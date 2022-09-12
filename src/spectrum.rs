@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul, Div};
+use std::ops::{Add, Sub, Mul, Div, AddAssign};
 use rand::random;
 
 pub type Spectrum = RGBSpectrum;
@@ -29,6 +29,14 @@ impl Add<RGBSpectrum> for RGBSpectrum {
             g: self.g + rhs.g,
             b: self.b + rhs.b,
         } 
+    }
+}
+
+impl AddAssign<RGBSpectrum> for RGBSpectrum {
+    fn add_assign(&mut self, rhs: RGBSpectrum) {
+        self.r += rhs.r;
+        self.g += rhs.g;
+        self.b += rhs.b; 
     }
 }
 
@@ -106,6 +114,19 @@ mod tests {
             assert_eq!(s1+s2, Spectrum::new(s1.r + s2.r, s1.g + s2.g, s1.b + s2.b));
         }
    }
+
+   #[test]
+    fn test_add_assign() {
+        for i in 0..10 {
+            let mut s1 = Spectrum::new(random(), random(), random());
+            let s2 = Spectrum::new(random(), random(), random());
+
+            let sum = s1 + s2;
+            s1 += s2;
+
+            assert_eq!(s1, sum);
+        }
+    }
 
     #[test]
     fn test_sub() {
