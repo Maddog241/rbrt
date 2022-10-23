@@ -5,6 +5,7 @@ mod bxdf;
 mod spectrum;
 mod primitive;
 mod material;
+mod light;
 
 use camera::{film::Film, perspective::PerspectiveCamera, pixel::Pixel, Camera, CameraSample};
 use cgmath::{Matrix4, Point2, Point3, Vector2, Vector3, Vector4};
