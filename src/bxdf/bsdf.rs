@@ -2,14 +2,14 @@ use super::{Bxdf, BxdfType, Spectrum, match_flags};
 use cgmath::{Vector3, InnerSpace};
 
 pub struct Bsdf {
-    eta_i: f64,  // refractive index inside
-    eta_o: f64,  // ... outside
-    ns: Vector3<f64>, // shading normal
-    ng: Vector3<f64>, // geometry normal
-    ss: Vector3<f64>, // s axis in the shading coordinate
-    ts: Vector3<f64>, // t axis in the shading coordinate
-    bxdfs: Vec<Box<dyn Bxdf>>,
-    n_bxdfs: usize, // the number of bxdfs 
+    pub eta_i: f64,  // refractive index inside
+    pub eta_o: f64,  // ... outside
+    pub ns: Vector3<f64>, // shading normal
+    pub ng: Vector3<f64>, // geometry normal
+    pub ss: Vector3<f64>, // s axis in the shading coordinate
+    pub ts: Vector3<f64>, // t axis in the shading coordinate
+    pub bxdfs: Vec<Box<dyn Bxdf>>,
+    pub n_bxdfs: usize, // the number of bxdfs 
 }
 
 impl Bsdf {

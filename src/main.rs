@@ -4,10 +4,16 @@ mod utils;
 mod bxdf;
 mod spectrum;
 mod primitive;
+mod material;
 
 use camera::{film::Film, perspective::PerspectiveCamera, pixel::Pixel, Camera, CameraSample};
 use cgmath::{Matrix4, Point2, Point3, Vector2, Vector3, Vector4};
-use geometry::{shape::Shape, sphere::Sphere, transform::Transform};
+use geometry::{sphere::Sphere, transform::Transform};
+use rand::random;
+use std::rc::Rc;
+
+use crate::{primitive::geometric_primitive::GeometricPrimitive, spectrum::Spectrum, material::matte::Matte};
+use crate::primitive::Primitive;
 
 
 const WIDTH: usize = 600;
@@ -17,7 +23,7 @@ const FRAME: f64 = (WIDTH as f64) / (HEIGHT as f64);
 
 fn main() {
     // create camera
-    let pos = Vector3::new(-5.0, 0.0, 0.0);
+    let pos = Vector3::new(0.0, 0.0, 0.0);
     let look = Vector3::new(0.0, 0.0, 3.0);
     let up = Vector3::new(0.0, 1.0, 0.0);
     let camera_to_world = Transform::look_at(pos, look, up).inverse();
@@ -30,10 +36,14 @@ fn main() {
         90.0,
         Film::new(WIDTH, HEIGHT),
     );
-    // create sphere
+    // create ball
+    //// create sphere
     let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 3.0));
     let world_to_object = object_to_world.inverse();
     let sphere = Sphere::new(1.0, object_to_world, world_to_object);
+    //// create lambertian material
+    let matte_material = Matte::new(Spectrum::new(0.4, 0.6, 0.2));
+    let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
 
     // render
     let now = std::time::Instant::now();
@@ -41,11 +51,16 @@ fn main() {
         for j in 0..WIDTH {
             // first render the upper left pixel, then go rightwards and downwards
             let sample = CameraSample::new(Point2::new(j as f64, i as f64), 0.0);
-            let r = camera.generate_ray(sample);
+            let mut r = camera.generate_ray(sample);
             let mut pixel = Pixel::new(0.0, 0.0, 0.0);
             // println!("{:?}", r.d);
-            if let Some(inter) = sphere.intersect(&r) {
-                pixel = Pixel::new(inter.n.x.max(0.0), inter.n.y.max(0.0), inter.n.z.max(0.0));
+            if let Some(isect) = ball.intersect(&mut r) {
+                let sample: Point2<f64> = Point2::new(random(), random());
+                if let Some(mat) = isect.material {
+                    let f = mat.compute_scattering(&isect).f()
+                }
+
+                pixel
             }
             camera.film.record(i, j, pixel);
         }
@@ -54,7 +69,7 @@ fn main() {
     println!("render cost: {} secs", (cost as f64) / 1000.0);
 
     // write the film to the file
-    camera.film.write_to_image("./images/cylinder.ppm");
+    camera.film.write_to_image("./images/material.ppm");
     let cost2 = now.elapsed().as_millis();
     println!("writing cost: {} secs", ((cost2 - cost) as f64) / 1000.0);
 }

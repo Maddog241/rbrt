@@ -73,11 +73,11 @@ impl Transform {
             t: si.t,
             time: si.time,
             wo: self.transform_vector3(&si.wo),
-            // primitive: if let Some(pri) = &si.primitive {
-            //     Some(Rc::clone(pri))
-            // } else {
-            //     None
-            // },
+            material: if let Some(pri) = &si.material {
+                Some(Rc::clone(pri))
+            } else {
+                None
+            },
         }
     }
 }

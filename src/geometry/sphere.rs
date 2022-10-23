@@ -69,7 +69,7 @@ impl Shape for Sphere {
             t,
             time: r.time,
             wo: -r.d,
-            // primitive: None,
+            material: None,
         };
         // convert the interaction in the object space to world space
 
