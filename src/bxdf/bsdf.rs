@@ -13,7 +13,7 @@ pub struct Bsdf {
 }
 
 impl Bsdf {
-    pub fn local_to_world(&self, v: &Vector3<f64>) -> Vector3<f64> {
+    pub fn local_to_world(&self, v: Vector3<f64>) -> Vector3<f64> {
         let (ss, ts, ns) = (self.ss, self.ts, self.ns);
 
         Vector3::new(
@@ -23,29 +23,29 @@ impl Bsdf {
         ) 
     }
 
-    pub fn world_to_local(&self, v: &Vector3<f64>) -> Vector3<f64> {
+    pub fn world_to_local(&self, v: Vector3<f64>) -> Vector3<f64> {
         let (ss, ts, ns) = (self.ss, self.ts, self.ns);
 
         Vector3::new(
-            ss.dot(*v),
-            ts.dot(*v),
-            ns.dot(*v)
+            ss.dot(v),
+            ts.dot(v),
+            ns.dot(v)
         )
     }
 }
 
 impl Bsdf{
-    pub fn sample_f(&self, wo: &Vector3<f64>, wi: &mut Vector3<f64>, sample: Point2<f64>, pdf: &mut f64) -> Spectrum {
+    pub fn sample_f(&self, wo: Vector3<f64>, sample: Point2<f64>) -> (Spectrum, Vector3<f64>, f64) {
         let (u, v) = (sample.x, sample.y);
         // choose the bxdf to sample
         let index = (u * self.n_bxdfs as f64) as usize;
         let u = (u - index as f64* self.n_bxdfs as f64) * self.n_bxdfs as f64;
 
         let sample = Point2::new(u, v);
-        self.bxdfs[index].sample_f(wo, wi, sample, pdf)
+        self.bxdfs[index].sample_f(wo, sample)
     }
 
-    fn f(&self, wo: &Vector3<f64>, wi: &Vector3<f64>, flags: i32) -> Spectrum {
+    pub fn f(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> Spectrum {
         let reflect: bool = wo.dot(self.ng) * wi.dot(self.ng) > 0.0;
 
         let wo = self.world_to_local(wo);
@@ -54,11 +54,10 @@ impl Bsdf{
         let mut ans = Spectrum::new(0.0, 0.0, 0.0);
 
         for i in 0..self.n_bxdfs {
-            if match_flags(&self.bxdfs[i], flags) && (
-                (reflect && (self.bxdfs[i].types() & BxdfType::Reflection as i32) != 0) || 
-                (!reflect && (self.bxdfs[i].types() & BxdfType::Transmission as i32) != 0)
-            ) {
-                ans += self.bxdfs[i].f(&wo, &wi);
+            if (reflect && (self.bxdfs[i].types() & BxdfType::Reflection as i32) != 0) || 
+                (!reflect && (self.bxdfs[i].types() & BxdfType::Transmission as i32) != 0) 
+            {
+                ans += self.bxdfs[i].f(wo, wi);
             }
         }
 

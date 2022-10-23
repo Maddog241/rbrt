@@ -1,5 +1,6 @@
-use std::ops::{Add, Sub, Mul, Div, AddAssign};
-use rand::random;
+use std::ops::{Add, Sub, Mul, Div, AddAssign, MulAssign};
+
+use crate::camera::pixel::Pixel;
 
 pub type Spectrum = RGBSpectrum;
 
@@ -17,6 +18,14 @@ impl RGBSpectrum {
 
     pub fn is_black(&self) -> bool {
         self.r == 0.0 && self.g == 0.0 && self.b == 0.0
+    }
+
+    pub fn to_pixel(&self) -> Pixel {
+        let r = self.r.sqrt();
+        let g = self.g.sqrt();
+        let b = self.b.sqrt();
+
+        Pixel::new(r, g, b)
     }
 }
 
@@ -64,6 +73,14 @@ impl Mul<RGBSpectrum> for RGBSpectrum {
     }
 }
 
+impl MulAssign<RGBSpectrum> for RGBSpectrum {
+    fn mul_assign(&mut self, rhs: RGBSpectrum) {
+        self.r *= rhs.r;
+        self.g *= rhs.g;
+        self.b *= rhs.b;
+    }
+}
+
 impl Mul<f64> for RGBSpectrum {
     type Output = RGBSpectrum;
 
@@ -105,6 +122,7 @@ impl PartialEq<RGBSpectrum> for RGBSpectrum {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rand::random;
     #[test] 
     fn test_add() {
         for _i in 0..10 {

@@ -6,14 +6,18 @@ mod spectrum;
 mod primitive;
 mod material;
 mod light;
+mod integrator;
+mod sampler;
 
 use camera::{film::Film, perspective::PerspectiveCamera, pixel::Pixel, Camera, CameraSample};
 use cgmath::{Matrix4, Point2, Point3, Vector2, Vector3, Vector4};
 use geometry::{sphere::Sphere, transform::Transform};
 use std::rc::Rc;
 
+use crate::integrator::path_integrator::PathIntegrator;
+use crate::light::point_light::PointLight;
+use crate::primitive::scene::Scene;
 use crate::{primitive::geometric_primitive::GeometricPrimitive, spectrum::Spectrum, material::matte::Matte};
-use crate::primitive::Primitive;
 
 
 const WIDTH: usize = 600;
@@ -28,7 +32,7 @@ fn main() {
     let up = Vector3::new(0.0, 1.0, 0.0);
     let camera_to_world = Transform::look_at(pos, look, up).inverse();
 
-    let mut camera = PerspectiveCamera::new(
+    let camera = PerspectiveCamera::new(
         camera_to_world,
         (Point2::new(-FRAME, -1.0), Point2::new(FRAME, 1.0)),
         0.0,
@@ -36,35 +40,28 @@ fn main() {
         90.0,
         Film::new(WIDTH, HEIGHT),
     );
+
+    let mut scene = Scene::new();
     // create ball
     //// create sphere
-    let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 3.0));
+    let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 6.0));
     let world_to_object = object_to_world.inverse();
-    let sphere = Sphere::new(1.0, object_to_world, world_to_object);
+    let sphere = Sphere::new(2.0, object_to_world, world_to_object);
     //// create lambertian material
-    let matte_material = Matte::new(Spectrum::new(0.4, 0.6, 0.2));
+    let matte_material = Matte::new(Spectrum::new(1.0, 0.6, 0.2));
     let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
+    scene.add_primitive(Box::new(ball));
+
+    // create light
+    let p_light = PointLight::new(Point3::new(0.0, 2.0, 5.0), Spectrum::new(1.0, 1.0, 1.0));
+    scene.add_light(Box::new(p_light));
 
     // render
     let now = std::time::Instant::now();
-    for i in 0..HEIGHT {
-        for j in 0..WIDTH {
-            // first render the upper left pixel, then go rightwards and downwards
-            let sample = CameraSample::new(Point2::new(j as f64, i as f64), 0.0);
-            let mut r = camera.generate_ray(sample);
-            let mut pixel = Pixel::new(0.0, 0.0, 0.0);
-            // println!("{:?}", r.d);
-            if let Some(inter) = ball.intersect(&mut r) {
-                pixel = Pixel::new(inter.n.x.max(0.0), inter.n.y.max(0.0), inter.n.z.max(0.0));
-            }
-            camera.film.record(i, j, pixel);
-        }
-    }
+
+    let mut integrator = PathIntegrator::new(50, camera);
+    integrator.render(&scene, "./images/integrator2.ppm");
+
     let cost = now.elapsed().as_millis();
     println!("render cost: {} secs", (cost as f64) / 1000.0);
-
-    // write the film to the file
-    camera.film.write_to_image("./images/material.ppm");
-    let cost2 = now.elapsed().as_millis();
-    println!("writing cost: {} secs", ((cost2 - cost) as f64) / 1000.0);
 }

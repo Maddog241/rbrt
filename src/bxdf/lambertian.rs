@@ -20,17 +20,18 @@ impl LambertianReflection {
 }
 
 impl Bxdf for LambertianReflection {
-    fn f(&self, _wo: &Vector3<f64>, _wi: &Vector3<f64>) -> Spectrum {
+    fn f(&self, _wo: Vector3<f64>, _wi: Vector3<f64>) -> Spectrum {
         self.reflectance * INV_PI
     }
 
-    fn sample_f(&self, _wo: &Vector3<f64>, wi: &mut Vector3<f64>, sample: Point2<f64>, pdf: &mut f64) -> Spectrum {
-        *pdf = INV_PI / 2.0;
+    fn sample_f(&self, _wo: Vector3<f64>, sample: Point2<f64>) -> (Spectrum, Vector3<f64>, f64) {
+        let pdf = INV_PI / 2.0;
+
         let theta = sample[0].acos();
         let phi = sample[1] * 2.0 * PI;
-        *wi = Vector3::new(phi.cos(), phi.sin(), theta.sin());
+        let wi = Vector3::new(phi.cos(), phi.sin(), theta.sin());
 
-        self.reflectance *  INV_PI
+        (self.reflectance *  INV_PI, wi, pdf)
     }
 
     fn types(&self) -> i32 {
