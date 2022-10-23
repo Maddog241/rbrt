@@ -9,7 +9,6 @@ mod material;
 use camera::{film::Film, perspective::PerspectiveCamera, pixel::Pixel, Camera, CameraSample};
 use cgmath::{Matrix4, Point2, Point3, Vector2, Vector3, Vector4};
 use geometry::{sphere::Sphere, transform::Transform};
-use rand::random;
 use std::rc::Rc;
 
 use crate::{primitive::geometric_primitive::GeometricPrimitive, spectrum::Spectrum, material::matte::Matte};
@@ -54,13 +53,8 @@ fn main() {
             let mut r = camera.generate_ray(sample);
             let mut pixel = Pixel::new(0.0, 0.0, 0.0);
             // println!("{:?}", r.d);
-            if let Some(isect) = ball.intersect(&mut r) {
-                let sample: Point2<f64> = Point2::new(random(), random());
-                if let Some(mat) = isect.material {
-                    let f = mat.compute_scattering(&isect).f()
-                }
-
-                pixel
+            if let Some(inter) = ball.intersect(&mut r) {
+                pixel = Pixel::new(inter.n.x.max(0.0), inter.n.y.max(0.0), inter.n.z.max(0.0));
             }
             camera.film.record(i, j, pixel);
         }
