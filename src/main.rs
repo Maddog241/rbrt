@@ -3,12 +3,12 @@ mod geometry;
 mod utils;
 mod bxdf;
 mod spectrum;
+mod primitive;
 
 use camera::{film::Film, perspective::PerspectiveCamera, pixel::Pixel, Camera, CameraSample};
 use cgmath::{Matrix4, Point2, Point3, Vector2, Vector3, Vector4};
 use geometry::{shape::Shape, sphere::Sphere, transform::Transform};
 
-use crate::geometry::cylinder::Cylinder;
 
 const WIDTH: usize = 600;
 const HEIGHT: usize = 500;
@@ -39,6 +39,7 @@ fn main() {
     let now = std::time::Instant::now();
     for i in 0..HEIGHT {
         for j in 0..WIDTH {
+            // first render the upper left pixel, then go rightwards and downwards
             let sample = CameraSample::new(Point2::new(j as f64, i as f64), 0.0);
             let r = camera.generate_ray(sample);
             let mut pixel = Pixel::new(0.0, 0.0, 0.0);

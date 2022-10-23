@@ -1,4 +1,7 @@
+use std::rc::Rc;
+
 use cgmath::{Point3, Vector3};
+use crate::primitive::geometric_primitive::GeometricPrimitive;
 
 pub trait Interaction {}
 
@@ -9,6 +12,7 @@ pub struct SurfaceInteraction {
     pub time: f64,
     pub wo: Vector3<f64>, // the reverse direction of the incoming ray
                           // medium interface, to be implemented later
+    // pub primitive: Option<Rc<GeometricPrimitive>>,
 }
 
 impl Interaction for SurfaceInteraction {}

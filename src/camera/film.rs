@@ -11,7 +11,7 @@ pub struct Film {
 
 impl Film {
     pub fn new(width: usize, height: usize) -> Self {
-        let pixels = vec![Pixel::new(1.0, 0.0, 0.0); width * height];
+        let pixels = vec![Pixel::new(0.0, 0.0, 0.0); width * height];
         Film {
             resolution: Point2::new(width, height),
             pixels,

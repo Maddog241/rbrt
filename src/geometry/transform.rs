@@ -3,6 +3,7 @@ use super::interaction::*;
 use super::ray::Ray;
 use cgmath::{InnerSpace, Matrix4, Point3, SquareMatrix, Vector3, Vector4};
 use std::ops::Mul;
+use std::rc::Rc;
 
 pub struct Transform {
     pub m: Matrix4<f64>,
@@ -72,6 +73,11 @@ impl Transform {
             t: si.t,
             time: si.time,
             wo: self.transform_vector3(&si.wo),
+            // primitive: if let Some(pri) = &si.primitive {
+            //     Some(Rc::clone(pri))
+            // } else {
+            //     None
+            // },
         }
     }
 }

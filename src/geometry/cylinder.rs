@@ -70,6 +70,7 @@ impl Shape for Cylinder {
             t,
             time: r.time,
             wo: -r.d,
+            // primitive: None,
         };
 
         // transform the interation back to the world coordinate
