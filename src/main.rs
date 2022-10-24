@@ -53,14 +53,14 @@ fn main() {
     scene.add_primitive(Box::new(ball));
 
     // create light
-    let p_light = PointLight::new(Point3::new(0.0, 2.0, 5.0), Spectrum::new(1.0, 1.0, 1.0));
+    let p_light = PointLight::new(Point3::new(0.0, 4.0, 3.0), Spectrum::new(5.0, 5.0, 5.0));
     scene.add_light(Box::new(p_light));
 
     // render
     let now = std::time::Instant::now();
 
     let mut integrator = PathIntegrator::new(50, camera);
-    integrator.render(&scene, "./images/integrator2.ppm");
+    integrator.render(&scene, "./images/integrator9.ppm");
 
     let cost = now.elapsed().as_millis();
     println!("render cost: {} secs", (cost as f64) / 1000.0);

@@ -23,6 +23,10 @@ impl Light for PointLight {
         let wi = (self.p - isect.p).normalize();
         let distance2 = (self.p - isect.p).magnitude2();
 
-        (self.intensity / distance2, wi, pdf)
+        if distance2 > 0.0 {
+            (self.intensity / distance2, wi, pdf)
+        } else {
+            (Spectrum::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 0.0), pdf)
+        }
     }
 }

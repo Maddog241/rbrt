@@ -1,5 +1,7 @@
 use cgmath::{Vector3, InnerSpace};
 
+use crate::spectrum::Spectrum;
+
 // w here are supposed to be in the local coordinate system
 pub fn cos_theta(w: Vector3<f64>) -> f64 {
     w.z
@@ -47,6 +49,10 @@ pub fn perpendicular(n: &Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
     let v = n.cross(u);
 
     (u, v)
+}
+
+pub fn assert_spectrum(spectrum: &Spectrum) -> bool {
+    spectrum.r >= 0.0 && spectrum.g >= 0.0 && spectrum.b >= 0.0
 }
 
 #[cfg(test)]

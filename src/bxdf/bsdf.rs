@@ -42,7 +42,11 @@ impl Bsdf{
         let u = (u - index as f64* self.n_bxdfs as f64) * self.n_bxdfs as f64;
 
         let sample = Point2::new(u, v);
-        self.bxdfs[index].sample_f(wo, sample)
+
+        let wo = self.world_to_local(wo);
+        let (f_value, wi, pdf) =  self.bxdfs[index].sample_f(wo, sample);
+        let wi = self.local_to_world(wi);
+        (f_value, wi, pdf)
     }
 
     pub fn f(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> Spectrum {

@@ -6,9 +6,9 @@ pub type Spectrum = RGBSpectrum;
 
 #[derive(Debug, Clone, Copy)]
 pub struct RGBSpectrum {
-    r: f64, 
-    g: f64, 
-    b: f64,
+    pub r: f64, 
+    pub g: f64, 
+    pub b: f64,
 }
 
 impl RGBSpectrum {
@@ -24,7 +24,7 @@ impl RGBSpectrum {
         let r = self.r.sqrt();
         let g = self.g.sqrt();
         let b = self.b.sqrt();
-
+        
         Pixel::new(r, g, b)
     }
 }
@@ -167,6 +167,17 @@ mod tests {
     }
 
     #[test]
+    fn test_mul_assign() {
+        for _i in 0..10 {
+            let mut s1 = Spectrum::new(random(), random(), random());
+            let s2 = Spectrum::new(random(), random(), random());
+            let s3 = s1 * s2;
+            s1 *= s2;
+            assert_eq!(s1, s3);
+        }
+    }
+
+    #[test]
     fn test_mul_f64() {
         for _i in 0..10 {
             let s = Spectrum::new(0.2, 0.1, 0.3);
@@ -186,4 +197,5 @@ mod tests {
             assert_eq!(s / k, Spectrum::new(s.r/k, s.g/k, s.b/k));
         }
     }
+
 }

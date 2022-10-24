@@ -1,8 +1,10 @@
+use std::f64::INFINITY;
+
 use cgmath::{Point2, InnerSpace};
 use rand::random;
 
 use crate::{camera::{perspective::PerspectiveCamera, CameraSample, pixel::Pixel, Camera}, spectrum::Spectrum, geometry::ray::Ray, primitive::scene::Scene};
-
+use crate::utils::assert_spectrum;
 use super::Integrator;
 
 pub struct PathIntegrator {
@@ -51,8 +53,9 @@ impl Integrator for PathIntegrator {
                     let sample: Point2<f64> = Point2::new(random(), random());
                     for light in scene.lights.iter() {
                         let (incoming_r, wi, pdf) = light.sample_li(&isect, sample);
-                        let f_value = bsdf.f(ray.d, wi);
-                        let cosine = wi.dot(isect.n).abs();
+                        // visibility testing for wi
+                        let f_value = bsdf.f(-ray.d, wi);
+                        let cosine = wi.dot(isect.n).max(0.0);
                         radiance += incoming_r * throughput * f_value * cosine / pdf;
                     }
 
@@ -60,9 +63,10 @@ impl Integrator for PathIntegrator {
                     let sample: Point2<f64> = Point2::new(random(), random());
                     let (f_value, wi, pdf) = bsdf.sample_f(-ray.d, sample);
 
-                    // update the throughput for next iteration
-                    let cosine = wi.dot(isect.n).abs();
+                    // update the throughput for next iteration, spawn the new ray
+                    let cosine = wi.dot(isect.n).max(0.0);
                     throughput *= f_value * cosine / pdf;
+                    *ray = Ray::new(isect.p, wi, ray.time, INFINITY);
                 }
             } else {
                 // does not hit the scene
