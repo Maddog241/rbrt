@@ -1,20 +1,20 @@
 use std::f64::INFINITY;
 
-use cgmath::{Point2, InnerSpace};
+use cgmath::{Point2, Point3, Vector3, InnerSpace};
 use rand::random;
 
-use crate::{camera::{perspective::PerspectiveCamera, CameraSample, pixel::Pixel, Camera}, spectrum::Spectrum, geometry::ray::Ray, primitive::scene::Scene};
-use crate::utils::assert_spectrum;
+use crate::{camera::{perspective::PerspectiveCamera, CameraSample, pixel::Pixel, Camera}, spectrum::Spectrum, geometry::{ray::Ray, interaction::SurfaceInteraction}, primitive::scene::Scene};
 use super::Integrator;
 
 pub struct PathIntegrator {
     max_depth: usize,
     camera: PerspectiveCamera,
+    n_sample: usize,
 }
 
 impl PathIntegrator {
     pub fn new(max_depth: usize, camera: PerspectiveCamera) -> Self {
-        PathIntegrator { max_depth, camera }
+        PathIntegrator { max_depth, camera, n_sample: 20}
     }
 
     pub fn render(&mut self, scene: &Scene, filename: &str) {
@@ -23,17 +23,30 @@ impl PathIntegrator {
         for i in 0..height {
             for j in 0..width {
                 // first render the upper left pixel, then go rightwards and downwards
-                let sample = CameraSample::new(Point2::new(j as f64, i as f64), 0.0);
-                let mut r = self.camera.generate_ray(sample);
+                let mut radiance = Spectrum::new(0.0, 0.0, 0.0);
 
-                let radiance = self.li(&mut r, scene);
+                for _ in 0..self.n_sample {
+                    let sample = CameraSample::new(Point2::new(j as f64 + random::<f64>(), i as f64 + random::<f64>()), 0.0);
+                    let mut r = self.camera.generate_ray(sample);
 
+                    radiance += self.li(&mut r, scene);
+                }
+
+                radiance /= self.n_sample as f64;
                 let pixel = radiance.to_pixel();
                 self.camera.film.record(i, j, pixel);
             }
         }
 
         self.camera.film.write_to_image(filename);
+    }
+
+    fn visibility_test(&self, isect: &SurfaceInteraction, sample_p: Point3<f64>, scene: &Scene) -> bool {
+        let shadow_ray = Ray::new(isect.p, sample_p-isect.p, isect.time, 1.0-0.0001);
+        match scene.intersect_p(&shadow_ray) {
+            Some(_t) => false,
+            None => true,
+        }
     }
 }
 
@@ -52,19 +65,22 @@ impl Integrator for PathIntegrator {
                     // sample lights to estimate the radiance value
                     let sample: Point2<f64> = Point2::new(random(), random());
                     for light in scene.lights.iter() {
-                        let (incoming_r, wi, pdf) = light.sample_li(&isect, sample);
+                        let (incoming_r, sample_p, pdf) = light.sample_li(&isect, sample);
                         // visibility testing for wi
-                        let f_value = bsdf.f(-ray.d, wi);
-                        let cosine = wi.dot(isect.n).max(0.0);
-                        radiance += incoming_r * throughput * f_value * cosine / pdf;
-                    }
+                        if self.visibility_test(&isect, sample_p, scene) {
+                            let wi = (sample_p - isect.p).normalize();
+                            let f_value = bsdf.f(-ray.d.normalize(), wi);
+                            let cosine = wi.dot(isect.n).abs();
+                            radiance += incoming_r * throughput * f_value * cosine / pdf;
+                        }
+                   }
 
                     // sample the bsdf to get the scattered ray
                     let sample: Point2<f64> = Point2::new(random(), random());
-                    let (f_value, wi, pdf) = bsdf.sample_f(-ray.d, sample);
+                    let (f_value, wi, pdf) = bsdf.sample_f(-ray.d.normalize(), sample);
 
                     // update the throughput for next iteration, spawn the new ray
-                    let cosine = wi.dot(isect.n).max(0.0);
+                    let cosine = wi.dot(isect.n).abs();
                     throughput *= f_value * cosine / pdf;
                     *ray = Ray::new(isect.p, wi, ray.time, INFINITY);
                 }

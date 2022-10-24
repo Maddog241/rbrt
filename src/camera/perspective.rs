@@ -57,7 +57,7 @@ impl Camera for PerspectiveCamera {
         // cast ray in the camera space
         let r = Ray {
             o: Point3::new(0.0, 0.0, 0.0),
-            d: p_camera.to_vec().normalize(),
+            d: p_camera.to_vec(),
             time: sample.time,
             t_max: INFINITY,
         };

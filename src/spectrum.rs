@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul, Div, AddAssign, MulAssign};
+use std::ops::{Add, Sub, Mul, Div, AddAssign, MulAssign, DivAssign};
 
 use crate::camera::pixel::Pixel;
 
@@ -113,6 +113,14 @@ impl Div<f64> for RGBSpectrum {
     }
 }
 
+impl DivAssign<f64> for RGBSpectrum {
+    fn div_assign(&mut self, rhs: f64) {
+        self.r /= rhs;
+        self.g /= rhs;
+        self.b /= rhs; 
+    }
+}
+
 impl PartialEq<RGBSpectrum> for RGBSpectrum {
     fn eq(&self, other: &RGBSpectrum) -> bool {
         self.r == other.r && self.g == other.g && self.b == other.b
@@ -198,4 +206,14 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_div_assign() {
+        for _i in 0..10 {
+            let mut s1 = Spectrum::new(random(), random(), random());
+            let k = 7.777;
+            let s2 = s1 / k;
+            s1 /= k;
+            assert_eq!(s1, s2);
+        }
+    }
 }

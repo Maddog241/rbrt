@@ -52,6 +52,13 @@ fn main() {
     let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
     scene.add_primitive(Box::new(ball));
 
+    let object_to_world2 = Transform::translate(Vector3::new(0.0, -100.0, 6.0));
+    let world_to_object2= object_to_world2.inverse();
+    let sphere = Sphere::new(98.0, object_to_world2, world_to_object2);
+    //// create lambertian material
+    let matte_material2 = Matte::new(Spectrum::new(0.4, 0.4, 0.5));
+    let ball2 = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material2));
+    scene.add_primitive(Box::new(ball2));
     // create light
     let p_light = PointLight::new(Point3::new(0.0, 4.0, 3.0), Spectrum::new(5.0, 5.0, 5.0));
     scene.add_light(Box::new(p_light));
@@ -60,7 +67,7 @@ fn main() {
     let now = std::time::Instant::now();
 
     let mut integrator = PathIntegrator::new(50, camera);
-    integrator.render(&scene, "./images/integrator9.ppm");
+    integrator.render(&scene, "./images/visibility.ppm");
 
     let cost = now.elapsed().as_millis();
     println!("render cost: {} secs", (cost as f64) / 1000.0);

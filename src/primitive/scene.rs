@@ -1,4 +1,6 @@
-use crate::light::Light;
+use std::f64::INFINITY;
+
+use crate::{light::Light, geometry::ray::Ray};
 
 use super::Primitive;
 
@@ -32,5 +34,20 @@ impl Scene {
         }
 
         ret
+    }
+
+    pub fn intersect_p(&self, r: &Ray) -> Option<f64> {
+        let mut t = INFINITY;
+        for prim in self.primitives.iter() {
+            if let Some(new_t) = prim.intersect_p(r) {
+                t = t.min(new_t);
+            }
+        }
+
+        if t == INFINITY {
+            None
+        } else {
+            Some(t)
+        }
     }
 }

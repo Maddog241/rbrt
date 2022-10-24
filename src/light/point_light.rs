@@ -18,15 +18,14 @@ impl PointLight {
 }
 
 impl Light for PointLight {
-    fn sample_li(&self, isect: &SurfaceInteraction, _sample: Point2<f64>) -> (Spectrum, Vector3<f64>, f64) {
+    fn sample_li(&self, isect: &SurfaceInteraction, _sample: Point2<f64>) -> (Spectrum, Point3<f64>, f64) {
         let pdf = 1.0;
-        let wi = (self.p - isect.p).normalize();
         let distance2 = (self.p - isect.p).magnitude2();
 
         if distance2 > 0.0 {
-            (self.intensity / distance2, wi, pdf)
+            (self.intensity / distance2, self.p, pdf)
         } else {
-            (Spectrum::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 0.0), pdf)
+            (Spectrum::new(0.0, 0.0, 0.0), Point3::new(0.0, 0.0, 0.0), pdf)
         }
     }
 }
