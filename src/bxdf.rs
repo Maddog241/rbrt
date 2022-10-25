@@ -1,5 +1,7 @@
 pub mod lambertian;
 pub mod bsdf;
+pub mod fresnel;
+pub mod specular;
 
 
 use std::ops::{BitOr, BitAnd};
@@ -22,7 +24,7 @@ pub enum BxdfType {
     All = 31,
 }
 
-impl BitOr for BxdfType {
+impl BitOr<BxdfType> for BxdfType {
     type Output = i32;
 
     fn bitor(self, rhs: Self) -> Self::Output {
@@ -30,11 +32,43 @@ impl BitOr for BxdfType {
     }
 }
 
-impl BitAnd for BxdfType {
+impl BitOr<i32> for BxdfType {
+    type Output = i32;
+
+    fn bitor(self, rhs: i32) -> Self::Output {
+        (self as i32) | rhs
+    }
+}
+
+impl BitOr<BxdfType> for i32 {
+    type Output = i32;
+
+    fn bitor(self, rhs: BxdfType) -> Self::Output {
+        self | rhs as i32
+    }
+}
+
+impl BitAnd<BxdfType> for BxdfType {
     type Output = i32;
 
     fn bitand(self, rhs: Self) -> Self::Output {
         (self as i32) & (rhs as i32)
+    }
+}
+
+impl BitAnd<i32> for BxdfType {
+    type Output = i32;
+
+    fn bitand(self, rhs: i32) -> Self::Output {
+        (self as i32) & rhs
+    }
+}
+
+impl BitAnd<BxdfType> for i32 {
+    type Output = i32;
+
+    fn bitand(self, rhs: BxdfType) -> Self::Output {
+        self & (rhs as i32)
     }
 }
 

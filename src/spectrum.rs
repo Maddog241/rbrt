@@ -27,6 +27,10 @@ impl RGBSpectrum {
         
         Pixel::new(r, g, b)
     }
+
+    pub fn skyblue(t: f64) -> RGBSpectrum {
+        (1.0-t) * RGBSpectrum::new(1.0, 1.0, 1.0) + t * RGBSpectrum::new(0.5, 0.7, 1.0)
+    }
 }
 
 impl Add<RGBSpectrum> for RGBSpectrum {
@@ -143,7 +147,7 @@ mod tests {
 
    #[test]
     fn test_add_assign() {
-        for i in 0..10 {
+        for _i in 0..10 {
             let mut s1 = Spectrum::new(random(), random(), random());
             let s2 = Spectrum::new(random(), random(), random());
 

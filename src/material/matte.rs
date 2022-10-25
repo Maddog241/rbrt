@@ -22,8 +22,6 @@ impl Material for Matte {
     fn compute_scattering(&self, isect: &crate::geometry::interaction::SurfaceInteraction) -> crate::bxdf::bsdf::Bsdf {
         let (ss, ts) = if isect.n.dot(isect.wo) > 0.0 { perpendicular(isect.n) } else {perpendicular(-isect.n) }; 
         let ret = Bsdf {
-            eta_i: 1.0,
-            eta_o: 1.0,
             ns: isect.n,
             ng: isect.n,
             ss,

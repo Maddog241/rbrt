@@ -1,9 +1,9 @@
 use std::f64::INFINITY;
 
-use cgmath::{Point2, Point3, Vector3, InnerSpace};
+use cgmath::{Point2, Point3, InnerSpace};
 use rand::random;
 
-use crate::{camera::{perspective::PerspectiveCamera, CameraSample, pixel::Pixel, Camera}, spectrum::Spectrum, geometry::{ray::Ray, interaction::SurfaceInteraction}, primitive::scene::Scene};
+use crate::{camera::{perspective::PerspectiveCamera, CameraSample, Camera}, spectrum::Spectrum, geometry::{ray::Ray, interaction::SurfaceInteraction}, primitive::scene::Scene};
 use super::Integrator;
 
 pub struct PathIntegrator {
@@ -14,7 +14,7 @@ pub struct PathIntegrator {
 
 impl PathIntegrator {
     pub fn new(max_depth: usize, camera: PerspectiveCamera) -> Self {
-        PathIntegrator { max_depth, camera, n_sample: 20}
+        PathIntegrator { max_depth, camera, n_sample: 200}
     }
 
     pub fn render(&mut self, scene: &Scene, filename: &str) {
@@ -89,6 +89,7 @@ impl Integrator for PathIntegrator {
                 }
             } else {
                 // does not hit the scene
+                radiance += Spectrum::skyblue(ray.d.y) * throughput;
                 break;
             }
         }

@@ -1,9 +1,7 @@
-use super::{Bxdf, BxdfType, Spectrum, match_flags};
+use super::{Bxdf, BxdfType, Spectrum};
 use cgmath::{Vector3, InnerSpace, Point2};
 
 pub struct Bsdf {
-    pub eta_i: f64,  // refractive index inside
-    pub eta_o: f64,  // ... outside
     pub ns: Vector3<f64>, // shading normal
     pub ng: Vector3<f64>, // geometry normal
     pub ss: Vector3<f64>, // s axis in the shading coordinate
