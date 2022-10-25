@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 
-use cgmath::{Vector3, Point3};
+use cgmath::{Vector3, Point3, InnerSpace};
 
 use super::{shape::Shape, interaction::SurfaceInteraction, ray::{Ray, Beam}, bound3::Bound3, transform::Transform};
 
@@ -69,7 +69,7 @@ impl Shape for Cylinder {
             n,
             t,
             time: r.time,
-            wo: -r.d,
+            wo: -r.d.normalize(),
             material: None,
         };
 

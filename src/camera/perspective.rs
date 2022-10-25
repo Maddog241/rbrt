@@ -35,7 +35,6 @@ impl PerspectiveCamera {
             * Transform::translate(Vector3::new(-screen_window.0.x, -screen_window.1.y, 0.0));
 
         let camera_to_screen = Transform::perspective(fov, 1.0, 1e6); // the near and far plane are set arbitrarily
-        println!("perspective: {:?}", camera_to_screen.m);
 
         PerspectiveCamera {
             camera_to_world,

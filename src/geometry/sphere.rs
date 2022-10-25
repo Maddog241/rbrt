@@ -68,7 +68,7 @@ impl Shape for Sphere {
             n,
             t,
             time: r.time,
-            wo: -r.d,
+            wo: -r.d.normalize(),
             material: None,
         };
         // convert the interaction in the object space to world space

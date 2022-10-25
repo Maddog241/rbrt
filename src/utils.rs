@@ -36,7 +36,7 @@ pub fn sin_phi(w: Vector3<f64>) -> f64 {
 }
 
 
-pub fn perpendicular(n: &Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
+pub fn perpendicular(n: Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
     // n is a normal vector
     assert!(n.magnitude2() != 0.0);
     let n = n.normalize();
@@ -63,7 +63,7 @@ mod tests {
     fn test_perpendicular() {
         for _ in 0..10 {
             let w: Vector3<f64> = Vector3::new(random(), random(), random());
-            let (u, v) = perpendicular(&w);
+            let (u, v) = perpendicular(w);
             assert!((u.dot(v)-1.0) < 1e-3);
             assert!((u.dot(w)-1.0) < 1e-3);
             assert!((v.dot(w)-1.0) < 1e-3);

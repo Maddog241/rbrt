@@ -12,8 +12,10 @@ mod sampler;
 use camera::{film::Film, perspective::PerspectiveCamera, pixel::Pixel, Camera, CameraSample};
 use cgmath::{Matrix4, Point2, Point3, Vector2, Vector3, Vector4};
 use geometry::{sphere::Sphere, transform::Transform};
+use std::f64::consts::PI;
 use std::rc::Rc;
 
+use crate::geometry::cylinder::{Cylinder, self};
 use crate::integrator::path_integrator::PathIntegrator;
 use crate::light::point_light::PointLight;
 use crate::primitive::scene::Scene;
@@ -27,8 +29,8 @@ const FRAME: f64 = (WIDTH as f64) / (HEIGHT as f64);
 
 fn main() {
     // create camera
-    let pos = Vector3::new(0.0, 0.0, 0.0);
-    let look = Vector3::new(0.0, 0.0, 3.0);
+    let pos = Vector3::new(0.0, 0.0, -3.0);
+    let look = Vector3::new(0.0, 0.0, 1.0);
     let up = Vector3::new(0.0, 1.0, 0.0);
     let camera_to_world = Transform::look_at(pos, look, up).inverse();
 
@@ -41,33 +43,13 @@ fn main() {
         Film::new(WIDTH, HEIGHT),
     );
 
-    let mut scene = Scene::new();
-    // create ball
-    //// create sphere
-    let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 6.0));
-    let world_to_object = object_to_world.inverse();
-    let sphere = Sphere::new(2.0, object_to_world, world_to_object);
-    //// create lambertian material
-    let matte_material = Matte::new(Spectrum::new(1.0, 0.6, 0.2));
-    let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
-    scene.add_primitive(Box::new(ball));
-
-    let object_to_world2 = Transform::translate(Vector3::new(0.0, -100.0, 6.0));
-    let world_to_object2= object_to_world2.inverse();
-    let sphere = Sphere::new(98.0, object_to_world2, world_to_object2);
-    //// create lambertian material
-    let matte_material2 = Matte::new(Spectrum::new(0.4, 0.4, 0.5));
-    let ball2 = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material2));
-    scene.add_primitive(Box::new(ball2));
-    // create light
-    let p_light = PointLight::new(Point3::new(0.0, 4.0, 3.0), Spectrum::new(5.0, 5.0, 5.0));
-    scene.add_light(Box::new(p_light));
+    let scene = Scene::world_one();
 
     // render
     let now = std::time::Instant::now();
 
     let mut integrator = PathIntegrator::new(50, camera);
-    integrator.render(&scene, "./images/visibility.ppm");
+    integrator.render(&scene, "./images/toy.ppm");
 
     let cost = now.elapsed().as_millis();
     println!("render cost: {} secs", (cost as f64) / 1000.0);

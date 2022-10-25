@@ -1,8 +1,9 @@
-use std::f64::INFINITY;
+use std::{f64::INFINITY, rc::Rc};
 
-use crate::{light::Light, geometry::ray::Ray};
-
-use super::Primitive;
+use crate::{light::{Light, point_light::PointLight}, geometry::{ray::Ray, sphere::Sphere, cylinder::Cylinder}, material::matte::Matte, spectrum::Spectrum};
+use crate::Transform;
+use super::{Primitive, geometric_primitive::GeometricPrimitive};
+use cgmath::{Vector3, Point3};
 
 pub struct Scene {
     pub lights: Vec<Box<dyn Light>>,
@@ -49,5 +50,46 @@ impl Scene {
         } else {
             Some(t)
         }
+    }
+
+    pub fn world_one() -> Scene {
+        let mut scene = Scene::new();
+    // create ball
+    // create sphere
+        let object_to_world = Transform::translate(Vector3::new(0.0, 4.0, 6.0));
+        let world_to_object = object_to_world.inverse();
+        let sphere = Sphere::new(2.0, object_to_world, world_to_object);
+        //// create lambertian material
+        let matte_material = Matte::new(Spectrum::new(1.0, 0.6, 0.2));
+        let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
+        scene.add_primitive(Box::new(ball));
+
+        let object_to_world2 = Transform::translate(Vector3::new(0.0, -100.0, 6.0));
+        let world_to_object2= object_to_world2.inverse();
+        let sphere = Sphere::new(100.0, object_to_world2, world_to_object2);
+        //// create lambertian material
+        let matte_material2 = Matte::new(Spectrum::new(0.4, 0.4, 0.5));
+        let ball2 = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material2));
+        scene.add_primitive(Box::new(ball2));
+
+        let object_to_world3 = Transform::translate(Vector3::new(0.0, 0.0, 6.0)) * Transform::rotate_x(90.0);
+        let world_to_object3= object_to_world3.inverse();
+        let cylinder = Cylinder::new(object_to_world3, world_to_object3, 2.0, 2.0, 0.0);
+        //// create lambertian material
+        let matte_material3 = Matte::new(Spectrum::new(0.8, 0.0, 0.0));
+        let cylinder = GeometricPrimitive::new(Box::new(cylinder), Rc::new(matte_material3));
+        scene.add_primitive(Box::new(cylinder));
+
+        // create light
+        let p_light = PointLight::new(Point3::new(2.0, 4.0, 4.0), Spectrum::new(10.0, 10.0, 10.0));
+        scene.add_light(Box::new(p_light));
+
+        let p_light2 = PointLight::new(Point3::new(-2.0, 4.0, 4.0), Spectrum::new(10.0, 5.0, 10.0));
+        scene.add_light(Box::new(p_light2));
+
+        let p_light3 = PointLight::new(Point3::new(0.0, 8.0, 3.0), Spectrum::new(10.0, 5.0, 10.0));
+        scene.add_light(Box::new(p_light3));
+
+        scene
     }
 }
