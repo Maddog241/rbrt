@@ -1,5 +1,4 @@
 use crate::{bxdf::{bsdf::Bsdf, specular::FresnelSpecular}, spectrum::Spectrum, utils::perpendicular};
-use cgmath::InnerSpace;
 use super::Material;
 
 pub struct Glass {

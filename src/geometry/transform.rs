@@ -18,7 +18,7 @@ impl Transform {
         }
     }
 
-    pub fn transform_point3(&self, p: &Point3<f64>) -> Point3<f64> {
+    pub fn transform_point3(&self, p: Point3<f64>) -> Point3<f64> {
         let np = self.m * Vector4::new(p.x, p.y, p.z, 1.0);
         if np.w == 1.0 {
             Point3::new(np.x, np.y, np.z)
@@ -27,7 +27,7 @@ impl Transform {
         }
     }
 
-    pub fn transform_vector3(&self, v: &Vector3<f64>) -> Vector3<f64> {
+    pub fn transform_vector3(&self, v: Vector3<f64>) -> Vector3<f64> {
         Vector3::new(
             self.m[0][0] * v.x + self.m[1][0] * v.y + self.m[2][0] * v.z,
             self.m[0][1] * v.x + self.m[1][1] * v.y + self.m[2][1] * v.z,
@@ -35,7 +35,7 @@ impl Transform {
         )
     }
 
-    pub fn transform_normal(&self, n: &Vector3<f64>) -> Vector3<f64> {
+    pub fn transform_normal(&self, n: Vector3<f64>) -> Vector3<f64> {
         // n must be normalized, which is different from that in pbrt
         // do not transpose the inverse matrix explicitly (change iteration method instead).
         // just multiplying the matrix may result in a non-normalized vector, so normalize it in the end.
@@ -49,39 +49,41 @@ impl Transform {
 
     pub fn transform_ray(&self, r: &Ray) -> Ray {
         Ray {
-            o: self.transform_point3(&r.o),
-            d: self.transform_vector3(&r.d),
+            o: self.transform_point3(r.o),
+            d: self.transform_vector3(r.d),
             time: r.time,
             t_max: r.t_max,
         }
     }
 
     pub fn transform_bound3(&self, b: &Bound3) -> Bound3 {
-        let p0 = self.transform_point3(&b.corner(0));
-        let p1 = self.transform_point3(&b.corner(1));
+        let p0 = self.transform_point3(b.corner(0));
+        let p1 = self.transform_point3(b.corner(1));
         let mut new_bound = Bound3::new(p0, p1);
         for i in 2..8 {
-            new_bound = new_bound.union_point3(&self.transform_point3(&b.corner(i)));
+            new_bound = new_bound.union_point3(&self.transform_point3(b.corner(i)));
         }
         new_bound
     }
 
     pub fn transform_surface_interaction(&self, si: &SurfaceInteraction) -> SurfaceInteraction {
         SurfaceInteraction {
-            p: self.transform_point3(&si.p),
-            n: self.transform_normal(&si.n),
+            p: self.transform_point3(si.p),
+            n: self.transform_normal(si.n),
             t: si.t,
             time: si.time,
-            wo: self.transform_vector3(&si.wo),
+            wo: self.transform_vector3(si.wo),
             material: if let Some(pri) = &si.material {
                 Some(Rc::clone(pri))
             } else {
                 None
             },
+            hit_light: si.hit_light,
         }
     }
 }
 
+#[allow(dead_code)]
 impl Transform {
     pub fn new(m: Matrix4<f64>, m_inv: Matrix4<f64>) -> Transform {
         Transform { m, m_inv }

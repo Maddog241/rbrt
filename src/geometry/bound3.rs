@@ -8,6 +8,7 @@ pub struct Bound3 {
     pub p_max: Point3<f64>,
 }
 
+#[allow(dead_code)]
 impl Bound3 {
     pub fn new(p: Point3<f64>, q: Point3<f64>) -> Bound3 {
         Bound3 {

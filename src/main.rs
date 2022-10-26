@@ -9,17 +9,12 @@ mod light;
 mod integrator;
 mod sampler;
 
-use camera::{film::Film, perspective::PerspectiveCamera, pixel::Pixel, Camera, CameraSample};
-use cgmath::{Matrix4, Point2, Point3, Vector2, Vector3, Vector4};
-use geometry::{sphere::Sphere, transform::Transform};
-use std::f64::consts::PI;
-use std::rc::Rc;
+use camera::{film::Film, perspective::PerspectiveCamera};
+use cgmath::{Point2, Vector3};
+use geometry::transform::Transform;
 
-use crate::geometry::cylinder::{Cylinder, self};
 use crate::integrator::path_integrator::PathIntegrator;
-use crate::light::point_light::PointLight;
 use crate::primitive::scene::Scene;
-use crate::{primitive::geometric_primitive::GeometricPrimitive, spectrum::Spectrum, material::matte::Matte};
 
 
 const WIDTH: usize = 600;
@@ -43,13 +38,13 @@ fn main() {
         Film::new(WIDTH, HEIGHT),
     );
 
-    let scene = Scene::world_two();
+    let scene = Scene::world_three();
 
     // render
     let now = std::time::Instant::now();
 
     let mut integrator = PathIntegrator::new(50, camera);
-    integrator.render(&scene, "./results/glass.ppm");
+    integrator.render(&scene, "./results/arealight4.ppm");
 
     let cost = now.elapsed().as_millis();
     println!("render cost: {} secs", (cost as f64) / 1000.0);

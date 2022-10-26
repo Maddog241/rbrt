@@ -68,13 +68,15 @@ impl Integrator for PathIntegrator {
                     // sample lights to estimate the radiance value
                     let sample: Point2<f64> = Point2::new(random(), random());
                     for light in scene.lights.iter() {
+                        // sample once for each light in the scene
                         let (incoming_r, sample_p, pdf) = light.sample_li(&isect, sample);
                         // visibility testing for wi
-                        if self.visibility_test(&isect, sample_p, scene) {
+                        if self.visibility_test(&isect, sample_p, scene) && pdf > 0.0 {
                             let wi = (sample_p - isect.p).normalize();
                             let f_value = bsdf.f(-ray.d.normalize(), wi);
                             let cosine = wi.dot(isect.n).abs();
-                            radiance += incoming_r * throughput * f_value * cosine / pdf;
+
+                            radiance += incoming_r * throughput * f_value * cosine / pdf; 
                         }
                    }
 
@@ -86,10 +88,14 @@ impl Integrator for PathIntegrator {
                     let cosine = wi.dot(isect.n).abs();
                     throughput *= f_value * cosine / pdf;
                     *ray = Ray::new(isect.p, wi, ray.time, INFINITY);
+                } else {
+                    // hit the medium
                 }
+                
             } else {
                 // does not hit the scene
-                radiance += Spectrum::skyblue(ray.d.y) * throughput;
+
+                // radiance += Spectrum::skyblue(ray.d.y) * throughput;
                 break;
             }
         }

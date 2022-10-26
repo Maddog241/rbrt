@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 
-use cgmath::{Vector3, Point3, InnerSpace};
+use cgmath::{Vector3, Point3, InnerSpace, Point2};
 
 use super::{shape::Shape, interaction::SurfaceInteraction, ray::{Ray, Beam}, bound3::Bound3, transform::Transform};
 
@@ -71,6 +71,7 @@ impl Shape for Cylinder {
             time: r.time,
             wo: -r.d.normalize(),
             material: None,
+            hit_light: false,
         };
 
         // transform the interation back to the world coordinate
@@ -107,6 +108,16 @@ impl Shape for Cylinder {
     }
 
     fn area(&self) -> f64 {
-        2.0 * PI * self.radius * (self.z_max - self.z_min)
+        2.0 * PI * self.radius * (self.z_max - self.z_min) // only considering the outfacing side
     }
+
+    fn sample(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
+        let theta = u[0] * 2.0 * PI;
+        let z = u[1] * (self.z_max - self.z_min) + self.z_min;
+        let x = self.radius * theta.cos();
+        let y = self.radius * theta.sin();
+
+        (Point3::new(x, y, z), Vector3::new(x, y, 0.0) / self.radius, 1.0 / self.area())
+    }
+
 }

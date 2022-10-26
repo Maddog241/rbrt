@@ -5,6 +5,8 @@ use super::interaction::*;
 use super::ray::*;
 use super::shape::Shape;
 use super::transform::Transform;
+use cgmath::Point2;
+use cgmath::Vector3;
 use cgmath::{EuclideanSpace, InnerSpace, Point3};
 
 pub struct Sphere {
@@ -70,6 +72,7 @@ impl Shape for Sphere {
             time: r.time,
             wo: -r.d.normalize(),
             material: None,
+            hit_light: false,
         };
         // convert the interaction in the object space to world space
 
@@ -106,4 +109,17 @@ impl Shape for Sphere {
     fn area(&self) -> f64 {
         4.0 * PI * self.radius * self.radius
     }
+
+    fn sample(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
+        let theta = (u[0] * 2.0 - 1.0).acos();
+        let phi = u[1] * 2.0 * PI;
+        let x = self.radius * theta.sin() * phi.cos();
+        let y = self.radius * theta.sin() * phi.sin();
+        let z = self.radius * theta.cos();
+
+        let p = self.object_to_world.transform_point3(Point3::new(x, y, z));
+        let n = self.object_to_world.transform_vector3(Vector3::new(x, y, z) / self.radius);
+        (p, n, 1.0 / self.area())
+    }
+
 }
