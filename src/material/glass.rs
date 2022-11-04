@@ -31,4 +31,8 @@ impl Material for Glass {
             n_bxdfs: 1,
         }
     }
+
+    fn is_specular(&self) -> bool {
+        true
+    }
 }

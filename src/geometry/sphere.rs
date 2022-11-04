@@ -73,6 +73,7 @@ impl Shape for Sphere {
             wo: -r.d.normalize(),
             material: None,
             hit_light: false,
+            radiance: None,
         };
         // convert the interaction in the object space to world space
 

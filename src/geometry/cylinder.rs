@@ -72,6 +72,7 @@ impl Shape for Cylinder {
             wo: -r.d.normalize(),
             material: None,
             hit_light: false,
+            radiance: None,
         };
 
         // transform the interation back to the world coordinate

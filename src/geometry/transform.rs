@@ -79,6 +79,7 @@ impl Transform {
                 None
             },
             hit_light: si.hit_light,
+            radiance: si.radiance,
         }
     }
 }

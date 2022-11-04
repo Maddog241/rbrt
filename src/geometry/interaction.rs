@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use cgmath::{Point3, Vector3};
-use crate::material::Material;
+use crate::{material::Material, spectrum::Spectrum};
 
 pub trait Interaction {}
 
@@ -14,6 +14,7 @@ pub struct SurfaceInteraction {
                           // medium interface, to be implemented later
     pub material: Option<Rc<dyn Material>>,
     pub hit_light: bool,
+    pub radiance: Option<Spectrum>,
 }
 
 impl Interaction for SurfaceInteraction {}

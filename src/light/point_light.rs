@@ -1,7 +1,7 @@
 use super::Light;
-use crate::geometry::interaction::SurfaceInteraction;
+use crate::geometry::{interaction::SurfaceInteraction, ray::Ray};
 use crate::spectrum::Spectrum;
-use cgmath::{Point2, Point3, InnerSpace};
+use cgmath::{Point2, Point3, InnerSpace, Vector3};
 
 pub struct PointLight {
     p: Point3<f64>,
@@ -29,4 +29,15 @@ impl Light for PointLight {
         }
     }
 
+    fn le(&self, _n: Vector3<f64>, _d: Vector3<f64>) -> Spectrum {
+        panic!("This method should not be called");
+    }
+
+    fn intersect_p(&self, _r: &crate::geometry::ray::Ray) -> Option<f64> {
+        None
+    }
+
+    fn intersect(&self, _r: &mut Ray) -> Option<SurfaceInteraction> {
+        None
+    }
 }

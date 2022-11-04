@@ -14,7 +14,7 @@ pub struct PathIntegrator {
 
 impl PathIntegrator {
     pub fn new(max_depth: usize, camera: PerspectiveCamera) -> Self {
-        PathIntegrator { max_depth, camera, n_sample: 200}
+        PathIntegrator { max_depth, camera, n_sample: 20}
     }
 
     pub fn render(&mut self, scene: &Scene, filename: &str) {
@@ -57,13 +57,29 @@ impl Integrator for PathIntegrator {
     fn li(&self, ray: &mut Ray, scene: &Scene) -> Spectrum {
         let mut throughput = Spectrum::new(1.0, 1.0, 1.0);
         let mut radiance = Spectrum::new(0.0, 0.0, 0.0);
+        let mut specular = false;
 
-        for _depth in 0..self.max_depth {
+        for depth in 0..self.max_depth {
             if let Some(isect) = scene.intersect(ray) {
                 // first checks if it has directly hit the light
+                if depth == 0 && isect.hit_light {
+                    radiance = isect.radiance.unwrap();
+                    break;
+                }
+
+                // hit the light
+                if specular && isect.hit_light {
+                    radiance += throughput * isect.radiance.unwrap();
+                    break;
+                }
+
+                if isect.hit_light {
+                    break;
+                }
 
                 // then check if it has hit a medium
                 if let Some(mat) = &isect.material {
+                    specular = mat.is_specular();
                     let bsdf = mat.compute_scattering(&isect);
                     // sample lights to estimate the radiance value
                     let sample: Point2<f64> = Point2::new(random(), random());

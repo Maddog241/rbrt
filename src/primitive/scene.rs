@@ -34,6 +34,12 @@ impl Scene {
             }
         }
 
+        for light in self.lights.iter() {
+            if let Some(isect) = light.intersect(r) {
+                ret = Some(isect);
+            }
+        }
+
         ret
     }
 
@@ -41,6 +47,12 @@ impl Scene {
         let mut t = INFINITY;
         for prim in self.primitives.iter() {
             if let Some(new_t) = prim.intersect_p(r) {
+                t = t.min(new_t);
+            }
+        }
+
+        for light in self.lights.iter() {
+            if let Some(new_t) = light.intersect_p(r) {
                 t = t.min(new_t);
             }
         }
@@ -158,7 +170,7 @@ impl Scene {
         scene.add_primitive(Box::new(cylinder));
 
         // create light
-        let object_to_world4 = Transform::translate(Vector3::new(4.0, 2.0, 5.0));
+        let object_to_world4 = Transform::translate(Vector3::new(1.0, 1.0, 3.0));
         let world_to_object4 = object_to_world4.inverse();
         let sphere2 = Sphere::new(1.0, object_to_world4, world_to_object4);
         let sphere_light = AreaLight::new(Box::new(sphere2), Spectrum::new(1.0, 1.0, 1.0));

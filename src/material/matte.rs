@@ -32,4 +32,8 @@ impl Material for Matte {
 
         ret
     }
+
+    fn is_specular(&self) -> bool {
+        false
+    }
 }
