@@ -1,4 +1,5 @@
-use cgmath::{Vector3, InnerSpace};
+use cgmath::{Vector3, InnerSpace, Point2};
+use rand::random;
 
 use crate::spectrum::Spectrum;
 
@@ -53,6 +54,10 @@ pub fn perpendicular(n: Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
 
 pub fn assert_spectrum(spectrum: &Spectrum) -> bool {
     spectrum.r >= 0.0 && spectrum.g >= 0.0 && spectrum.b >= 0.0
+}
+
+pub fn random_2d() -> Point2<f64> {
+    Point2::new(random(), random())
 }
 
 #[cfg(test)]

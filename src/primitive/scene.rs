@@ -178,4 +178,53 @@ impl Scene {
     
         scene
     }
+
+    pub fn cornell_box() -> Scene {
+        let mut scene = Scene::new();
+
+        let object_to_world = Transform::translate(Vector3::new(1000.0, 0.0, 3.0));
+        let world_to_object = object_to_world.inverse();
+        let sphere = Sphere::new(950.0, object_to_world, world_to_object);
+        let matte_material = Matte::new(Spectrum::new(0.8, 0.0, 0.0));
+        let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
+        scene.add_primitive(Box::new(ball));
+
+        let object_to_world = Transform::translate(Vector3::new(-1000.0, 0.0, 3.0));
+        let world_to_object = object_to_world.inverse();
+        let sphere = Sphere::new(950.0, object_to_world, world_to_object);
+        let matte_material = Matte::new(Spectrum::new(0.0, 0.8, 0.0));
+        let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
+        scene.add_primitive(Box::new(ball));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 1000.0));
+        let world_to_object = object_to_world.inverse();
+        let sphere = Sphere::new(900.0, object_to_world, world_to_object);
+        let matte_material = Matte::new(Spectrum::new(0.8, 0.8, 0.8));
+        let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
+        scene.add_primitive(Box::new(ball));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, -1000.0, 3.0));
+        let world_to_object = object_to_world.inverse();
+        let sphere = Sphere::new(950.0, object_to_world, world_to_object);
+        let matte_material = Matte::new(Spectrum::new(0.8, 0.8, 0.8));
+        let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
+        scene.add_primitive(Box::new(ball));
+
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, 1000.0, 3.0));
+        let world_to_object = object_to_world.inverse();
+        let sphere = Sphere::new(950.0, object_to_world, world_to_object);
+        let matte_material = Matte::new(Spectrum::new(0.8, 0.8, 0.8));
+        let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
+        scene.add_primitive(Box::new(ball));
+
+        let object_to_world4 = Transform::translate(Vector3::new(0.0, 0.0, 25.0));
+        let world_to_object4 = object_to_world4.inverse();
+        let sphere2 = Sphere::new(1.0, object_to_world4, world_to_object4);
+        let sphere_light = AreaLight::new(Box::new(sphere2), Spectrum::new(2.0, 2.0, 2.0));
+        scene.add_light(Box::new(sphere_light));
+
+
+        scene
+    }
 }

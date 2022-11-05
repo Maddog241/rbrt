@@ -1,10 +1,10 @@
 use std::f64::INFINITY;
 
-use cgmath::{Point2, Point3, InnerSpace};
+use cgmath::{Point2, InnerSpace};
 use rand::random;
 
-use crate::{camera::{perspective::PerspectiveCamera, CameraSample, Camera}, spectrum::Spectrum, geometry::{ray::Ray, interaction::SurfaceInteraction}, primitive::scene::Scene};
-use super::Integrator;
+use crate::{camera::{perspective::PerspectiveCamera, CameraSample, Camera}, spectrum::Spectrum, geometry::ray::Ray, primitive::scene::Scene};
+use super::{Integrator, visibility_test};
 
 pub struct PathIntegrator {
     max_depth: usize,
@@ -13,7 +13,7 @@ pub struct PathIntegrator {
 }
 
 impl PathIntegrator {
-    pub fn new(max_depth: usize, camera: PerspectiveCamera) -> Self {
+    pub fn new(camera: PerspectiveCamera, max_depth: usize) -> Self {
         PathIntegrator { max_depth, camera, n_sample: 20}
     }
 
@@ -41,16 +41,7 @@ impl PathIntegrator {
         self.camera.film.write_to_image(filename);
     }
 
-    fn visibility_test(&self, isect: &SurfaceInteraction, sample_p: Point3<f64>, scene: &Scene) -> bool {
-        let shadow_ray = Ray::new(isect.p, sample_p-isect.p, isect.time, 1.0-0.0001);
-        // back facing surfaces do not get lit
-        if shadow_ray.d.dot(isect.n) < 0.0 { return false; }
-        // test intersection 
-        match scene.intersect_p(&shadow_ray) {
-            Some(_t) => false,
-            None => true,
-        }
-    }
+    
 }
 
 impl Integrator for PathIntegrator {
@@ -87,7 +78,7 @@ impl Integrator for PathIntegrator {
                         // sample once for each light in the scene
                         let (incoming_r, sample_p, pdf) = light.sample_li(&isect, sample);
                         // visibility testing for wi
-                        if self.visibility_test(&isect, sample_p, scene) && pdf > 0.0 {
+                        if visibility_test(&isect, sample_p, scene) && pdf > 0.0 {
                             let wi = (sample_p - isect.p).normalize();
                             let f_value = bsdf.f(-ray.d.normalize(), wi);
                             let cosine = wi.dot(isect.n).abs();
