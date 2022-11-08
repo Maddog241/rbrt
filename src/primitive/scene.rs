@@ -185,28 +185,28 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(1000.0, 0.0, 3.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(950.0, object_to_world, world_to_object);
-        let matte_material = Matte::new(Spectrum::new(0.8, 0.0, 0.0));
+        let matte_material = Matte::new(Spectrum::new(0.65, 0.05, 0.05));
         let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
         let object_to_world = Transform::translate(Vector3::new(-1000.0, 0.0, 3.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(950.0, object_to_world, world_to_object);
-        let matte_material = Matte::new(Spectrum::new(0.0, 0.8, 0.0));
+        let matte_material = Matte::new(Spectrum::new(0.12, 0.45, 0.15));
         let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
         let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 1000.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(900.0, object_to_world, world_to_object);
-        let matte_material = Matte::new(Spectrum::new(0.8, 0.8, 0.8));
+        let matte_material = Matte::new(Spectrum::new(0.73, 0.73, 0.73));
         let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
         let object_to_world = Transform::translate(Vector3::new(0.0, -1000.0, 3.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(950.0, object_to_world, world_to_object);
-        let matte_material = Matte::new(Spectrum::new(0.8, 0.8, 0.8));
+        let matte_material = Matte::new(Spectrum::new(0.73, 0.73, 0.73));
         let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
@@ -218,10 +218,17 @@ impl Scene {
         let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
-        let object_to_world4 = Transform::translate(Vector3::new(0.0, 0.0, 25.0));
+        let object_to_world = Transform::translate(Vector3::new(0.0, -3.0, 25.0));
+        let world_to_object = object_to_world.inverse();
+        let sphere = Sphere::new(15.0, object_to_world, world_to_object);
+        let matte_material = Glass::new(1.5, 1.0, Spectrum::new(0.8, 0.3, 0.4), Spectrum::new(0.0, 0.0, 0.0));
+        let ball = GeometricPrimitive::new(Box::new(sphere), Rc::new(matte_material));
+        scene.add_primitive(Box::new(ball));
+
+        let object_to_world4 = Transform::translate(Vector3::new(0.0, 20.0, 25.0));
         let world_to_object4 = object_to_world4.inverse();
-        let sphere2 = Sphere::new(1.0, object_to_world4, world_to_object4);
-        let sphere_light = AreaLight::new(Box::new(sphere2), Spectrum::new(100.0, 100.0, 100.0));
+        let sphere2 = Sphere::new(2.0, object_to_world4, world_to_object4);
+        let sphere_light = AreaLight::new(Box::new(sphere2), Spectrum::new(500.0, 500.0, 500.0));
         scene.add_light(Box::new(sphere_light));
 
 

@@ -1,4 +1,6 @@
 use std::f64::INFINITY;
+use std::thread;
+use std::sync::{Arc, Mutex};
 
 use cgmath::{Point2, InnerSpace};
 use rand::random;
@@ -10,16 +12,18 @@ pub struct PathIntegrator {
     max_depth: usize,
     camera: PerspectiveCamera,
     n_sample: usize,
+    n_thread: usize,
 }
 
 impl PathIntegrator {
     pub fn new(camera: PerspectiveCamera, max_depth: usize) -> Self {
-        PathIntegrator { max_depth, camera, n_sample: 20}
+        PathIntegrator { max_depth, camera, n_sample: 200, n_thread: 12}
     }
 
     pub fn render(&mut self, scene: &Scene, filename: &str) {
         let res = self.camera.film.resolution;
         let (width, height) = (res.x, res.y);
+        
         for i in 0..height {
             for j in 0..width {
                 // first render the upper left pixel, then go rightwards and downwards

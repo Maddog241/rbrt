@@ -1,7 +1,7 @@
 pub mod geometric_primitive;
 pub mod scene;
 
-use crate::geometry::{ray::Ray, interaction::SurfaceInteraction, bound3::Bound3};
+use crate::{geometry::{ray::Ray, interaction::SurfaceInteraction, bound3::Bound3}, light::Light};
 
 pub trait Primitive {
     fn intersect(&self, r: &mut Ray) -> Option<SurfaceInteraction>;

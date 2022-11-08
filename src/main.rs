@@ -45,7 +45,7 @@ fn main() {
     let now = std::time::Instant::now();
 
     let mut integrator = PathIntegrator::new(camera, 20);
-    integrator.render(&scene, "./images/cornell9.ppm");
+    integrator.render(&scene, "./results/mirror.ppm");
 
     let cost = now.elapsed().as_millis();
     println!("render cost: {} secs", (cost as f64) / 1000.0);
