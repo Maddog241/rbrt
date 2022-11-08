@@ -77,6 +77,18 @@ impl Mul<RGBSpectrum> for RGBSpectrum {
     }
 }
 
+impl Mul<RGBSpectrum> for &RGBSpectrum {
+    type Output = RGBSpectrum;
+
+    fn mul(self, rhs: RGBSpectrum) -> Self::Output {
+        RGBSpectrum {
+            r: self.r * rhs.r,
+            g: self.g * rhs.g,
+            b: self.b * rhs.b,
+        }
+    }
+}
+
 impl MulAssign<RGBSpectrum> for RGBSpectrum {
     fn mul_assign(&mut self, rhs: RGBSpectrum) {
         self.r *= rhs.r;
@@ -86,6 +98,18 @@ impl MulAssign<RGBSpectrum> for RGBSpectrum {
 }
 
 impl Mul<f64> for RGBSpectrum {
+    type Output = RGBSpectrum;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        RGBSpectrum {
+            r: self.r * rhs,
+            g: self.g * rhs,
+            b: self.b * rhs,
+        }
+    }
+}
+
+impl Mul<f64> for &RGBSpectrum {
     type Output = RGBSpectrum;
 
     fn mul(self, rhs: f64) -> Self::Output {

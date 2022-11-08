@@ -6,7 +6,7 @@ pub struct Bsdf {
     pub ng: Vector3<f64>, // geometry normal
     pub ss: Vector3<f64>, // s axis in the shading coordinate
     pub ts: Vector3<f64>, // t axis in the shading coordinate
-    pub bxdfs: Vec<Box<dyn Bxdf>>,
+    pub bxdfs: Vec<Bxdf>,
     pub n_bxdfs: usize, // the number of bxdfs 
 }
 

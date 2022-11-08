@@ -1,7 +1,6 @@
 pub mod lambertian;
 pub mod bsdf;
 pub mod fresnel;
-pub mod specular;
 
 
 use std::ops::{BitOr, BitAnd};
@@ -9,10 +8,55 @@ use std::ops::{BitOr, BitAnd};
 use crate::spectrum::Spectrum;
 use cgmath::{Point2, Vector3};
 
-pub trait Bxdf {
-    fn f(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> Spectrum;
-    fn sample_f(&self, wo: Vector3<f64>, sample: Point2<f64>) -> (Spectrum, Vector3<f64>, f64); // f-value, wi, pdf
-    fn types(&self) -> i32;
+pub enum Bxdf {
+    LambertianReflection {
+        reflectance: Spectrum,    
+    },
+    FresnelSpecular {
+        eta_a: f64,
+        eta_b: f64,
+        r: Spectrum,
+        t: Spectrum,
+    }
+}
+
+impl Bxdf {
+    pub fn f(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> Spectrum {
+        match self {
+            Self::LambertianReflection { reflectance } => {
+                lambertian::f(self, wo, wi)
+            },
+
+            Self::FresnelSpecular { eta_a, eta_b, r, t } => {
+            fresnel::f(self, wo, wi)
+            }
+        }
+    }
+    
+    pub fn sample_f(&self, wo: Vector3<f64>, sample: Point2<f64>) -> (Spectrum, Vector3<f64>, f64) { 
+        // return: f-value, wi, pdf 
+        match self {
+            Self::LambertianReflection { reflectance } => {
+                lambertian::sample_f(self, wo, sample)
+            },
+
+            Self::FresnelSpecular { eta_a, eta_b, r, t } => {
+                fresnel::sample_f(self, wo, sample)
+            }
+        }
+    }
+
+    pub fn types(&self) -> i32 {
+        match self {
+            Self::LambertianReflection { reflectance } => {
+                lambertian::types(self)
+            },
+
+            Self::FresnelSpecular { eta_a, eta_b, r, t } => {
+                fresnel::types(self)
+            }
+        }
+    }
 }
 
 pub enum BxdfType {
@@ -72,7 +116,3 @@ impl BitAnd<BxdfType> for i32 {
     }
 }
 
-pub fn match_flags(bxdf_obj: &Box<dyn Bxdf>, flags: i32) -> bool {
-    // test if the bxdf_obj matches all the requirements represented by flags
-    (bxdf_obj.types() & flags) == bxdf_obj.types()
-}

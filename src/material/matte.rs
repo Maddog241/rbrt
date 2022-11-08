@@ -1,39 +1,31 @@
 use crate::utils::perpendicular;
-use crate::{spectrum::Spectrum, bxdf::{bsdf::Bsdf, lambertian::LambertianReflection}};
+use crate::bxdf::{bsdf::Bsdf, Bxdf::LambertianReflection};
 use cgmath::InnerSpace;
 
 use super::Material;
 
-pub struct Matte {
-    // now there's no texture. So this returns a Lambertian only
-    kd: Spectrum,
-}
-
-impl Matte {
-    pub fn new(kd: Spectrum) -> Matte {
-        Matte {
-            kd
-        }
-    }
-}
-
-
-impl Material for Matte {
-    fn compute_scattering(&self, isect: &crate::geometry::interaction::SurfaceInteraction) -> crate::bxdf::bsdf::Bsdf {
+pub fn compute_scattering(material: &Material, isect: &crate::geometry::interaction::SurfaceInteraction) -> crate::bxdf::bsdf::Bsdf {
+    if let Material::Matte { kd } = material {
         let (ss, ts) = if isect.n.dot(isect.wo) > 0.0 { perpendicular(isect.n) } else {perpendicular(-isect.n) }; 
         let ret = Bsdf {
             ns: isect.n,
             ng: isect.n,
             ss,
             ts,
-            bxdfs: vec![Box::new(LambertianReflection::new(self.kd))],
+            bxdfs: vec![LambertianReflection{reflectance: *kd} ],
             n_bxdfs: 1,
         };
 
         ret
+    } else {
+        panic!()
     }
+}
 
-    fn is_specular(&self) -> bool {
+pub fn is_specular(material: &Material) -> bool {
+    if let Material::Matte { kd } = material {
         false
+    } else {
+        panic!()
     }
 }

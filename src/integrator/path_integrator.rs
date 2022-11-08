@@ -9,43 +9,16 @@ use crate::{camera::{perspective::PerspectiveCamera, CameraSample, Camera}, spec
 use super::{Integrator, visibility_test};
 
 pub struct PathIntegrator {
-    max_depth: usize,
-    camera: PerspectiveCamera,
-    n_sample: usize,
-    n_thread: usize,
+    pub max_depth: usize,
+    pub camera: PerspectiveCamera,
+    pub n_sample: usize,
+    pub n_thread: usize,
 }
 
 impl PathIntegrator {
     pub fn new(camera: PerspectiveCamera, max_depth: usize) -> Self {
-        PathIntegrator { max_depth, camera, n_sample: 200, n_thread: 12}
+        PathIntegrator { max_depth, camera, n_sample: 20, n_thread: 10}
     }
-
-    pub fn render(&mut self, scene: &Scene, filename: &str) {
-        let res = self.camera.film.resolution;
-        let (width, height) = (res.x, res.y);
-        
-        for i in 0..height {
-            for j in 0..width {
-                // first render the upper left pixel, then go rightwards and downwards
-                let mut radiance = Spectrum::new(0.0, 0.0, 0.0);
-
-                for _ in 0..self.n_sample {
-                    let sample = CameraSample::new(Point2::new(j as f64 + random::<f64>(), i as f64 + random::<f64>()), 0.0);
-                    let mut r = self.camera.generate_ray(sample);
-
-                    radiance += self.li(&mut r, scene);
-                }
-
-                radiance /= self.n_sample as f64;
-                let pixel = radiance.to_pixel();
-                self.camera.film.record(i, j, pixel);
-            }
-        }
-
-        self.camera.film.write_to_image(filename);
-    }
-
-    
 }
 
 impl Integrator for PathIntegrator {

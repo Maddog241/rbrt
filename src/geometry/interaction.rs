@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use cgmath::{Point3, Vector3};
 use crate::{material::Material, spectrum::Spectrum};
@@ -12,7 +12,7 @@ pub struct SurfaceInteraction {
     pub time: f64,
     pub wo: Vector3<f64>, // the reverse direction of the incoming ray
                           // medium interface, to be implemented later
-    pub material: Option<Rc<dyn Material>>,
+    pub material: Option<Arc<Material>>,
     pub hit_light: bool,
     pub radiance: Option<Spectrum>,
 }

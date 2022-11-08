@@ -1,5 +1,5 @@
 pub mod path_integrator;
-pub mod direct_integrator;
+// pub mod direct_integrator;
 
 use cgmath::{InnerSpace, Point3};
 
