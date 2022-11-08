@@ -29,7 +29,7 @@ impl Bxdf for LambertianReflection {
 
         let theta = sample[0].acos();
         let phi = sample[1] * 2.0 * PI;
-        let wi = Vector3::new(phi.cos(), phi.sin(), theta.sin());
+        let wi = Vector3::new(theta.sin() * phi.cos(), theta.sin() * phi.sin(), theta.cos());
 
         (self.reflectance *  INV_PI, wi, pdf)
     }

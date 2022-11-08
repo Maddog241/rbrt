@@ -23,10 +23,10 @@ impl Light for AreaLight {
         let (p, n, area_pdf) = self.shape.sample(u);
 
         let distance2 = (p - isect.p).magnitude2();
-        let we = isect.p - p;
-        let cosine = we.dot(n).max(0.0);
+        let we = (isect.p - p).normalize();
+        let cosine = we.dot(n).abs();
 
-        let pdf = if cosine != 0.0 { area_pdf * distance2 / cosine } else { 0.0 };
+        let pdf = area_pdf * distance2 / cosine;
 
         (self.le(isect.n, isect.wo), p, pdf)
     }

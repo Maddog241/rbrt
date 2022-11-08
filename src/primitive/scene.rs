@@ -221,7 +221,7 @@ impl Scene {
         let object_to_world4 = Transform::translate(Vector3::new(0.0, 0.0, 25.0));
         let world_to_object4 = object_to_world4.inverse();
         let sphere2 = Sphere::new(1.0, object_to_world4, world_to_object4);
-        let sphere_light = AreaLight::new(Box::new(sphere2), Spectrum::new(2.0, 2.0, 2.0));
+        let sphere_light = AreaLight::new(Box::new(sphere2), Spectrum::new(100.0, 100.0, 100.0));
         scene.add_light(Box::new(sphere_light));
 
 

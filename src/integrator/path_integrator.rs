@@ -3,7 +3,7 @@ use std::f64::INFINITY;
 use cgmath::{Point2, InnerSpace};
 use rand::random;
 
-use crate::{camera::{perspective::PerspectiveCamera, CameraSample, Camera}, spectrum::Spectrum, geometry::ray::Ray, primitive::scene::Scene};
+use crate::{camera::{perspective::PerspectiveCamera, CameraSample, Camera}, spectrum::Spectrum, geometry::ray::Ray, primitive::scene::Scene, utils::random_2d};
 use super::{Integrator, visibility_test};
 
 pub struct PathIntegrator {
@@ -73,19 +73,19 @@ impl Integrator for PathIntegrator {
                     specular = mat.is_specular();
                     let bsdf = mat.compute_scattering(&isect);
                     // sample lights to estimate the radiance value
-                    let sample: Point2<f64> = Point2::new(random(), random());
                     for light in scene.lights.iter() {
                         // sample once for each light in the scene
+                        let sample: Point2<f64> = Point2::new(random(), random());
                         let (incoming_r, sample_p, pdf) = light.sample_li(&isect, sample);
                         // visibility testing for wi
-                        if visibility_test(&isect, sample_p, scene) && pdf > 0.0 {
+                        if pdf > 0.0 && !incoming_r.is_black() && visibility_test(&isect, sample_p, scene) {
                             let wi = (sample_p - isect.p).normalize();
                             let f_value = bsdf.f(-ray.d.normalize(), wi);
                             let cosine = wi.dot(isect.n).abs();
 
                             radiance += incoming_r * throughput * f_value * cosine / pdf; 
                         }
-                   }
+                    }
 
                     // sample the bsdf to get the scattered ray
                     let sample: Point2<f64> = Point2::new(random(), random());

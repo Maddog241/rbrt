@@ -3,7 +3,7 @@ use std::f64::INFINITY;
 use cgmath::Point2;
 use rand::random;
 
-use crate::{camera::{perspective::PerspectiveCamera, CameraSample, Camera}, spectrum::Spectrum, utils::random_2d};
+use crate::{camera::{perspective::PerspectiveCamera, CameraSample, Camera}, spectrum::Spectrum, utils::random_2d, light::Light};
 
 use super::*;
 
@@ -47,10 +47,6 @@ impl DirectIntegrator {
 
     }
 
-    fn check_nan(&self, radiance: Spectrum)  -> bool {
-        radiance.r.is_nan() || radiance.g.is_nan() || radiance.b.is_nan()
-    }
-
     fn uniform_sample_one_light(&self, ray: &mut Ray, scene: &Scene, depth: usize) -> Spectrum {
         if depth == 0 { return Spectrum::new(1.0, 0.0, 0.0); }
 
@@ -71,15 +67,12 @@ impl DirectIntegrator {
                     let light = &scene.lights[i];
                     let (incoming_r, sample_p, pdf) = light.sample_li(&isect, random_2d());
 
-                    if visibility_test(&isect, sample_p, scene) && pdf > 0.0 {
+                    if pdf > 0.0 && !incoming_r.is_black() && visibility_test(&isect, sample_p, scene) {
                         let wi = (sample_p - isect.p).normalize();
                         let f_value = bsdf.f(-ray.d.normalize(), wi);
                         let n_lights = scene.lights.len() as f64;
                         let cosine = wi.dot(isect.n).abs();
 
-                        if pdf == 0.0 {
-                            print!("ZERO !!!!!!!!!!! ")
-                        }
                         radiance += n_lights * f_value * incoming_r * cosine / pdf;
                     }
                 }
@@ -93,10 +86,6 @@ impl DirectIntegrator {
             // hit nothing in the scene
 
             // radiance += Spectrum::skyblue(ray.d.y);
-        }
-
-        if self.check_nan(radiance) {
-            panic!("nan!");
         }
 
         radiance
