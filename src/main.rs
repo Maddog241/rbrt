@@ -21,6 +21,8 @@ use crate::integrator::Integrator;
 
 use rand::random;
 
+use clap::Parser;
+
 use std::sync::Arc;
 use std::thread;
 
@@ -28,8 +30,79 @@ const WIDTH: usize = 500;
 const HEIGHT: usize = 500;
 const FRAME: f64 = (WIDTH as f64) / (HEIGHT as f64);
 
+#[derive(Parser)]
+#[command(name = "rbrt")]
+#[command(author = "Maddog241 <Maddog5XZ@gmail.com")]
+#[command(version = "1.0")]
+struct Cli {
+    /// number of threads to run
+    #[arg(short, long)]
+    thread: Option<usize>,
+
+    /// number of samples per pixel per thread
+    #[arg(short, long)]
+    sample: Option<usize>,
+
+    /// maximum recursion depth
+    #[arg(short, long)]
+    depth: Option<usize>,
+
+    /// relative path for storing the rendered image
+    #[arg(short, long)]
+    filename: Option<String>,
+}
+
+struct Arguments {
+    n_thread: usize,
+    n_sample: usize,
+    max_depth: usize,
+    filename: String,
+}
+
+impl Arguments {
+    fn new() -> Self {
+        // set the default values for the arguments
+        Arguments { 
+            n_thread: 10,
+            n_sample: 20,
+            max_depth: 20,
+            filename: String::from("./result.ppm"),
+        }
+    }
+
+    fn process_arguments(&mut self, cli: &Cli) {
+        if let Some(n_thread) =  &cli.thread {
+            self.n_thread = *n_thread;
+        }
+
+        if let Some(n_sample) = &cli.sample {
+            self.n_sample = *n_sample;
+        }
+
+        if let Some(max_depth) = &cli.depth {
+            self.max_depth = *max_depth;
+        }
+
+        if let Some(filename) = &cli.filename {
+            self.filename = filename.clone();
+        }
+
+
+        println!("CURRENT CONFIG:");
+        println!("\tn_thread: {}", self.n_thread);
+        println!("\tn_sample: {}", self.n_sample);
+        println!("\tmax_depth: {}", self.max_depth);
+        println!("\tfilename: {}", self.filename);
+    }
+}
+
 
 fn main() {
+    // receiving command line arguments
+    let cli = Cli::parse();
+    let mut args = Arguments::new();
+    args.process_arguments(&cli);
+
     // create camera
     let pos = Vector3::new(0.0, 0.0, 0.0);
     let look = Vector3::new(0.0, 0.0, 1.0);
@@ -50,12 +123,12 @@ fn main() {
     // render
     let now = std::time::Instant::now();
 
-    let integrator = PathIntegrator::new(camera, 20);
-    render(integrator, scene, "./results/cornell_glass.ppm");
+    let integrator = PathIntegrator::new(camera, args.max_depth, args.n_sample, args.n_thread);
+    render(integrator, scene, &args.filename);
 
 
     let cost = now.elapsed().as_millis();
-    println!("render cost: {} secs", (cost as f64) / 1000.0);
+    println!("RENDER COST: {} secs", (cost as f64) / 1000.0);
 }
 
 
