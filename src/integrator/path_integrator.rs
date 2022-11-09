@@ -17,7 +17,7 @@ pub struct PathIntegrator {
 
 impl PathIntegrator {
     pub fn new(camera: PerspectiveCamera, max_depth: usize) -> Self {
-        PathIntegrator { max_depth, camera, n_sample: 20, n_thread: 10}
+        PathIntegrator { max_depth, camera, n_sample: 2, n_thread: 10}
     }
 }
 

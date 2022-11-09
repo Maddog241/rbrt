@@ -21,17 +21,17 @@ use crate::integrator::Integrator;
 
 use rand::random;
 
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::thread;
 
-const WIDTH: usize = 600;
+const WIDTH: usize = 500;
 const HEIGHT: usize = 500;
 const FRAME: f64 = (WIDTH as f64) / (HEIGHT as f64);
 
 
 fn main() {
     // create camera
-    let pos = Vector3::new(0.0, 0.0, -3.0);
+    let pos = Vector3::new(0.0, 0.0, 0.0);
     let look = Vector3::new(0.0, 0.0, 1.0);
     let up = Vector3::new(0.0, 1.0, 0.0);
     let camera_to_world = Transform::look_at(pos, look, up).inverse();
@@ -41,7 +41,7 @@ fn main() {
         (Point2::new(-FRAME, -1.0), Point2::new(FRAME, 1.0)),
         0.0,
         1.0,
-        90.0,
+        60.0,
         Film::new(WIDTH, HEIGHT),
     );
 
@@ -50,8 +50,8 @@ fn main() {
     // render
     let now = std::time::Instant::now();
 
-    let integrator = PathIntegrator::new(camera, 50);
-    render(integrator, scene, "./results/cornell_glass_thread.ppm");
+    let integrator = PathIntegrator::new(camera, 20);
+    render(integrator, scene, "./results/cornell_box2.ppm");
 
 
     let cost = now.elapsed().as_millis();

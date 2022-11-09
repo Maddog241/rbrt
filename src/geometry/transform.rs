@@ -188,7 +188,7 @@ impl Transform {
         }
     }
 
-    pub fn rorate(theta: f64, axis: Vector3<f64>) -> Transform {
+    pub fn rotate(theta: f64, axis: Vector3<f64>) -> Transform {
         let theta = theta.to_radians();
         let sin_theta = theta.sin();
         let cos_theta = theta.cos();

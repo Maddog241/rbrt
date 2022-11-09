@@ -6,3 +6,4 @@ pub mod transform;
 
 pub mod sphere;
 pub mod cylinder;
+pub mod disk;
