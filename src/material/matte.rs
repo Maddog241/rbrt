@@ -1,12 +1,14 @@
 use crate::utils::perpendicular;
 use crate::bxdf::{bsdf::Bsdf, Bxdf::LambertianReflection};
-use cgmath::InnerSpace;
 
 use super::Material;
 
+
+
 pub fn compute_scattering(material: &Material, isect: &crate::geometry::interaction::SurfaceInteraction) -> crate::bxdf::bsdf::Bsdf {
     if let Material::Matte { kd } = material {
-        let (ss, ts) = if isect.n.dot(isect.wo) > 0.0 { perpendicular(isect.n) } else {perpendicular(-isect.n) }; 
+        let (ss, ts) =  perpendicular(isect.n); 
+
         let ret = Bsdf {
             ns: isect.n,
             ng: isect.n,

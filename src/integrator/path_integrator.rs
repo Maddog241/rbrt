@@ -1,3 +1,4 @@
+use core::panic;
 use std::f64::INFINITY;
 use std::thread;
 use std::sync::{Arc, Mutex};
@@ -5,6 +6,7 @@ use std::sync::{Arc, Mutex};
 use cgmath::{Point2, InnerSpace};
 use rand::random;
 
+use crate::material::Material;
 use crate::{camera::{perspective::PerspectiveCamera, CameraSample, Camera}, spectrum::Spectrum, geometry::ray::Ray, primitive::scene::Scene, utils::random_2d};
 use super::{Integrator, visibility_test};
 
@@ -17,7 +19,7 @@ pub struct PathIntegrator {
 
 impl PathIntegrator {
     pub fn new(camera: PerspectiveCamera, max_depth: usize) -> Self {
-        PathIntegrator { max_depth, camera, n_sample: 2, n_thread: 10}
+        PathIntegrator { max_depth, camera, n_sample: 200, n_thread: 10}
     }
 }
 
@@ -31,7 +33,7 @@ impl Integrator for PathIntegrator {
             if let Some(isect) = scene.intersect(ray) {
                 // first checks if it has directly hit the light
                 if depth == 0 && isect.hit_light {
-                    radiance = isect.radiance.unwrap();
+                    radiance += isect.radiance.unwrap();
                     break;
                 }
 
@@ -50,17 +52,19 @@ impl Integrator for PathIntegrator {
                     specular = mat.is_specular();
                     let bsdf = mat.compute_scattering(&isect);
                     // sample lights to estimate the radiance value
-                    for light in scene.lights.iter() {
-                        // sample once for each light in the scene
-                        let sample: Point2<f64> = Point2::new(random(), random());
-                        let (incoming_r, sample_p, pdf) = light.sample_li(&isect, sample);
-                        // visibility testing for wi
-                        if pdf > 0.0 && !incoming_r.is_black() && visibility_test(&isect, sample_p, scene) {
-                            let wi = (sample_p - isect.p).normalize();
-                            let f_value = bsdf.f(-ray.d.normalize(), wi);
-                            let cosine = wi.dot(isect.n).abs();
+                    if !specular {
+                        for light in scene.lights.iter() {
+                            // sample once for each light in the scene
+                            let sample: Point2<f64> = Point2::new(random(), random());
+                            let (incoming_r, sample_p, pdf) = light.sample_li(&isect, sample);
+                            // visibility testing for wi
+                            if pdf > 0.0 && !incoming_r.is_black() && visibility_test(&isect, sample_p, scene) {
+                                let wi = (sample_p - isect.p).normalize();
+                                let f_value = bsdf.f(-ray.d.normalize(), wi);
+                                let cosine = wi.dot(isect.n).abs();
 
-                            radiance += incoming_r * throughput * f_value * cosine / pdf; 
+                                radiance += incoming_r * throughput * f_value * cosine / pdf; 
+                            } 
                         }
                     }
 
@@ -74,6 +78,7 @@ impl Integrator for PathIntegrator {
                     *ray = Ray::new(isect.p, wi, ray.time, INFINITY);
                 } else {
                     // hit the medium
+                    panic!();
                 }
                 
             } else {

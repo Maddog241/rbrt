@@ -22,6 +22,9 @@ pub fn sample_f(lambertian_reflection: &Bxdf, _wo: Vector3<f64>, sample: Point2<
         let phi = sample[1] * 2.0 * PI;
         let wi = Vector3::new(theta.sin() * phi.cos(), theta.sin() * phi.sin(), theta.cos());
 
+        if wi[0].is_nan() || wi[1].is_nan() || wi[2].is_nan() {
+            println!("Not a Number in lambertian");
+        }
         (reflectance *  INV_PI, wi, pdf)
     } else {
         panic!()

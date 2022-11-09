@@ -51,7 +51,7 @@ fn main() {
     let now = std::time::Instant::now();
 
     let integrator = PathIntegrator::new(camera, 20);
-    render(integrator, scene, "./results/cornell_box2.ppm");
+    render(integrator, scene, "./results/cornell_glass.ppm");
 
 
     let cost = now.elapsed().as_millis();

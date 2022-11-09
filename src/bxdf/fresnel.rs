@@ -17,6 +17,7 @@ fn evaluate(fresnel_specular: &Bxdf, wi: Vector3<f64>) -> (f64, Option<Vector3<f
         let sin_theta_t = eta_i / eta_t * sin_theta_i;
         if sin_theta_t > 1.0 {
             // total internal reflection
+            println!("total internal reflection");
             return (1.0, None);
         }
 
