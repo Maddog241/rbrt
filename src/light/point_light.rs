@@ -19,7 +19,7 @@ pub fn sample_li(light: &Light, isect: &SurfaceInteraction, _u: Point2<f64>) -> 
     }
 }
 
-pub fn le(light: &Light, _n: Vector3<f64>, _d: Vector3<f64>) -> Spectrum {
+pub fn le(light: &Light) -> Spectrum {
     if let Light::PointLight { p, intensity } = light {
         panic!("This method should not be called");
     } else {

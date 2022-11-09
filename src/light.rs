@@ -29,14 +29,14 @@ impl Light {
     }
 
 
-    pub fn le(&self, n: Vector3<f64>, d: Vector3<f64>) -> Spectrum {
+    pub fn le(&self) -> Spectrum {
         match self {
             Self::PointLight { p, intensity } => {
-                point_light::le(self, n, d)
+                point_light::le(self)
             },
 
             Self::AreaLight { shape, emit } => {
-                area_light::le(self, n, d)
+                area_light::le(self)
             }
         }
     }

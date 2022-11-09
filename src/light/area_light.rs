@@ -15,15 +15,15 @@ pub fn sample_li(light: &Light, isect: &SurfaceInteraction, u: Point2::<f64>) ->
 
         let pdf = area_pdf * distance2 / cosine;
 
-        (le(light, isect.n, isect.wo), p, pdf)
+        (le(light), p, pdf)
     } else {
         panic!()
     }
 }
 
-pub fn le(light: &Light, n: Vector3<f64>, d: Vector3<f64>) -> Spectrum {
+pub fn le(light: &Light) -> Spectrum {
     if let Light::AreaLight { shape, emit } = light {
-        emit * n.dot(d).max(0.0)
+        *emit
     } else {
         panic!()
     }
@@ -41,7 +41,7 @@ pub fn intersect(light: &Light, r: &mut Ray) -> Option<SurfaceInteraction> {
     if let Light::AreaLight { shape, emit } = light {
         if let Some(mut isect) = shape.intersect(r) {
             isect.hit_light = true;
-            isect.radiance = Some(le(light, isect.n, isect.wo));
+            isect.radiance = Some(le(light));
             Some(isect)
         } else {
             None
