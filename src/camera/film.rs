@@ -1,7 +1,6 @@
 use crate::spectrum::Spectrum;
 
-use super::pixel::Pixel;
-use cgmath::{Point2, Vector3};
+use cgmath::Point2;
 
 use std::fs::File;
 use std::io::{BufWriter, Write};

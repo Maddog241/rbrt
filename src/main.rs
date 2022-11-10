@@ -12,6 +12,7 @@ mod sampler;
 use camera::{film::Film, perspective::PerspectiveCamera};
 use cgmath::{Point2, Vector3};
 use geometry::transform::Transform;
+use indicatif::{ProgressBar, MultiProgress, ProgressStyle};
 
 use crate::integrator::path_integrator::PathIntegrator;
 use crate::primitive::scene::Scene;
@@ -66,7 +67,7 @@ impl Arguments {
             n_thread: 10,
             n_sample: 20,
             max_depth: 20,
-            filename: String::from("./result.ppm"),
+            filename: String::from("./images/result.ppm"),
         }
     }
 
@@ -141,11 +142,22 @@ fn render(integrator: PathIntegrator, scene: Scene, filename: &str) {
 
     let mut handlers = Vec::new();
 
-    for _tid in 0..integrator.n_thread {
+    let multi_bar = MultiProgress::new();
+
+    multi_bar.println(format!("{} threads running...", integrator.n_thread)).unwrap();
+
+    for tid in 0..integrator.n_thread {
         let int = Arc::clone(&integrator);
         let scene = Arc::clone(&scene);
+        // set the progress bar
+        let bar = multi_bar.add(ProgressBar::new(height as u64));
+        bar.set_message(format!("t{}", tid));
+        bar.set_style(ProgressStyle::with_template("{msg}  {bar:40.cyan/blue} {pos:>7}/{len:7} [{elapsed_precise}]")
+            .unwrap()
+            .progress_chars("=>-"));
 
         let handler = thread::spawn(move || {
+
             for i in 0..height {
                 for j in 0..width {
                     // first render the upper left pixel, then go rightwards and downwards
@@ -162,7 +174,10 @@ fn render(integrator: PathIntegrator, scene: Scene, filename: &str) {
 
                     int.camera.film.record(i, j, radiance);
                 }
+                bar.inc(1);
             }
+
+            bar.finish();
         });
 
         handlers.push(handler);

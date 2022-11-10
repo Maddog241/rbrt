@@ -71,7 +71,6 @@ pub fn intersect(sphere: &Shape, r: &Ray) -> Option<SurfaceInteraction> {
 
         let inter = object_to_world.transform_surface_interaction(&inter);
         Some(inter)
-
     } else {
         panic!()
     }

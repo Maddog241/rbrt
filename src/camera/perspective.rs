@@ -1,6 +1,6 @@
 use std::f64::INFINITY;
 
-use cgmath::{EuclideanSpace, InnerSpace, Point2, Point3, Vector3};
+use cgmath::{EuclideanSpace, Point2, Point3, Vector3};
 
 use super::super::geometry::ray::Ray;
 use super::super::geometry::transform::Transform;

@@ -73,7 +73,7 @@ pub fn intersect(cylinder: &Shape, r: &Ray) -> Option<SurfaceInteraction> {
 }
 
 pub fn intersect_p(cylinder: &Shape, r: &Ray) -> Option<f64> {
-    if let Shape::Cylinder { object_to_world, world_to_object, radius, z_max, z_min } = cylinder {
+    if let Shape::Cylinder { object_to_world:_, world_to_object, radius, z_max, z_min } = cylinder {
         let r = world_to_object.transform_ray(r);
 
         // compute the quadric coefficients
@@ -105,7 +105,7 @@ pub fn intersect_p(cylinder: &Shape, r: &Ray) -> Option<f64> {
 }
 
 pub fn area(cylinder: &Shape) -> f64 {
-    if let Shape::Cylinder { object_to_world, world_to_object, radius, z_max, z_min } = cylinder {
+    if let Shape::Cylinder { object_to_world: _, world_to_object:_, radius, z_max, z_min } = cylinder {
         2.0 * PI * radius * (z_max - z_min) // only considering the outfacing side
     } else {
         panic!()
@@ -113,7 +113,7 @@ pub fn area(cylinder: &Shape) -> f64 {
 }
 
 pub fn sample(cylinder: &Shape, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
-    if let Shape::Cylinder { object_to_world, world_to_object, radius, z_max, z_min } = cylinder {
+    if let Shape::Cylinder { object_to_world:_, world_to_object:_, radius, z_max, z_min } = cylinder {
         let theta = u[0] * 2.0 * PI;
         let z = u[1] * (z_max - z_min) + z_min;
         let x = radius * theta.cos();

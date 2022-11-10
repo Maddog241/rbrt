@@ -32,7 +32,7 @@ pub fn sample_f(lambertian_reflection: &Bxdf, _wo: Vector3<f64>, sample: Point2<
 }
 
 pub fn types(lambertian_reflection: &Bxdf) -> i32 {
-    if let Bxdf::LambertianReflection { reflectance } = lambertian_reflection {
+    if let Bxdf::LambertianReflection { reflectance: _ } = lambertian_reflection {
         BxdfType::Diffuse | BxdfType::Reflection
     } else {
         panic!()

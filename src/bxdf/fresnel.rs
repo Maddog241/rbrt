@@ -6,7 +6,7 @@ use super::{BxdfType, Bxdf};
 
 
 fn evaluate(fresnel_specular: &Bxdf, wi: Vector3<f64>) -> (f64, Option<Vector3<f64>>) {
-    if let Bxdf::FresnelSpecular { eta_a, eta_b, r, t } = fresnel_specular {
+    if let Bxdf::FresnelSpecular { eta_a, eta_b, r:_, t:_ } = fresnel_specular {
         // compute the fresnel term, and the refracted direction(if it exists)
         let cos_theta_i = wi.z;
         assert!(cos_theta_i >= -1.0 && cos_theta_i <= 1.0);
@@ -41,7 +41,7 @@ fn evaluate(fresnel_specular: &Bxdf, wi: Vector3<f64>) -> (f64, Option<Vector3<f
 }
 
 pub fn f(fresnel_specular: &Bxdf, _wo: cgmath::Vector3<f64>, _wi: cgmath::Vector3<f64>) -> Spectrum {
-    if let Bxdf::FresnelSpecular { eta_a, eta_b, r, t } = fresnel_specular {
+    if let Bxdf::FresnelSpecular { eta_a:_, eta_b:_, r:_, t:_ } = fresnel_specular {
         Spectrum::new(0.0, 0.0, 0.0)
     } else {
         panic!()
@@ -72,7 +72,7 @@ pub fn sample_f(fresnel_specular: &Bxdf, wo: cgmath::Vector3<f64>, sample: cgmat
 }
 
 pub fn types(fresnel_specular: &Bxdf) -> i32 {
-    if let Bxdf::FresnelSpecular { eta_a, eta_b, r, t } = fresnel_specular {
+    if let Bxdf::FresnelSpecular { eta_a:_, eta_b:_, r:_, t:_ } = fresnel_specular {
         BxdfType::Specular | BxdfType::Reflection | BxdfType::Transmission
     } else {
         panic!()
