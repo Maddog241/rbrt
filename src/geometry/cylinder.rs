@@ -6,7 +6,7 @@ use super::{shape::Shape, interaction::SurfaceInteraction, ray::{Ray, Beam}, bou
 
 
 pub fn object_bound(cylinder: &Shape) -> super::bound3::Bound3 {
-    if let Shape::Cylinder { object_to_world, world_to_object, radius, z_max, z_min } = cylinder {
+    if let Shape::Cylinder { object_to_world:_, world_to_object:_, radius, z_max, z_min } = cylinder {
         Bound3::new(
             Point3::new(-radius, -radius, *z_min),
             Point3::new(*radius, *radius, *z_max),
@@ -17,7 +17,7 @@ pub fn object_bound(cylinder: &Shape) -> super::bound3::Bound3 {
 }
 
 pub fn world_bound(cylinder: &Shape) -> super::bound3::Bound3 {
-    if let Shape::Cylinder { object_to_world, world_to_object, radius, z_max, z_min } = cylinder {
+    if let Shape::Cylinder { object_to_world, world_to_object:_, radius:_, z_max:_, z_min:_ } = cylinder {
         object_to_world.transform_bound3(&object_bound(cylinder))
     } else {
         panic!()

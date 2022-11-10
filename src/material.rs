@@ -18,11 +18,11 @@ pub enum Material {
 impl Material {
     pub fn compute_scattering(&self, isect: &SurfaceInteraction) -> Bsdf {
         match self {
-            Self::Matte { kd } => {
+            Self::Matte { kd:_ } => {
                 matte::compute_scattering(self, isect)
             },
 
-            Self::Glass { eta_a, eta_b, r, t } => {
+            Self::Glass { eta_a:_, eta_b:_, r:_, t:_ } => {
                 glass::compute_scattering(self, isect)
             }
         }
@@ -31,11 +31,11 @@ impl Material {
 
     pub fn is_specular(&self) -> bool {
         match self {
-            Self::Matte { kd } => {
+            Self::Matte { kd:_ } => {
                 matte::is_specular(self)
             },
             
-            Self::Glass { eta_a, eta_b, r, t } => {
+            Self::Glass { eta_a:_, eta_b:_, r:_, t:_ } => {
                 glass::is_specular(self)
             }
         }

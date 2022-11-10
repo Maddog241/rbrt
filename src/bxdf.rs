@@ -23,11 +23,11 @@ pub enum Bxdf {
 impl Bxdf {
     pub fn f(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> Spectrum {
         match self {
-            Self::LambertianReflection { reflectance } => {
+            Self::LambertianReflection { reflectance:_ } => {
                 lambertian::f(self, wo, wi)
             },
 
-            Self::FresnelSpecular { eta_a, eta_b, r, t } => {
+            Self::FresnelSpecular { eta_a:_, eta_b:_, r:_, t:_ } => {
             fresnel::f(self, wo, wi)
             }
         }
@@ -36,11 +36,11 @@ impl Bxdf {
     pub fn sample_f(&self, wo: Vector3<f64>, sample: Point2<f64>) -> (Spectrum, Vector3<f64>, f64) { 
         // return: f-value, wi, pdf 
         match self {
-            Self::LambertianReflection { reflectance } => {
+            Self::LambertianReflection { reflectance:_ } => {
                 lambertian::sample_f(self, wo, sample)
             },
 
-            Self::FresnelSpecular { eta_a, eta_b, r, t } => {
+            Self::FresnelSpecular { eta_a:_, eta_b:_, r:_, t:_ } => {
                 fresnel::sample_f(self, wo, sample)
             }
         }
@@ -48,11 +48,11 @@ impl Bxdf {
 
     pub fn types(&self) -> i32 {
         match self {
-            Self::LambertianReflection { reflectance } => {
+            Self::LambertianReflection { reflectance:_ } => {
                 lambertian::types(self)
             },
 
-            Self::FresnelSpecular { eta_a, eta_b, r, t } => {
+            Self::FresnelSpecular { eta_a:_, eta_b:_, r:_, t:_ } => {
                 fresnel::types(self)
             }
         }

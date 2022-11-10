@@ -156,8 +156,8 @@ fn render(integrator: PathIntegrator, scene: Scene, filename: &str) {
             .unwrap()
             .progress_chars("=>-"));
 
+        // create process
         let handler = thread::spawn(move || {
-
             for i in 0..height {
                 for j in 0..width {
                     // first render the upper left pixel, then go rightwards and downwards

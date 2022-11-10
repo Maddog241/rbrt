@@ -1,7 +1,7 @@
 use super::Light;
 use crate::geometry::{interaction::SurfaceInteraction, ray::Ray};
 use crate::spectrum::Spectrum;
-use cgmath::{Point2, Point3, InnerSpace, Vector3};
+use cgmath::{Point2, Point3, InnerSpace};
 
 
 pub fn sample_li(light: &Light, isect: &SurfaceInteraction, _u: Point2<f64>) -> (Spectrum, Point3<f64>, f64) {
@@ -20,7 +20,7 @@ pub fn sample_li(light: &Light, isect: &SurfaceInteraction, _u: Point2<f64>) -> 
 }
 
 pub fn le(light: &Light) -> Spectrum {
-    if let Light::PointLight { p, intensity } = light {
+    if let Light::PointLight { p:_, intensity:_ } = light {
         panic!("This method should not be called");
     } else {
         panic!()
@@ -28,7 +28,7 @@ pub fn le(light: &Light) -> Spectrum {
 }
 
 pub fn intersect_p(light: &Light, _r: &crate::geometry::ray::Ray) -> Option<f64> {
-    if let Light::PointLight { p, intensity } = light {
+    if let Light::PointLight { p:_, intensity:_ } = light {
         None
     } else {
         panic!()
@@ -36,7 +36,7 @@ pub fn intersect_p(light: &Light, _r: &crate::geometry::ray::Ray) -> Option<f64>
 }
 
 pub fn intersect(light: &Light, _r: &mut Ray) -> Option<SurfaceInteraction> {
-    if let Light::PointLight { p, intensity } = light {
+    if let Light::PointLight { p:_, intensity:_ } = light {
         None
     } else {
         panic!()

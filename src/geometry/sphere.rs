@@ -10,7 +10,7 @@ use cgmath::{EuclideanSpace, InnerSpace, Point3};
 
 
 pub fn object_bound(sphere: &Shape) -> Bound3 {
-    if let Shape::Sphere { radius, object_to_world, world_to_object } = sphere {
+    if let Shape::Sphere { radius, object_to_world:_, world_to_object:_ } = sphere {
         Bound3 {
             p_min: Point3::new(-radius, -radius, -radius),
             p_max: Point3::new(*radius, *radius, *radius),
@@ -21,7 +21,7 @@ pub fn object_bound(sphere: &Shape) -> Bound3 {
 }
 
 pub fn world_bound(sphere: &Shape) -> Bound3 {
-    if let Shape::Sphere { radius, object_to_world, world_to_object } = sphere {
+    if let Shape::Sphere { radius:_, object_to_world, world_to_object:_ } = sphere {
         object_to_world.transform_bound3(&object_bound(sphere))
     } else {
         panic!()
@@ -77,7 +77,7 @@ pub fn intersect(sphere: &Shape, r: &Ray) -> Option<SurfaceInteraction> {
 }
 
 pub fn intersect_p(sphere: &Shape, r: &Ray) -> Option<f64> {
-    if let Shape::Sphere { radius, object_to_world, world_to_object } = sphere {
+    if let Shape::Sphere { radius, object_to_world:_, world_to_object } = sphere {
         let r = world_to_object.transform_ray(r);
 
         let a = r.d.dot(r.d);
@@ -107,7 +107,7 @@ pub fn intersect_p(sphere: &Shape, r: &Ray) -> Option<f64> {
 }
 
 pub fn area(sphere: &Shape) -> f64 {
-    if let Shape::Sphere { radius, object_to_world, world_to_object } = sphere {
+    if let Shape::Sphere { radius, object_to_world:_, world_to_object:_ } = sphere {
         4.0 * PI * radius * radius
     } else {
         panic!()
@@ -115,7 +115,7 @@ pub fn area(sphere: &Shape) -> f64 {
 }
 
 pub fn sample(sphere: &Shape, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
-    if let Shape::Sphere { radius, object_to_world, world_to_object } = sphere {
+    if let Shape::Sphere { radius, object_to_world, world_to_object:_ } = sphere {
         let theta = (u[0] * 2.0 - 1.0).acos();
         let phi = u[1] * 2.0 * PI;
         let x = radius * theta.sin() * phi.cos();

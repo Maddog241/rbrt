@@ -1,4 +1,4 @@
-use std::{f64::INFINITY, rc::Rc};
+use std::f64::INFINITY;
 
 use crate::geometry::shape::Shape;
 use crate::material::Material;
@@ -12,6 +12,7 @@ pub struct Scene {
     pub primitives: Vec<Primitive>,
 }
 
+#[allow(dead_code)]
 impl Scene {
     pub fn new() -> Self {
         Scene {

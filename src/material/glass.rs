@@ -18,7 +18,7 @@ pub fn compute_scattering(material: &Material, isect: &crate::geometry::interact
 }
 
 pub fn is_specular(material: &Material) -> bool {
-    if let Material::Glass { eta_a, eta_b, r, t } = material {
+    if let Material::Glass { eta_a:_, eta_b:_, r:_, t:_ } = material {
         true
     } else {
         panic!()

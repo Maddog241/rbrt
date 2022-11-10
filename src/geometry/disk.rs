@@ -1,12 +1,11 @@
 use std::f64::consts::PI;
 
 use cgmath::{Point2, Vector3, Point3, InnerSpace, EuclideanSpace};
-use rand::random;
 
 use super::{bound3::Bound3, shape::Shape, ray::{Ray, Beam}, interaction::SurfaceInteraction};
 
 pub fn object_bound(disk: &Shape) -> Bound3 {
-    if let Shape::Disk { object_to_world, world_to_object, radius } = disk {
+    if let Shape::Disk { object_to_world:_, world_to_object:_, radius } = disk {
         let p = Point3::new(-radius, -radius, 0.0);
         let q = Point3::new(*radius, *radius, 0.0);
 
@@ -17,7 +16,7 @@ pub fn object_bound(disk: &Shape) -> Bound3 {
 }
 
 pub fn world_bound(disk: &Shape) -> Bound3 {
-    if let Shape::Disk { object_to_world, world_to_object, radius } = disk {
+    if let Shape::Disk { object_to_world, world_to_object:_, radius:_ } = disk {
         object_to_world.transform_bound3(&object_bound(disk))
     } else {
         panic!()
@@ -61,7 +60,7 @@ pub fn intersect(disk: &Shape, r: &Ray) -> Option<SurfaceInteraction> {
 }
 
 pub fn intersect_p(disk: &Shape, r: &Ray) -> Option<f64> {
-    if let Shape::Disk { object_to_world, world_to_object, radius } = disk {
+    if let Shape::Disk { object_to_world:_, world_to_object, radius } = disk {
         let r = world_to_object.transform_ray(r);
 
         if r.d.z == 0.0 { return None; } // parallel to the disk
@@ -82,7 +81,7 @@ pub fn intersect_p(disk: &Shape, r: &Ray) -> Option<f64> {
 }
 
 pub fn area(disk: &Shape) -> f64 {
-    if let Shape::Disk { object_to_world, world_to_object, radius } = disk {
+    if let Shape::Disk { object_to_world:_, world_to_object:_, radius } = disk {
         PI * radius * radius
     } else {
         panic!()
@@ -90,7 +89,7 @@ pub fn area(disk: &Shape) -> f64 {
 }
 
 pub fn sample(disk: &Shape, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
-    if let Shape::Disk { object_to_world, world_to_object, radius } = disk {
+    if let Shape::Disk { object_to_world, world_to_object:_, radius } = disk {
         let r = radius * u[0].sqrt();
         let theta = u[1] * PI * 2.0;
 

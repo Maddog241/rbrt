@@ -30,18 +30,19 @@ pub enum Shape {
     }
 }
 
+#[allow(dead_code)]
 impl Shape {
     pub fn object_bound(&self) -> Bound3 {
         match self {
-            Self::Sphere { radius, object_to_world, world_to_object } => {
+            Self::Sphere { radius:_, object_to_world:_, world_to_object:_ } => {
                 sphere::object_bound(self)
             },
 
-            Self::Cylinder { object_to_world, world_to_object, radius, z_max, z_min } => {
+            Self::Cylinder { object_to_world:_, world_to_object:_, radius:_, z_max:_, z_min:_ } => {
                 cylinder::object_bound(self)
             },
 
-            Self::Disk { object_to_world, world_to_object, radius } => {
+            Self::Disk { object_to_world:_, world_to_object:_, radius:_ } => {
                 disk::object_bound(self)
             }
         }
@@ -49,15 +50,15 @@ impl Shape {
 
     pub fn world_bound(&self) -> Bound3 {
         match self {
-            Self::Sphere { radius, object_to_world, world_to_object } => {
+            Self::Sphere { radius:_, object_to_world:_, world_to_object:_ } => {
                 sphere::world_bound(self)
             } ,
 
-            Self::Cylinder { object_to_world, world_to_object, radius, z_max, z_min } => {
+            Self::Cylinder { object_to_world:_, world_to_object:_, radius:_, z_max:_, z_min:_ } => {
                 cylinder::world_bound(self)
             },
 
-            Self::Disk { object_to_world, world_to_object, radius } => {
+            Self::Disk { object_to_world:_, world_to_object:_, radius:_ } => {
                 disk::world_bound(self)
             }
         }
@@ -65,15 +66,15 @@ impl Shape {
 
     pub fn intersect(&self, r: &Ray) -> Option<SurfaceInteraction> {
         match self {
-            Self::Sphere { radius, object_to_world, world_to_object } => {
+            Self::Sphere { radius:_, object_to_world:_, world_to_object:_ } => {
                 sphere::intersect(self, r)
             },
 
-            Self::Cylinder { object_to_world, world_to_object, radius, z_max, z_min } => {
+            Self::Cylinder { object_to_world:_, world_to_object:_, radius:_, z_max:_, z_min:_ } => {
                 cylinder::intersect(self, r)
             },
 
-            Self::Disk { object_to_world, world_to_object, radius } => {
+            Self::Disk { object_to_world:_, world_to_object:_, radius:_ } => {
                 disk::intersect(self, r)
             }
         }
@@ -81,15 +82,15 @@ impl Shape {
 
     pub fn intersect_p(&self, r: &Ray) -> Option<f64> {
         match self {
-            Self::Sphere { radius, object_to_world, world_to_object } => {
+            Self::Sphere { radius:_, object_to_world:_, world_to_object:_ } => {
                 sphere::intersect_p(self, r)
             },
 
-            Self::Cylinder { object_to_world, world_to_object, radius, z_max, z_min } => {
+            Self::Cylinder { object_to_world:_, world_to_object:_, radius:_, z_max:_, z_min:_ } => {
                 cylinder::intersect_p(self, r)
             },
 
-            Self::Disk { object_to_world, world_to_object, radius } => {
+            Self::Disk { object_to_world:_, world_to_object:_, radius:_ } => {
                 disk::intersect_p(self, r)
             }
         }
@@ -97,15 +98,15 @@ impl Shape {
 
     pub fn area(&self) -> f64 {
         match self {
-            Self::Sphere { radius, object_to_world, world_to_object } => {
+            Self::Sphere { radius:_, object_to_world:_, world_to_object:_ } => {
                 sphere::area(self)
             },
 
-            Self::Cylinder { object_to_world, world_to_object, radius, z_max, z_min } => {
+            Self::Cylinder { object_to_world:_, world_to_object:_, radius:_, z_max:_, z_min:_ } => {
                 cylinder::area(self)
             },
 
-            Self::Disk { object_to_world, world_to_object, radius } => {
+            Self::Disk { object_to_world:_, world_to_object:_, radius:_ } => {
                 disk::area(self)
             }
         }
@@ -113,15 +114,15 @@ impl Shape {
 
     pub fn sample(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
         match self {
-            Self::Sphere { radius, object_to_world, world_to_object } => {
+            Self::Sphere { radius:_, object_to_world:_, world_to_object:_ } => {
                 sphere::sample(self, u)
             },
 
-            Self::Cylinder { object_to_world, world_to_object, radius, z_max, z_min } => {
+            Self::Cylinder { object_to_world:_, world_to_object:_, radius:_, z_max:_, z_min:_ } => {
                 cylinder::sample(self, u)
             },
 
-            Self::Disk { object_to_world, world_to_object, radius } => {
+            Self::Disk { object_to_world:_, world_to_object:_, radius:_ } => {
                 disk::sample(self, u)
             }
         }

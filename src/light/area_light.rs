@@ -1,12 +1,11 @@
-use cgmath::{Point3, Point2, InnerSpace, Vector3};
-
-use crate::{geometry::{shape::Shape, interaction::SurfaceInteraction, ray::Ray}, spectrum::Spectrum};
+use cgmath::{Point3, Point2, InnerSpace};
+use crate::{geometry::{interaction::SurfaceInteraction, ray::Ray}, spectrum::Spectrum};
 
 use super::Light;
 
 
 pub fn sample_li(light: &Light, isect: &SurfaceInteraction, u: Point2::<f64>) -> (Spectrum, Point3::<f64>, f64) {
-    if let Light::AreaLight { shape, emit } = light {
+    if let Light::AreaLight { shape, emit:_ } = light {
         let (p, n, area_pdf) = shape.sample(u);
 
         let distance2 = (p - isect.p).magnitude2();
@@ -22,7 +21,7 @@ pub fn sample_li(light: &Light, isect: &SurfaceInteraction, u: Point2::<f64>) ->
 }
 
 pub fn le(light: &Light) -> Spectrum {
-    if let Light::AreaLight { shape, emit } = light {
+    if let Light::AreaLight { shape:_, emit } = light {
         *emit
     } else {
         panic!()
@@ -30,7 +29,7 @@ pub fn le(light: &Light) -> Spectrum {
 }
 
 pub fn intersect_p(light: &Light, r: &crate::geometry::ray::Ray) -> Option<f64> {
-    if let Light::AreaLight { shape, emit } = light {
+    if let Light::AreaLight { shape, emit:_ } = light {
         shape.intersect_p(r)
     } else {
         panic!()
@@ -38,7 +37,7 @@ pub fn intersect_p(light: &Light, r: &crate::geometry::ray::Ray) -> Option<f64> 
 }
 
 pub fn intersect(light: &Light, r: &mut Ray) -> Option<SurfaceInteraction> {
-    if let Light::AreaLight { shape, emit } = light {
+    if let Light::AreaLight { shape, emit:_ } = light {
         if let Some(mut isect) = shape.intersect(r) {
             isect.hit_light = true;
             isect.radiance = Some(le(light));

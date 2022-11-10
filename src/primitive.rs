@@ -3,7 +3,7 @@ pub mod scene;
 
 use std::sync::Arc;
 
-use crate::{geometry::{ray::Ray, interaction::SurfaceInteraction, bound3::Bound3, shape::Shape}, light::Light, material::Material};
+use crate::{geometry::{ray::Ray, interaction::SurfaceInteraction, bound3::Bound3, shape::Shape}, material::Material};
 
 pub enum Primitive {
     GeometricPrimitive {
@@ -13,10 +13,11 @@ pub enum Primitive {
 
 }
 
+#[allow(dead_code)]
 impl Primitive {
     pub fn intersect(&self, r: &mut Ray) -> Option<SurfaceInteraction> {
         match self {
-            Self::GeometricPrimitive { shape, material } => {
+            Self::GeometricPrimitive { shape:_, material:_ } => {
                 geometric_primitive::intersect(self, r)
             }
         }
@@ -25,7 +26,7 @@ impl Primitive {
 
     pub fn intersect_p(&self, r: &Ray) -> Option<f64> {
         match self {
-            Self::GeometricPrimitive { shape, material } => {
+            Self::GeometricPrimitive { shape:_, material:_ } => {
                 geometric_primitive::intersect_p(self, r)
             }
         }
@@ -34,7 +35,7 @@ impl Primitive {
 
     pub fn world_bound(&self) -> Bound3 {
         match self {
-            Self::GeometricPrimitive { shape, material } => {
+            Self::GeometricPrimitive { shape:_, material:_ } => {
                 geometric_primitive::world_bound(self)
             }
         }

@@ -25,7 +25,7 @@ pub fn compute_scattering(material: &Material, isect: &crate::geometry::interact
 }
 
 pub fn is_specular(material: &Material) -> bool {
-    if let Material::Matte { kd } = material {
+    if let Material::Matte { kd:_ } = material {
         false
     } else {
         panic!()

@@ -7,6 +7,7 @@ use super::super::geometry::transform::Transform;
 use super::film::Film;
 use super::{Camera, CameraSample};
 
+#[allow(dead_code)]
 pub struct PerspectiveCamera {
     camera_to_world: Transform, // view matrix
     raster_to_camera: Transform,

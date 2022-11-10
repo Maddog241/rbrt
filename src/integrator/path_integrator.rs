@@ -1,13 +1,10 @@
 use core::panic;
 use std::f64::INFINITY;
-use std::thread;
-use std::sync::{Arc, Mutex};
 
 use cgmath::{Point2, InnerSpace};
 use rand::random;
 
-use crate::material::Material;
-use crate::{camera::{perspective::PerspectiveCamera, CameraSample, Camera}, spectrum::Spectrum, geometry::ray::Ray, primitive::scene::Scene, utils::random_2d};
+use crate::{camera::perspective::PerspectiveCamera, spectrum::Spectrum, geometry::ray::Ray, primitive::scene::Scene};
 use super::{Integrator, visibility_test};
 
 pub struct PathIntegrator {
