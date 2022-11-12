@@ -2,37 +2,42 @@ use std::f64::consts::PI;
 
 use cgmath::{Vector3, Point3, InnerSpace, Point2};
 
-use super::{shape::Shape, interaction::SurfaceInteraction, ray::{Ray, Beam}, bound3::Bound3};
+use super::{shape::Shape, interaction::SurfaceInteraction, ray::{Ray, Beam}, bound3::Bound3, transform::Transform};
 
+pub struct Cylinder {
+    object_to_world: Transform,
+    world_to_object: Transform,
+    radius: f64,
+    z_max: f64,
+    z_min: f64,
+}
 
-pub fn object_bound(cylinder: &Shape) -> super::bound3::Bound3 {
-    if let Shape::Cylinder { object_to_world:_, world_to_object:_, radius, z_max, z_min } = cylinder {
+impl Cylinder {
+    pub fn new(object_to_world: Transform, world_to_object: Transform, radius: f64, z_min: f64, z_max: f64) -> Cylinder {
+        Cylinder { object_to_world, world_to_object, radius, z_max, z_min }
+    }
+}
+
+impl Shape for Cylinder {
+    fn object_bound(&self) -> super::bound3::Bound3 {
         Bound3::new(
-            Point3::new(-radius, -radius, *z_min),
-            Point3::new(*radius, *radius, *z_max),
+            Point3::new(-self.radius, -self.radius, self.z_min),
+            Point3::new(self.radius, self.radius, self.z_max),
         )
-    } else {
-        panic!()
     }
-}
 
-pub fn world_bound(cylinder: &Shape) -> super::bound3::Bound3 {
-    if let Shape::Cylinder { object_to_world, world_to_object:_, radius:_, z_max:_, z_min:_ } = cylinder {
-        object_to_world.transform_bound3(&object_bound(cylinder))
-    } else {
-        panic!()
+    fn world_bound(&self) -> super::bound3::Bound3 {
+        self.object_to_world.transform_bound3(&self.object_bound())
     }
-}
 
-pub fn intersect(cylinder: &Shape, r: &Ray) -> Option<SurfaceInteraction> {
-    if let Shape::Cylinder { object_to_world, world_to_object, radius, z_max, z_min } = cylinder {
+    fn intersect(&self, r: &Ray) -> Option<SurfaceInteraction> {
         // transform the ray from world to object
-        let r = world_to_object.transform_ray(r);
+        let r = self.world_to_object.transform_ray(r);
 
         // compute the quadric coefficients
         let a = r.d.x * r.d.x + r.d.y * r.d.y;
         let b = 2.0 * (r.o.x * r.d.x + r.o.y * r.d.y);
-        let c = r.o.x * r.o.x + r.o.y * r.o.y - radius * radius;
+        let c = r.o.x * r.o.x + r.o.y * r.o.y - self.radius * self.radius;
         let discriminant = b * b - 4.0 * a * c;
         // check solutions
         if discriminant <= 0.0 {
@@ -42,10 +47,10 @@ pub fn intersect(cylinder: &Shape, r: &Ray) -> Option<SurfaceInteraction> {
         let sqrt_discriminant = discriminant.sqrt();
         let mut t = (-b - sqrt_discriminant) / (2.0 * a);
         let p1 = r.at(t);
-        if t < 0.0001 || t > r.t_max || p1.z < *z_min || p1.z > *z_max {
+        if t < 0.0001 || t > r.t_max || p1.z < self.z_min || p1.z > self.z_max {
             t = (-b + sqrt_discriminant) / (2.0 * a);
             let p2 = r.at(t);
-            if t < 0.0001 || t > r.t_max || p2.z < *z_min || p2.z > *z_max {
+            if t < 0.0001 || t > r.t_max || p2.z < self.z_min || p2.z > self.z_max {
                 return None;
             }
         }
@@ -65,21 +70,17 @@ pub fn intersect(cylinder: &Shape, r: &Ray) -> Option<SurfaceInteraction> {
         };
 
         // transform the interation back to the world coordinate
-        let inter = object_to_world.transform_surface_interaction(&inter);
+        let inter = self.object_to_world.transform_surface_interaction(&inter);
         Some(inter)
-    } else {
-        panic!()
     }
-}
 
-pub fn intersect_p(cylinder: &Shape, r: &Ray) -> Option<f64> {
-    if let Shape::Cylinder { object_to_world:_, world_to_object, radius, z_max, z_min } = cylinder {
-        let r = world_to_object.transform_ray(r);
+    fn intersect_p(&self, r: &Ray) -> Option<f64> {
+        let r = self.world_to_object.transform_ray(r);
 
         // compute the quadric coefficients
         let a = r.d.x * r.d.x + r.d.y * r.d.y;
         let b = 2.0 * (r.o.x * r.d.x + r.o.y * r.d.y);
-        let c = r.o.x * r.o.x + r.o.y * r.o.y - radius * radius;
+        let c = r.o.x * r.o.x + r.o.y * r.o.y - self.radius * self.radius;
         let discriminant = b * b - 4.0 * a * c;
         // check solutions
         if discriminant <= 0.0 {
@@ -89,38 +90,28 @@ pub fn intersect_p(cylinder: &Shape, r: &Ray) -> Option<f64> {
         let sqrt_discriminant = discriminant.sqrt();
         let mut t = (-b - sqrt_discriminant) / (2.0 * a);
         let p1 = r.at(t);
-        if t < 0.0001 || t > r.t_max || p1.z < *z_min || p1.z > *z_max {
+        if t < 0.0001 || t > r.t_max || p1.z < self.z_min || p1.z > self.z_max {
             t = (-b + sqrt_discriminant) / (2.0 * a);
             let p2 = r.at(t);
-            if t < 0.0001 || t > r.t_max || p2.z < *z_min || p2.z > *z_max {
+            if t < 0.0001 || t > r.t_max || p2.z < self.z_min || p2.z > self.z_max {
                 return None;
             }
         }
         // get the solution t
     
         Some(t)
-    } else {
-        panic!()
     }
-}
 
-pub fn area(cylinder: &Shape) -> f64 {
-    if let Shape::Cylinder { object_to_world: _, world_to_object:_, radius, z_max, z_min } = cylinder {
-        2.0 * PI * radius * (z_max - z_min) // only considering the outfacing side
-    } else {
-        panic!()
+    fn area(&self) -> f64 {
+        2.0 * PI * self.radius * (self.z_max - self.z_min) // only considering the outfacing side
     }
-}
 
-pub fn sample(cylinder: &Shape, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
-    if let Shape::Cylinder { object_to_world:_, world_to_object:_, radius, z_max, z_min } = cylinder {
+    fn sample(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
         let theta = u[0] * 2.0 * PI;
-        let z = u[1] * (z_max - z_min) + z_min;
-        let x = radius * theta.cos();
-        let y = radius * theta.sin();
+        let z = u[1] * (self.z_max - self.z_min) + self.z_min;
+        let x = self.radius * theta.cos();
+        let y = self.radius * theta.sin();
 
-        (Point3::new(x, y, z), Vector3::new(x, y, 0.0) / *radius, 1.0 / area(cylinder))
-    } else {
-        panic!()
+        (Point3::new(x, y, z), Vector3::new(x, y, 0.0) / self.radius, 1.0 / self.area())
     }
 }

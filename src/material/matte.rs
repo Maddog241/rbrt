@@ -1,12 +1,21 @@
+use crate::spectrum::Spectrum;
 use crate::utils::perpendicular;
 use crate::bxdf::{bsdf::Bsdf, Bxdf::LambertianReflection};
 
 use super::Material;
 
+pub struct Matte {
+    kd: Spectrum,
+}
 
+impl Matte {
+    pub fn new(kd: Spectrum) -> Matte {
+        Matte { kd }
+    }
+}
 
-pub fn compute_scattering(material: &Material, isect: &crate::geometry::interaction::SurfaceInteraction) -> crate::bxdf::bsdf::Bsdf {
-    if let Material::Matte { kd } = material {
+impl Material for Matte {
+    fn compute_scattering(&self, isect: &crate::geometry::interaction::SurfaceInteraction) -> crate::bxdf::bsdf::Bsdf {
         let (ss, ts) =  perpendicular(isect.n); 
 
         let ret = Bsdf {
@@ -14,20 +23,14 @@ pub fn compute_scattering(material: &Material, isect: &crate::geometry::interact
             ng: isect.n,
             ss,
             ts,
-            bxdfs: vec![LambertianReflection{reflectance: *kd} ],
+            bxdfs: vec![LambertianReflection{reflectance: self.kd} ],
             n_bxdfs: 1,
         };
 
         ret
-    } else {
-        panic!()
     }
-}
 
-pub fn is_specular(material: &Material) -> bool {
-    if let Material::Matte { kd:_ } = material {
+    fn is_specular(&self) -> bool {
         false
-    } else {
-        panic!()
     }
 }

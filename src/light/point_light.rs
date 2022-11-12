@@ -4,41 +4,38 @@ use crate::spectrum::Spectrum;
 use cgmath::{Point2, Point3, InnerSpace};
 
 
-pub fn sample_li(light: &Light, isect: &SurfaceInteraction, _u: Point2<f64>) -> (Spectrum, Point3<f64>, f64) {
-    if let Light::PointLight { p, intensity } = light {
+pub struct PointLight {
+    p: Point3<f64>,
+    intensity: Spectrum,
+}
+
+impl PointLight {
+    pub fn new(p: Point3<f64>, intensity: Spectrum) -> PointLight {
+        PointLight { p, intensity}
+    }
+}
+
+impl Light for PointLight {
+    fn sample_li(&self, isect: &SurfaceInteraction, _u: Point2<f64>) -> (Spectrum, Point3<f64>, f64) {
         let pdf = 1.0;
-        let distance2 = (p - isect.p).magnitude2();
+        let distance2 = (self.p - isect.p).magnitude2();
 
         if distance2 > 0.0 {
-            (*intensity / distance2, *p, pdf)
+            (self.intensity / distance2, self.p, pdf)
         } else {
             (Spectrum::new(0.0, 0.0, 0.0), Point3::new(0.0, 0.0, 0.0), pdf)
         }
-    } else {
-        panic!()
     }
-}
 
-pub fn le(light: &Light) -> Spectrum {
-    if let Light::PointLight { p:_, intensity:_ } = light {
+    fn le(&self) -> Spectrum {
         panic!("This method should not be called");
-    } else {
-        panic!()
     }
-}
 
-pub fn intersect_p(light: &Light, _r: &crate::geometry::ray::Ray) -> Option<f64> {
-    if let Light::PointLight { p:_, intensity:_ } = light {
+    fn intersect_p(&self, _r: &crate::geometry::ray::Ray) -> Option<f64> {
         None
-    } else {
-        panic!()
     }
-}
 
-pub fn intersect(light: &Light, _r: &mut Ray) -> Option<SurfaceInteraction> {
-    if let Light::PointLight { p:_, intensity:_ } = light {
+    fn intersect(&self, _r: &mut Ray) -> Option<SurfaceInteraction> {
         None
-    } else {
-        panic!()
     }
 }

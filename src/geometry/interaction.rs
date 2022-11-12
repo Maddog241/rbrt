@@ -12,7 +12,7 @@ pub struct SurfaceInteraction {
     pub time: f64,
     pub wo: Vector3<f64>, // the reverse direction of the incoming ray
                           // medium interface, to be implemented later
-    pub material: Option<Arc<Material>>,
+    pub material: Option<Arc<dyn Material>>,
     pub hit_light: bool,
     pub radiance: Option<Spectrum>,
 }
