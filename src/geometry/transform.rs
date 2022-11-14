@@ -5,6 +5,7 @@ use cgmath::{InnerSpace, Matrix4, Point3, SquareMatrix, Vector3, Vector4};
 use std::ops::Mul;
 use std::sync::Arc;
 
+#[derive(Clone)]
 pub struct Transform {
     pub m: Matrix4<f64>,
     pub m_inv: Matrix4<f64>,

@@ -1,15 +1,16 @@
 use crate::spectrum::Spectrum;
+use crate::texture::Texture;
 use crate::utils::perpendicular;
 use crate::bxdf::{bsdf::Bsdf, Bxdf::LambertianReflection};
 
 use super::Material;
 
 pub struct Matte {
-    kd: Spectrum,
+    kd: Box<dyn Texture<Spectrum>>,
 }
 
 impl Matte {
-    pub fn new(kd: Spectrum) -> Matte {
+    pub fn new(kd: Box<dyn Texture<Spectrum>>) -> Matte {
         Matte { kd }
     }
 }
@@ -23,7 +24,7 @@ impl Material for Matte {
             ng: isect.n,
             ss,
             ts,
-            bxdfs: vec![LambertianReflection{reflectance: self.kd} ],
+            bxdfs: vec![LambertianReflection{reflectance: self.kd.evaluate(isect)} ],
             n_bxdfs: 1,
         };
 

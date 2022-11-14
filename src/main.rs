@@ -120,7 +120,7 @@ fn main() {
         Film::new(WIDTH, HEIGHT),
     );
 
-    let scene = Scene::cornell_box();
+    let scene = Scene::test_texture();
 
     // render
     let now = std::time::Instant::now();

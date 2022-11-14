@@ -8,6 +8,9 @@ use crate::light::area_light::AreaLight;
 use crate::light::point_light::PointLight;
 use crate::material::glass::Glass;
 use crate::material::matte::Matte;
+use crate::texture::constant::ConstantTexture;
+use crate::texture::imagemap::{ImageTexture, Texels};
+use crate::texture::mapping::spherical::SphericalMapping;
 use crate::{light::Light, geometry::ray::Ray, spectrum::Spectrum};
 use crate::Transform;
 use super::Primitive;
@@ -82,7 +85,7 @@ impl Scene {
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 2.0);
         //// create lambertian material
-        let matte_material = Matte::new(Spectrum::new(1.0, 0.6, 0.2));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(1.0, 0.6, 0.2))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
@@ -90,7 +93,7 @@ impl Scene {
         let world_to_object2= object_to_world2.inverse();
         let sphere = Sphere::new(object_to_world2, world_to_object2, 100.0);
         //// create lambertian material
-        let matte_material2 = Matte::new(Spectrum::new(0.4, 0.4, 0.5));
+        let matte_material2 = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.4, 0.4, 0.5))));
         let ball2 = GeometricPrimitive::new(Box::new(sphere),Arc::new(matte_material2));
         scene.add_primitive(Box::new(ball2));
 
@@ -98,7 +101,7 @@ impl Scene {
         let world_to_object3= object_to_world3.inverse();
         let cylinder = Cylinder::new(object_to_world3, world_to_object3, 2.0, 2.0, 0.0);
         //// create lambertian material
-        let matte_material3 = Matte::new(Spectrum::new(0.8, 0.0, 0.0));
+        let matte_material3 = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.8, 0.0, 0.0))));
         let cylinder = GeometricPrimitive::new(Box::new(cylinder), Arc::new(matte_material3));
         scene.add_primitive(Box::new(cylinder));
 
@@ -122,7 +125,7 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(0.0, 4.0, 6.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new( object_to_world, world_to_object, 2.0);
-        let matte_material = Matte::new(Spectrum::new(1.0, 0.6, 0.2));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(1.0, 0.6, 0.2))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
@@ -136,14 +139,14 @@ impl Scene {
         let object_to_world4 = Transform::translate(Vector3::new(0.0, -20.0, 10.0));
         let world_to_object4= object_to_world4.inverse();
         let sphere = Sphere::new( object_to_world4, world_to_object4, 2.5);
-        let matte_material4 = Matte::new(Spectrum::new(0.8, 0.8, 0.8));
+        let matte_material4 = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.8, 0.8, 0.8))));
         let ball4 = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material4));
         scene.add_primitive(Box::new(ball4));
 
         let object_to_world3 = Transform::translate(Vector3::new(0.0, 0.0, 6.0)) * Transform::rotate_x(90.0);
         let world_to_object3= object_to_world3.inverse();
         let cylinder = Cylinder::new(object_to_world3, world_to_object3, 2.0, 2.0, 0.0);
-        let matte_material3 = Matte::new(Spectrum::new(0.8, 0.0, 0.0));
+        let matte_material3 = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.8, 0.0, 0.0))));
         let cylinder = GeometricPrimitive::new(Box::new(cylinder), Arc::new(matte_material3));
         scene.add_primitive(Box::new(cylinder));
 
@@ -161,7 +164,7 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(0.0, 4.0, 6.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new( object_to_world, world_to_object, 2.0);
-        let matte_material = Matte::new(Spectrum::new(1.0, 0.6, 0.2));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(1.0, 0.6, 0.2))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
@@ -175,7 +178,7 @@ impl Scene {
         let object_to_world3 = Transform::translate(Vector3::new(0.0, 0.0, 6.0)) * Transform::rotate_x(90.0);
         let world_to_object3= object_to_world3.inverse();
         let cylinder = Cylinder::new(object_to_world3, world_to_object3, 2.0, 2.0, 0.0);
-        let matte_material3 = Matte::new(Spectrum::new(0.8, 0.0, 0.0));
+        let matte_material3 = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.8, 0.0, 0.0))));
         let cylinder = GeometricPrimitive::new(Box::new(cylinder), Arc::new(matte_material3));
         scene.add_primitive(Box::new(cylinder));
 
@@ -197,28 +200,28 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
         let world_to_object = object_to_world.inverse();
         let right_wall = Disk::new(object_to_world, world_to_object, 150.0);
-        let matte_material = Matte::new(Spectrum::new(0.65, 0.05, 0.05));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.65, 0.05, 0.05))));
         let right_wall = GeometricPrimitive::new(Box::new(right_wall), Arc::new(matte_material));
         scene.add_primitive(Box::new(right_wall));
 
         let object_to_world = Transform::translate(Vector3::new(-10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
         let world_to_object = object_to_world.inverse();
         let left_wall = Disk::new(object_to_world, world_to_object, 150.0);
-        let matte_material = Matte::new(Spectrum::new(0.12, 0.45, 0.15));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.12, 0.45, 0.15))));
         let left_wall = GeometricPrimitive::new(Box::new(left_wall), Arc::new(matte_material));
         scene.add_primitive(Box::new(left_wall));
 
         let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 30.0));
         let world_to_object = object_to_world.inverse();
         let back_wall = Disk::new(object_to_world, world_to_object, 150.0);
-        let matte_material = Matte::new(Spectrum::new(0.73, 0.73, 0.73));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
         let back_wall = GeometricPrimitive::new(Box::new(back_wall), Arc::new(matte_material));
         scene.add_primitive(Box::new(back_wall));
 
         let object_to_world = Transform::translate(Vector3::new(0.0, 10.0, 0.0)) * Transform::rotate_x(90.0);
         let world_to_object = object_to_world.inverse();
         let upper_wall = Disk::new(object_to_world, world_to_object, 150.0);
-        let matte_material = Matte::new(Spectrum::new(0.73, 0.73, 0.73));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
         let upper_wall = GeometricPrimitive::new(Box::new(upper_wall), Arc::new(matte_material));
         scene.add_primitive(Box::new(upper_wall));
 
@@ -226,7 +229,7 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(0.0, -10.0, 0.0)) * Transform::rotate_x(-90.0);
         let world_to_object = object_to_world.inverse();
         let bot_wall = Disk::new(object_to_world, world_to_object, 150.0);
-        let matte_material = Matte::new(Spectrum::new(0.8, 0.8, 0.8));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.8, 0.8, 0.8))));
         let bot_wall = GeometricPrimitive::new(Box::new(bot_wall), Arc::new(matte_material));
         scene.add_primitive(Box::new(bot_wall));
 
@@ -240,7 +243,7 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(0.0, -6.0, 20.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 1.0);
-        let matte_material = Matte::new(Spectrum::new(0.5, 0.1, 0.1));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.5, 0.1, 0.1))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
@@ -260,28 +263,28 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(1000.0, 0.0, 3.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 950.0);
-        let matte_material = Matte::new(Spectrum::new(0.65, 0.05, 0.05));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.65, 0.05, 0.05))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
         let object_to_world = Transform::translate(Vector3::new(-1000.0, 0.0, 3.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new( object_to_world, world_to_object, 950.0);
-        let matte_material = Matte::new(Spectrum::new(0.12, 0.45, 0.15));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.12, 0.45, 0.15))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
         let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 1000.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 900.0);
-        let matte_material = Matte::new(Spectrum::new(0.73, 0.73, 0.73));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
         let object_to_world = Transform::translate(Vector3::new(0.0, -1000.0, 3.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 950.0);
-        let matte_material = Matte::new(Spectrum::new(0.73, 0.73, 0.73));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
@@ -289,7 +292,7 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(0.0, 1000.0, 3.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new( object_to_world, world_to_object, 950.0);
-        let matte_material = Matte::new(Spectrum::new(0.8, 0.8, 0.8));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.8, 0.8, 0.8))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
@@ -322,28 +325,28 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(1000.0, 0.0, 3.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new( object_to_world, world_to_object, 950.0);
-        let matte_material = Matte::new(Spectrum::new(0.65, 0.05, 0.05));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.65, 0.05, 0.05))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
         let object_to_world = Transform::translate(Vector3::new(-1000.0, 0.0, 3.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 950.0);
-        let matte_material = Matte::new(Spectrum::new(0.12, 0.45, 0.15));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.12, 0.45, 0.15))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
         let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 1000.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 900.0);
-        let matte_material = Matte::new(Spectrum::new(0.73, 0.73, 0.73));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
         let object_to_world = Transform::translate(Vector3::new(0.0, -1000.0, 3.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 950.0);
-        let matte_material = Matte::new(Spectrum::new(0.73, 0.73, 0.73));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
@@ -351,14 +354,14 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(0.0, 1000.0, 3.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 950.0);
-        let matte_material = Matte::new(Spectrum::new(0.8, 0.8, 0.8));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.8, 0.8, 0.8))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         scene.add_primitive(Box::new(ball));
 
         let object_to_world = Transform::translate(Vector3::new(0.0, -10.0, 25.0)) * Transform::rotate_x(90.0);
         let world_to_object = object_to_world.inverse();
         let disk = Disk::new(object_to_world, world_to_object, 5.0);
-        let matte_material = Matte::new(Spectrum::new(0.4, 0.4, 0.4));
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.4, 0.4, 0.4))));
         let disk = GeometricPrimitive::new(Box::new(disk), Arc::new(matte_material));
         scene.add_primitive(Box::new(disk));
 
@@ -371,4 +374,63 @@ impl Scene {
 
         scene
     }
+
+    pub fn test_texture() -> Scene {
+        let mut scene = Scene::new();
+
+        let object_to_world = Transform::translate(Vector3::new(10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
+        let world_to_object = object_to_world.inverse();
+        let right_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.65, 0.05, 0.05))));
+        let right_wall = GeometricPrimitive::new(Box::new(right_wall), Arc::new(matte_material));
+        scene.add_primitive(Box::new(right_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(-10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
+        let world_to_object = object_to_world.inverse();
+        let left_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.12, 0.45, 0.15))));
+        let left_wall = GeometricPrimitive::new(Box::new(left_wall), Arc::new(matte_material));
+        scene.add_primitive(Box::new(left_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 30.0));
+        let world_to_object = object_to_world.inverse();
+        let back_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
+        let back_wall = GeometricPrimitive::new(Box::new(back_wall), Arc::new(matte_material));
+        scene.add_primitive(Box::new(back_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, 10.0, 0.0)) * Transform::rotate_x(90.0);
+        let world_to_object = object_to_world.inverse();
+        let upper_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
+        let upper_wall = GeometricPrimitive::new(Box::new(upper_wall), Arc::new(matte_material));
+        scene.add_primitive(Box::new(upper_wall));
+
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, -10.0, 0.0)) * Transform::rotate_x(-90.0);
+        let world_to_object = object_to_world.inverse();
+        let bot_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.8, 0.8, 0.8))));
+        let bot_wall = GeometricPrimitive::new(Box::new(bot_wall), Arc::new(matte_material));
+        scene.add_primitive(Box::new(bot_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, -4.0, 20.0));
+        let world_to_object = object_to_world.inverse();
+        let sphere = Sphere::new(object_to_world.clone(), world_to_object, 4.0);
+        let world_to_texture = (object_to_world * Transform::rotate_x(90.0)).inverse();
+        let mapping = SphericalMapping::new(world_to_texture);
+        let matte_material = Matte::new(Box::new(ImageTexture::new(Box::new(mapping), Texels::new("./earthmap.jpg"))));
+        let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
+        scene.add_primitive(Box::new(ball));
+
+        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.99, 20.0)) * Transform::rotate_x(90.0);
+        let world_to_object4 = object_to_world4.inverse();
+        let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
+        let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
+        scene.add_light(Box::new(disk_light));
+
+
+        scene
+    }
+
 }
