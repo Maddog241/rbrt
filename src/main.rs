@@ -8,6 +8,7 @@ mod material;
 mod light;
 mod integrator;
 mod sampler;
+mod texture;
 
 use camera::{film::Film, perspective::PerspectiveCamera};
 use cgmath::{Point2, Vector3};

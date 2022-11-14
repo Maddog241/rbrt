@@ -1,42 +1,40 @@
 use core::panic;
 
-use cgmath::{Vector3, InnerSpace, Point2};
-use rand::random;
+use cgmath::{Vector3, InnerSpace};
 
-use crate::spectrum::Spectrum;
 
 // w here are supposed to be in the local coordinate system
 pub fn cos_theta(w: Vector3<f64>) -> f64 {
     w.z
 }
 
-pub fn cos_theta_square(w: Vector3<f64>) -> f64 {
-    w.z * w.z
-}
+// pub fn cos_theta_square(w: Vector3<f64>) -> f64 {
+//     w.z * w.z
+// }
 
-pub fn sin_theta(w: Vector3<f64>) -> f64 {
-    sin_theta_square(w).sqrt()
-}
+// pub fn sin_theta(w: Vector3<f64>) -> f64 {
+//     sin_theta_square(w).sqrt()
+// }
 
-pub fn sin_theta_square(w: Vector3<f64>) -> f64 {
-    (1.0 - cos_theta_square(w)).clamp(0.0, 1.0)
-}
+// pub fn sin_theta_square(w: Vector3<f64>) -> f64 {
+//     (1.0 - cos_theta_square(w)).clamp(0.0, 1.0)
+// }
 
-pub fn cos_phi(w: Vector3<f64>) -> f64 {
-    if sin_theta_square(w) != 0.0 {
-        w.x / sin_theta(w)
-    } else {
-        1.0
-    }
-}
+// pub fn cos_phi(w: Vector3<f64>) -> f64 {
+//     if sin_theta_square(w) != 0.0 {
+//         w.x / sin_theta(w)
+//     } else {
+//         1.0
+//     }
+// }
 
-pub fn sin_phi(w: Vector3<f64>) -> f64 {
-    if sin_theta(w) != 0.0 {
-        w.y / sin_theta(w)
-    } else {
-        0.0
-    }
-}
+// pub fn sin_phi(w: Vector3<f64>) -> f64 {
+//     if sin_theta(w) != 0.0 {
+//         w.y / sin_theta(w)
+//     } else {
+//         0.0
+//     }
+// }
 
 fn is_nan(color: Vector3<f64>) -> bool {
     color.x.is_nan() || color.y.is_nan() || color.z.is_nan()
@@ -67,13 +65,13 @@ pub fn perpendicular(n: Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
     (u, v)
 }
 
-pub fn assert_spectrum(spectrum: &Spectrum) -> bool {
-    spectrum.r >= 0.0 && spectrum.g >= 0.0 && spectrum.b >= 0.0
-}
+// pub fn assert_spectrum(spectrum: &Spectrum) -> bool {
+//     spectrum.r >= 0.0 && spectrum.g >= 0.0 && spectrum.b >= 0.0
+// }
 
-pub fn random_2d() -> Point2<f64> {
-    Point2::new(random(), random())
-}
+// pub fn random_2d() -> Point2<f64> {
+//     Point2::new(random(), random())
+// }
 
 #[cfg(test)]
 mod tests {
