@@ -1,5 +1,5 @@
-pub mod point_light;
-pub mod area_light;
+pub mod point;
+pub mod area;
 
 use crate::{spectrum::Spectrum, geometry::{interaction::SurfaceInteraction, ray::Ray}};
 use cgmath::{Point2, Point3};
