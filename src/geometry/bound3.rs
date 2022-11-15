@@ -3,12 +3,12 @@ use std::mem::swap;
 use super::ray::Ray;
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector3};
 
+#[derive(Clone)]
 pub struct Bound3 {
     pub p_min: Point3<f64>,
     pub p_max: Point3<f64>,
 }
 
-#[allow(dead_code)]
 impl Bound3 {
     pub fn new(p: Point3<f64>, q: Point3<f64>) -> Bound3 {
         Bound3 {
@@ -52,7 +52,7 @@ impl Bound3 {
         }
     }
 
-    pub fn union_point3(&self, p: &Point3<f64>) -> Bound3 {
+    pub fn union_point3(&self, p: Point3<f64>) -> Bound3 {
         Bound3 {
             p_min: Point3::new(
                 self.p_min.x.min(p.x),
@@ -89,7 +89,7 @@ impl Bound3 {
         x && y && z
     }
 
-    pub fn contains(&self, p: &Point3<f64>) -> bool {
+    pub fn contains(&self, p: Point3<f64>) -> bool {
         // this corresponds to the 'inside' function on page 79
         self.p_min.x <= p.x
             && p.x <= self.p_max.x
@@ -99,7 +99,7 @@ impl Bound3 {
             && p.z <= self.p_max.z
     }
 
-    pub fn contains_exlusive(&self, p: &Point3<f64>) -> bool {
+    pub fn contains_exlusive(&self, p: Point3<f64>) -> bool {
         // do not consider the upper bound
         self.p_min.x <= p.x
             && p.x < self.p_max.x
@@ -151,7 +151,7 @@ impl Bound3 {
         )
     }
 
-    pub fn offset(&self, p: &Point3<f64>) -> Vector3<f64> {
+    pub fn offset(&self, p: Point3<f64>) -> Vector3<f64> {
         let mut o = p - self.p_min;
         o.x /= self.p_max.x - self.p_min.x;
         o.y /= self.p_max.y - self.p_min.y;

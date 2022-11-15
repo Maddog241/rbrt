@@ -62,7 +62,7 @@ impl Transform {
         let p1 = self.transform_point3(b.corner(1));
         let mut new_bound = Bound3::new(p0, p1);
         for i in 2..8 {
-            new_bound = new_bound.union_point3(&self.transform_point3(b.corner(i)));
+            new_bound = new_bound.union_point3(self.transform_point3(b.corner(i)));
         }
         new_bound
     }

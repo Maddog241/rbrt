@@ -1,5 +1,6 @@
 pub mod geometric_primitive;
 pub mod scene;
+pub mod bound_scene;
 
 
 use crate::geometry::{ray::Ray, interaction::SurfaceInteraction, bound3::Bound3};

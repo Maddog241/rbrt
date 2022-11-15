@@ -16,6 +16,7 @@ use crate::Transform;
 use super::Primitive;
 use super::geometric_primitive::GeometricPrimitive;
 use cgmath::{Vector3, Point3};
+use rand::random;
 
 pub struct Scene {
     pub lights: Vec<Box<dyn Light>>,
@@ -498,4 +499,82 @@ impl Scene {
 
         scene
     }
+    
+    
+    pub fn sphere_100() -> Scene {
+        let mut scene = Scene::new();
+
+        let object_to_world = Transform::translate(Vector3::new(10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
+        let world_to_object = object_to_world.inverse();
+        let right_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.65, 0.05, 0.05))));
+        let right_wall = GeometricPrimitive::new(Box::new(right_wall), Arc::new(matte_material));
+        scene.add_primitive(Box::new(right_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(-10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
+        let world_to_object = object_to_world.inverse();
+        let left_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.12, 0.45, 0.15))));
+        let left_wall = GeometricPrimitive::new(Box::new(left_wall), Arc::new(matte_material));
+        scene.add_primitive(Box::new(left_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 30.0));
+        let world_to_object = object_to_world.inverse();
+        let back_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
+        let back_wall = GeometricPrimitive::new(Box::new(back_wall), Arc::new(matte_material));
+        scene.add_primitive(Box::new(back_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, 10.0, 0.0)) * Transform::rotate_x(90.0);
+        let world_to_object = object_to_world.inverse();
+        let upper_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
+        let upper_wall = GeometricPrimitive::new(Box::new(upper_wall), Arc::new(matte_material));
+        scene.add_primitive(Box::new(upper_wall));
+
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, -10.0, 0.0)) * Transform::rotate_x(-90.0);
+        let world_to_object = object_to_world.inverse();
+        let bot_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.8, 0.8, 0.8))));
+        let bot_wall = GeometricPrimitive::new(Box::new(bot_wall), Arc::new(matte_material));
+        scene.add_primitive(Box::new(bot_wall));
+
+        // create 100 spheres inside the box
+        let z_min = 18.0;
+        let z_max = 28.0;
+        let y_min = -9.0;
+        let y_max = 9.0;
+        let x_min = -7.0;
+        let x_max = 7.0;
+
+        for _i in 0..100 {
+            let x = x_min + (x_max - x_min) * random::<f64>();
+            let y = y_min + (y_max - y_min) * random::<f64>();
+            let z = z_min + (z_max - z_min) * random::<f64>();
+            let object_to_world = Transform::translate(Vector3::new(x, y, z));
+            let world_to_object = object_to_world.inverse();
+            let sphere = Sphere::new(object_to_world.clone(), world_to_object, 0.2);
+            let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(random(), random(), random()))));
+            let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
+            scene.add_primitive(Box::new(ball));
+        }
+
+        // lights
+
+        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.9, 20.0)) * Transform::rotate_x(90.0);
+        let world_to_object4 = object_to_world4.inverse();
+        let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
+        let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
+        scene.add_light(Box::new(disk_light));
+
+        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.9, 20.0)) * Transform::rotate_x(90.0);
+        let world_to_object4 = object_to_world4.inverse();
+        let disk_light = Cylinder::new(object_to_world4, world_to_object4, 3.0, 0.0, 0.3);
+        let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
+        scene.add_light(Box::new(disk_light));
+
+
+        scene
+    }   
 }
