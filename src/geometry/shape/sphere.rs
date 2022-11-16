@@ -1,10 +1,11 @@
 use std::f64::consts::PI;
 
-use super::bound3::Bound3;
-use super::interaction::*;
-use super::ray::*;
-use super::shape::Shape;
-use super::transform::Transform;
+use crate::geometry::transform::Transform;
+
+use super::super::bound3::Bound3;
+use super::super::interaction::*;
+use super::super::ray::*;
+use super::Shape;
 use cgmath::Point2;
 use cgmath::Vector3;
 use cgmath::{EuclideanSpace, InnerSpace, Point3};

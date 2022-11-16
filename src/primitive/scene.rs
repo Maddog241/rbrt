@@ -2,9 +2,9 @@ use std::f64::INFINITY;
 use std::sync::Arc;
 
 use crate::accelerator::bvh::BVH;
-use crate::geometry::cylinder::Cylinder;
-use crate::geometry::disk::Disk;
-use crate::geometry::sphere::Sphere;
+use crate::geometry::shape::cylinder::Cylinder;
+use crate::geometry::shape::disk::Disk;
+use crate::geometry::shape::sphere::Sphere;
 use crate::light::area::AreaLight;
 use crate::light::point::PointLight;
 use crate::material::glass::Glass;

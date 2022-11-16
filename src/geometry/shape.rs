@@ -1,3 +1,7 @@
+pub mod disk;
+pub mod sphere;
+pub mod cylinder;
+
 use cgmath::{Point2, Point3, Vector3};
 
 use super::bound3::Bound3;

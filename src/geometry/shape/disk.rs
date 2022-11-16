@@ -2,7 +2,10 @@ use std::f64::consts::PI;
 
 use cgmath::{Point2, Vector3, Point3, InnerSpace, EuclideanSpace};
 
-use super::{bound3::Bound3, shape::Shape, ray::{Ray, Beam}, interaction::SurfaceInteraction, transform::Transform};
+use crate::geometry::{transform::Transform, bound3::Bound3, ray::{Ray, Beam}, interaction::SurfaceInteraction};
+
+use super::Shape;
+
 
 pub struct Disk {
     object_to_world: Transform,

@@ -103,40 +103,35 @@ impl Arguments {
 
 fn main() {
     // receiving command line arguments
+    let cli = Cli::parse();
+    let mut args = Arguments::new();
+    args.process_arguments(&cli);
 
-    // let cli = Cli::parse();
-    // let mut args = Arguments::new();
-    // args.process_arguments(&cli);
+    // create camera
+    let pos = Vector3::new(0.0, 0.0, 0.0);
+    let look = Vector3::new(0.0, 0.0, 1.0);
+    let up = Vector3::new(0.0, 1.0, 0.0);
+    let camera_to_world = Transform::look_at(pos, look, up).inverse();
 
-    // // create camera
-    // let pos = Vector3::new(0.0, 0.0, 0.0);
-    // let look = Vector3::new(0.0, 0.0, 1.0);
-    // let up = Vector3::new(0.0, 1.0, 0.0);
-    // let camera_to_world = Transform::look_at(pos, look, up).inverse();
+    let camera = PerspectiveCamera::new(
+        camera_to_world,
+        (Point2::new(-FRAME, -1.0), Point2::new(FRAME, 1.0)),
+        0.0,
+        1.0,
+        60.0,
+        Film::new(WIDTH, HEIGHT),
+    );
 
-    // let camera = PerspectiveCamera::new(
-    //     camera_to_world,
-    //     (Point2::new(-FRAME, -1.0), Point2::new(FRAME, 1.0)),
-    //     0.0,
-    //     1.0,
-    //     60.0,
-    //     Film::new(WIDTH, HEIGHT),
-    // );
+    let scene = Scene::cornell_box();
 
-    // let scene = Scene::cornell_box();
+    // render
+    let now = std::time::Instant::now();
 
-    // // render
-    // let now = std::time::Instant::now();
+    let integrator = PathIntegrator::new(camera, args.max_depth, args.n_sample, args.n_thread);
+    render(integrator, scene, &args.filename);
 
-    // let integrator = PathIntegrator::new(camera, args.max_depth, args.n_sample, args.n_thread);
-    // render(integrator, scene, &args.filename);
-
-
-    // let cost = now.elapsed().as_millis();
-    // println!("RENDER COST: {} secs", (cost as f64) / 1000.0);
-
-    let filename = "./models/bunny.obj";
-    load(filename);
+    let cost = now.elapsed().as_millis();
+    println!("RENDER COST: {} secs", (cost as f64) / 1000.0);
 }
 
 

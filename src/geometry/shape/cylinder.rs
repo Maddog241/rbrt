@@ -2,7 +2,10 @@ use std::f64::consts::PI;
 
 use cgmath::{Vector3, Point3, InnerSpace, Point2};
 
-use super::{shape::Shape, interaction::SurfaceInteraction, ray::{Ray, Beam}, bound3::Bound3, transform::Transform};
+use crate::geometry::{transform::Transform, bound3::Bound3, ray::{Ray, Beam}, interaction::SurfaceInteraction};
+
+use super::Shape;
+
 
 pub struct Cylinder {
     object_to_world: Transform,
@@ -19,14 +22,14 @@ impl Cylinder {
 }
 
 impl Shape for Cylinder {
-    fn object_bound(&self) -> super::bound3::Bound3 {
+    fn object_bound(&self) -> Bound3 {
         Bound3::new(
             Point3::new(-self.radius, -self.radius, self.z_min),
             Point3::new(self.radius, self.radius, self.z_max),
         )
     }
 
-    fn world_bound(&self) -> super::bound3::Bound3 {
+    fn world_bound(&self) -> Bound3 {
         self.object_to_world.transform_bound3(&self.object_bound())
     }
 
