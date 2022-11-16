@@ -246,9 +246,16 @@ impl Scene {
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         primitives.push(Box::new(ball));
 
-        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.99, 20.0)) * Transform::rotate_x(90.0);
+
+        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.9, 20.0)) * Transform::rotate_x(90.0);
         let world_to_object4 = object_to_world4.inverse();
         let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
+        let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
+        lights.push(Box::new(disk_light));
+
+        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.9, 20.0)) * Transform::rotate_x(90.0);
+        let world_to_object4 = object_to_world4.inverse();
+        let disk_light = Cylinder::new(object_to_world4, world_to_object4, 3.0, 0.0, 0.3);
         let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
         lights.push(Box::new(disk_light));
 

@@ -40,7 +40,7 @@ impl BVH {
             cen_bound = cen_bound.union_point3(primitive_infos[i].center);
         }
 
-        // check if cen_bound contains a single point
+        // check if cen_bound contains only a single point
         if cen_bound.p_max == cen_bound.p_min {
             let mut indexes = Vec::new();
 
