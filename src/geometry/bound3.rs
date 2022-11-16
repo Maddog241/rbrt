@@ -3,12 +3,14 @@ use std::mem::swap;
 use super::ray::Ray;
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector3};
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct Bound3 {
     pub p_min: Point3<f64>,
     pub p_max: Point3<f64>,
 }
 
+#[allow(dead_code)]
 impl Bound3 {
     pub fn new(p: Point3<f64>, q: Point3<f64>) -> Bound3 {
         Bound3 {

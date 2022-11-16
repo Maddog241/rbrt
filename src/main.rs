@@ -16,9 +16,7 @@ use cgmath::{Point2, Vector3};
 use geometry::transform::Transform;
 use indicatif::{ProgressBar, MultiProgress, ProgressStyle};
 
-use crate::accelerator::bvh::BVH;
 use crate::integrator::path_integrator::PathIntegrator;
-use crate::primitive::bound_scene::BoundScene;
 use crate::primitive::scene::Scene;
 use crate::spectrum::Spectrum;
 use crate::camera::{Camera, CameraSample};
@@ -123,9 +121,7 @@ fn main() {
         Film::new(WIDTH, HEIGHT),
     );
 
-    let (primitives, lights) = BoundScene::sphere_100();
-    let bvh = BVH::new(primitives);
-    let scene = BoundScene::new(lights, bvh);
+    let scene = Scene::cornell_box();
 
     // render
     let now = std::time::Instant::now();
@@ -139,64 +135,8 @@ fn main() {
 }
 
 
-// fn render(integrator: PathIntegrator, scene: Scene, filename: &str) {
-//     let res = integrator.camera.film.resolution;
-//     let (width, height) = (res.x, res.y);
 
-//     let integrator = Arc::new(integrator);
-//     let scene = Arc::new(scene);
-
-//     let mut handlers = Vec::new();
-
-//     let multi_bar = MultiProgress::new();
-
-//     multi_bar.println(format!("{} threads running...", integrator.n_thread)).unwrap();
-
-//     for tid in 0..integrator.n_thread {
-//         let int = Arc::clone(&integrator);
-//         let scene = Arc::clone(&scene);
-//         // set the progress bar
-//         let bar = multi_bar.add(ProgressBar::new(height as u64));
-//         bar.set_message(format!("t{}", tid));
-//         bar.set_style(ProgressStyle::with_template("{msg}  {bar:40.cyan/blue} {pos:>7}/{len:7} [{elapsed_precise}]")
-//             .unwrap()
-//             .progress_chars("=>-"));
-
-//         // create process
-//         let handler = thread::spawn(move || {
-//             for i in 0..height {
-//                 for j in 0..width {
-//                     // first render the upper left pixel, then go rightwards and downwards
-//                     let mut radiance = Spectrum::new(0.0, 0.0, 0.0);
-                    
-//                     for _ in 0..int.n_sample {
-//                         let sample = CameraSample::new(Point2::new(j as f64 + random::<f64>(), i as f64 + random::<f64>()), 0.0);
-//                         let mut r = int.camera.generate_ray(sample);
-
-//                         radiance += int.li(&mut r, &scene);
-//                     }
-
-//                     radiance /= int.n_sample as f64 * int.n_thread as f64;
-
-//                     int.camera.film.record(i, j, radiance);
-//                 }
-//                 bar.inc(1);
-//             }
-
-//             bar.finish();
-//         });
-
-//         handlers.push(handler);
-//     }
-
-//     for handler in handlers {
-//         handler.join().unwrap();
-//     }
-
-//     integrator.camera.film.write_to_image(filename);
-// }
-
-fn render(integrator: PathIntegrator, scene: BoundScene, filename: &str) {
+fn render(integrator: PathIntegrator, scene: Scene, filename: &str) {
     let res = integrator.camera.film.resolution;
     let (width, height) = (res.x, res.y);
 

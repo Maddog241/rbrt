@@ -7,6 +7,7 @@ pub struct BVH {
     root: BVHNode, // the tree may contain nothing
 }
 
+#[allow(dead_code)]
 impl BVH {
     pub fn new(primitives: Vec<Box<dyn Primitive>>) -> Self {
         let mut primitive_infos = Vec::new();
@@ -112,6 +113,7 @@ struct BVHNode {
     prim_indexes: Vec<usize>, // the index of primitives
 }
 
+#[allow(dead_code)]
 impl BVHNode {
     fn new_interior(left: Option<BVHNode>, right: Option<BVHNode>) -> Self {
         // left and right could not all be None
@@ -286,6 +288,7 @@ impl BVHNode {
     }
 }
 
+#[allow(dead_code)]
 struct PrimitiveInfo {
     index: usize,
     bound: Bound3,
