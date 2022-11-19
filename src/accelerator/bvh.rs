@@ -87,10 +87,10 @@ impl Primitive for BVH {
             } 
 
             if let Some(r_node) = &self.root.r_child {
-                if let Some(t) = r_node.intersect_p(r, &self.primitives) {
+                if let Some(new_t) = r_node.intersect_p(r, &self.primitives) {
                     match res {
-                        None => res = Some(t),
-                        Some(new_t) => res = Some(t.min(new_t)),
+                        None => res = Some(new_t),
+                        Some(t) => res = Some(t.min(new_t)),
                     }
                 }
             }

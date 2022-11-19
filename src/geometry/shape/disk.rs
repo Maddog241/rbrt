@@ -25,8 +25,9 @@ impl Disk {
 
 impl Shape for Disk {
     fn object_bound(&self) -> Bound3 {
-        let p = Point3::new(-self.radius, -self.radius, 0.0);
-        let q = Point3::new(self.radius, self.radius, 0.0);
+        // DO NOT let the bounding box be thickless
+        let p = Point3::new(-self.radius, -self.radius, 0.1);
+        let q = Point3::new(self.radius, self.radius, -0.1);
 
         Bound3::new(p, q)
     }

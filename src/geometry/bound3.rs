@@ -167,7 +167,7 @@ impl Bound3 {
     }
 
     pub fn intersect_p(&self, r: &Ray) -> Option<(f64, f64)> {
-        let mut t0 = 0.0;
+        let mut t0 = 0.0001;
         let mut t1 = r.t_max;
         for i in 0..3 {
             let inv_dir = 1.0 / r.d[i];

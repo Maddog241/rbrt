@@ -68,10 +68,6 @@ pub fn perpendicular(n: Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
     (u, v)
 }
 
-pub fn load(filename: &str) {
-    
-}
-
 // pub fn assert_spectrum(spectrum: &Spectrum) -> bool {
 //     spectrum.r >= 0.0 && spectrum.g >= 0.0 && spectrum.b >= 0.0
 // }

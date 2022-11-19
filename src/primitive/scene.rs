@@ -4,6 +4,7 @@ use std::sync::Arc;
 use crate::accelerator::bvh::BVH;
 use crate::geometry::shape::cylinder::Cylinder;
 use crate::geometry::shape::disk::Disk;
+use crate::geometry::shape::mesh::{TriangleMesh, Triangle};
 use crate::geometry::shape::sphere::Sphere;
 use crate::light::area::AreaLight;
 use crate::light::point::PointLight;
@@ -586,6 +587,139 @@ impl Scene {
             primitives.push(Box::new(ball));
         }
 
+        // lights
+
+        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.9, 20.0)) * Transform::rotate_x(90.0);
+        let world_to_object4 = object_to_world4.inverse();
+        let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
+        let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
+        lights.push(Box::new(disk_light));
+
+        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.9, 20.0)) * Transform::rotate_x(90.0);
+        let world_to_object4 = object_to_world4.inverse();
+        let disk_light = Cylinder::new(object_to_world4, world_to_object4, 3.0, 0.0, 0.3);
+        let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
+        lights.push(Box::new(disk_light));
+
+
+        let bvh = BVH::new(primitives);
+        let scene = Scene::new(lights, Box::new(bvh));
+
+        scene
+    }   
+
+    pub fn test_triangle() -> Scene {
+        let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
+        let mut lights: Vec<Box<dyn Light>> = Vec::new();
+
+        let object_to_world = Transform::translate(Vector3::new(10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
+        let world_to_object = object_to_world.inverse();
+        let right_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.65, 0.05, 0.05))));
+        let right_wall = GeometricPrimitive::new(Box::new(right_wall), Arc::new(matte_material));
+        primitives.push(Box::new(right_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(-10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
+        let world_to_object = object_to_world.inverse();
+        let left_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.12, 0.45, 0.15))));
+        let left_wall = GeometricPrimitive::new(Box::new(left_wall), Arc::new(matte_material));
+        primitives.push(Box::new(left_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 30.0));
+        let world_to_object = object_to_world.inverse();
+        let back_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
+        let back_wall = GeometricPrimitive::new(Box::new(back_wall), Arc::new(matte_material));
+        primitives.push(Box::new(back_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, 10.0, 0.0)) * Transform::rotate_x(90.0);
+        let world_to_object = object_to_world.inverse();
+        let upper_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
+        let upper_wall = GeometricPrimitive::new(Box::new(upper_wall), Arc::new(matte_material));
+        primitives.push(Box::new(upper_wall));
+
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, -10.0, 0.0)) * Transform::rotate_x(-90.0);
+        let world_to_object = object_to_world.inverse();
+        let bot_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.8, 0.8, 0.8))));
+        let bot_wall = GeometricPrimitive::new(Box::new(bot_wall), Arc::new(matte_material));
+        primitives.push(Box::new(bot_wall));
+
+        let positions = vec![Point3::new(3.0, -5.0, 15.0), Point3::new(-3.0, -5.0, 15.0), Point3::new(0.0, -2.0, 15.0)];
+        let normal = Vector3::new(0.0, 0.0, -1.0);
+        let triangle = Triangle::new(0, 1, 2, Arc::new(positions), Arc::new(Vec::new()), Arc::new(vec![normal, normal, normal]), Arc::new(Matte::new(Box::new(ConstantTexture::new(Spectrum::new(1.0, 0.0, 0.0))))));
+        primitives.push(Box::new(triangle));
+        
+        // lights
+
+        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.9, 20.0)) * Transform::rotate_x(90.0);
+        let world_to_object4 = object_to_world4.inverse();
+        let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
+        let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
+        lights.push(Box::new(disk_light));
+
+        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.9, 20.0)) * Transform::rotate_x(90.0);
+        let world_to_object4 = object_to_world4.inverse();
+        let disk_light = Cylinder::new(object_to_world4, world_to_object4, 3.0, 0.0, 0.3);
+        let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
+        lights.push(Box::new(disk_light));
+
+
+        let bvh = BVH::new(primitives);
+        let scene = Scene::new(lights, Box::new(bvh));
+
+        scene
+    }   
+
+    pub fn test_obj() -> Scene {
+        let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
+        let mut lights: Vec<Box<dyn Light>> = Vec::new();
+
+        let object_to_world = Transform::translate(Vector3::new(10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
+        let world_to_object = object_to_world.inverse();
+        let right_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.65, 0.05, 0.05))));
+        let right_wall = GeometricPrimitive::new(Box::new(right_wall), Arc::new(matte_material));
+        primitives.push(Box::new(right_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(-10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
+        let world_to_object = object_to_world.inverse();
+        let left_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.12, 0.45, 0.15))));
+        let left_wall = GeometricPrimitive::new(Box::new(left_wall), Arc::new(matte_material));
+        primitives.push(Box::new(left_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 30.0));
+        let world_to_object = object_to_world.inverse();
+        let back_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
+        let back_wall = GeometricPrimitive::new(Box::new(back_wall), Arc::new(matte_material));
+        primitives.push(Box::new(back_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, 10.0, 0.0)) * Transform::rotate_x(90.0);
+        let world_to_object = object_to_world.inverse();
+        let upper_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
+        let upper_wall = GeometricPrimitive::new(Box::new(upper_wall), Arc::new(matte_material));
+        primitives.push(Box::new(upper_wall));
+
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, -10.0, 0.0)) * Transform::rotate_x(-90.0);
+        let world_to_object = object_to_world.inverse();
+        let bot_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.8, 0.8, 0.8))));
+        let bot_wall = GeometricPrimitive::new(Box::new(bot_wall), Arc::new(matte_material));
+        primitives.push(Box::new(bot_wall));
+
+        let models = TriangleMesh::load("./models/bunny.obj");
+        for m in models {
+            primitives.push(Box::new(m));
+        }
+        
+        
         // lights
 
         let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.9, 20.0)) * Transform::rotate_x(90.0);

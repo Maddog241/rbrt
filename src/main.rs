@@ -15,7 +15,6 @@ use camera::{film::Film, perspective::PerspectiveCamera};
 use cgmath::{Point2, Vector3};
 use geometry::transform::Transform;
 use indicatif::{ProgressBar, MultiProgress, ProgressStyle};
-use utils::load;
 
 use crate::integrator::path_integrator::PathIntegrator;
 use crate::primitive::scene::Scene;
@@ -30,8 +29,8 @@ use clap::Parser;
 use std::sync::Arc;
 use std::thread;
 
-const WIDTH: usize = 1920;
-const HEIGHT: usize = 1080;
+const WIDTH: usize = 500;
+const HEIGHT: usize = 500;
 const FRAME: f64 = (WIDTH as f64) / (HEIGHT as f64);
 
 #[derive(Parser)]
@@ -122,7 +121,7 @@ fn main() {
         Film::new(WIDTH, HEIGHT),
     );
 
-    let scene = Scene::cornell_box();
+    let scene = Scene::test_obj();
 
     // render
     let now = std::time::Instant::now();
