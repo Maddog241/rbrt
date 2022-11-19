@@ -4,7 +4,7 @@ use cgmath::{Vector3, Point3, InnerSpace, Point2};
 
 use crate::geometry::{transform::Transform, bound3::Bound3, ray::{Ray, Beam}, interaction::SurfaceInteraction};
 
-use super::Shape;
+use super::{Shape, SampleableShape};
 
 
 pub struct Cylinder {
@@ -105,6 +105,10 @@ impl Shape for Cylinder {
         Some(t)
     }
 
+
+}
+
+impl SampleableShape for Cylinder {
     fn area(&self) -> f64 {
         2.0 * PI * self.radius * (self.z_max - self.z_min) // only considering the outfacing side
     }

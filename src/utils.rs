@@ -69,36 +69,7 @@ pub fn perpendicular(n: Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
 }
 
 pub fn load(filename: &str) {
-    let bunny = tobj::load_obj(
-        filename,
-        &tobj::LoadOptions{
-            single_index: true,
-            triangulate: true,
-            ..Default::default()
-        }
-    );
-
-    let (models, _materials) = bunny.expect("Failed to load bunny.obj");
-
-    println!("# of models: {}", models.len());
-
-    for (_i, m) in models.iter().enumerate() {
-        let mesh = &m.mesh;
-
-        println!("model name: {}", m.name);
-
-        println!("{} triangles", mesh.positions.len() / 3);
-
-        for v in 0..mesh.positions.len() / 3 {
-            println!(
-                "v[{}] = ({}, {}, {})",
-                v,
-                mesh.positions[3 * v],
-                mesh.positions[3 * v + 1],
-                mesh.positions[3 * v + 2],
-            );
-        }
-    }
+    
 }
 
 // pub fn assert_spectrum(spectrum: &Spectrum) -> bool {

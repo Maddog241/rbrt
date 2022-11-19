@@ -1,15 +1,15 @@
 use cgmath::{Point3, Point2, InnerSpace};
-use crate::{geometry::{interaction::SurfaceInteraction, ray::Ray, shape::Shape}, spectrum::Spectrum};
+use crate::{geometry::{interaction::SurfaceInteraction, ray::Ray, shape::{Shape, SampleableShape}}, spectrum::Spectrum};
 
 use super::Light;
 
 pub struct AreaLight {
-    shape: Box<dyn Shape>,
+    shape: Box<dyn SampleableShape>,
     emit: Spectrum,
 }
 
 impl AreaLight {
-    pub fn new(shape: Box<dyn Shape>, emit: Spectrum) -> AreaLight {
+    pub fn new(shape: Box<dyn SampleableShape>, emit: Spectrum) -> AreaLight {
         AreaLight { shape, emit}
     }
 }

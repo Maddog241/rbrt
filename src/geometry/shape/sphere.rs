@@ -5,6 +5,7 @@ use crate::geometry::transform::Transform;
 use super::super::bound3::Bound3;
 use super::super::interaction::*;
 use super::super::ray::*;
+use super::SampleableShape;
 use super::Shape;
 use cgmath::Point2;
 use cgmath::Vector3;
@@ -105,6 +106,11 @@ impl Shape for Sphere {
         Some(t)
     }
 
+  
+
+}
+
+impl SampleableShape for Sphere {
     fn area(&self) -> f64 {
         4.0 * PI * self.radius * self.radius
     }
@@ -120,5 +126,4 @@ impl Shape for Sphere {
         let n = self.object_to_world.transform_vector3(Vector3::new(x, y, z) / self.radius);
         (p, n, 1.0 / self.area())
     }
-
 }
