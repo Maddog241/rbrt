@@ -4,7 +4,7 @@ use std::f64::INFINITY;
 use cgmath::{Point2, InnerSpace};
 use rand::random;
 
-use crate::{camera::perspective::PerspectiveCamera, spectrum::Spectrum, geometry::ray::Ray, primitive::scene::Scene};
+use crate::{camera::perspective::PerspectiveCamera, spectrum::Spectrum, geometry::ray::Ray, scene::Scene};
 use super::{Integrator, visibility_test};
 
 pub struct PathIntegrator {

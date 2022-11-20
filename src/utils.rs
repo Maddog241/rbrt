@@ -2,10 +2,6 @@ use core::panic;
 
 use cgmath::{Vector3, InnerSpace};
 
-use crate::primitive::Primitive;
-
-use tobj;
-
 // w here are supposed to be in the local coordinate system
 pub fn cos_theta(w: Vector3<f64>) -> f64 {
     w.z

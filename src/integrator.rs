@@ -3,7 +3,7 @@ pub mod path_integrator;
 
 use cgmath::{InnerSpace, Point3};
 
-use crate::{geometry::{ray::Ray, interaction::SurfaceInteraction}, spectrum::Spectrum, primitive::scene::Scene};
+use crate::{geometry::{ray::Ray, interaction::SurfaceInteraction}, spectrum::Spectrum, scene::Scene};
 
 pub trait Integrator {
     fn li(&self, ray: &mut Ray, scene: &Scene) -> Spectrum;

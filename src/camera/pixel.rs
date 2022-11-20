@@ -1,4 +1,5 @@
 use cgmath::Vector3;
+use image::Rgb;
 
 #[derive(Clone)]
 pub struct Pixel {
@@ -16,10 +17,11 @@ impl Pixel {
         }
     }
 
-    pub fn to_u8(&self) -> [u8; 3] {
+    pub fn to_rgb(&self) -> Rgb<u8> {
         let x = (self.rgb.x * 255.0) as u8;
         let y = (self.rgb.y * 255.0) as u8;
         let z = (self.rgb.z * 255.0) as u8;
-        [x, y, z]
+
+        Rgb([x, y, z])
     }
 }

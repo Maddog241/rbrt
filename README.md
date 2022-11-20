@@ -1,3 +1,5 @@
+# log
+
 - 2022-11-15
   光线加速结构
   scene::sphere_100() 创建了包含100球的cornell box
@@ -12,11 +14,7 @@
 
   另外一个模型最好只load一次以节约内存，使用同一个mesh的不同物体使用这个mesh的引用就可以了，所以mesh仅仅实现Shape是最好的，而不是为了实现primitive而给它加上一个material，甚至加上world_to_object矩阵，这样就不能复用了。由于目前的三角形-光线求交算法是默认了在world-space进行（而不是像其它的shape求交算法那样把光线转到object-space），这要求triangle拥有一个变换矩阵，然而这种信息只能在primitive中得到，而不能在load的时候得到，因此不如仍然将光线转到object-space来进行求交...但是这样计算效率会明显降低么？三角形求交算法算是最耗时的函数了...
 
-  另外，目前从命令行传递路径参数的方式也有问题。一旦 -f [filename]里边的filename是非法路径，就只能在渲染结束之后检测到路径非法，如果渲染了很长时间心态就崩了...
-
   pathintegrator的写法不好看，directintegrator已经很长时间没有改了...
-
-  scene是不是不要放在primitve文件夹下边比较好，我自己每次都要找好一会，逻辑上来讲也不太合适...
 
   对于round error还没有足够鲁棒的方式来处理，目前的处理方式就仅仅是在intersect函数里边写死的t>0.0001，一定程度上能够避免self-intersect，但足够么？
 

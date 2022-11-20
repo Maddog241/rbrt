@@ -10,6 +10,7 @@ mod integrator;
 mod sampler;
 mod texture;
 mod accelerator;
+mod scene;
 
 use camera::{film::Film, perspective::PerspectiveCamera};
 use cgmath::{Point2, Vector3};
@@ -17,7 +18,7 @@ use geometry::transform::Transform;
 use indicatif::{ProgressBar, MultiProgress, ProgressStyle};
 
 use crate::integrator::path_integrator::PathIntegrator;
-use crate::primitive::scene::Scene;
+use crate::scene::Scene;
 use crate::spectrum::Spectrum;
 use crate::camera::{Camera, CameraSample};
 use crate::integrator::Integrator;
@@ -26,10 +27,11 @@ use rand::random;
 
 use clap::Parser;
 
+use std::path::Path;
 use std::sync::Arc;
 use std::thread;
 
-const WIDTH: usize = 500;
+const WIDTH: usize = 800;
 const HEIGHT: usize = 500;
 const FRAME: f64 = (WIDTH as f64) / (HEIGHT as f64);
 
@@ -55,25 +57,25 @@ struct Cli {
     filename: Option<String>,
 }
 
-struct Arguments {
+struct Arguments<'a> {
     n_thread: usize,
     n_sample: usize,
     max_depth: usize,
-    filename: String,
+    filename: &'a Path,
 }
 
-impl Arguments {
+impl<'a> Arguments<'a> {
     fn new() -> Self {
         // set the default values for the arguments
         Arguments { 
             n_thread: 10,
             n_sample: 20,
             max_depth: 20,
-            filename: String::from("./images/result.ppm"),
+            filename: Path::new("./images/result.ppm"),
         }
     }
 
-    fn process_arguments(&mut self, cli: &Cli) {
+    fn process_arguments(&mut self, cli: &'a Cli) {
         if let Some(n_thread) =  &cli.thread {
             self.n_thread = *n_thread;
         }
@@ -87,15 +89,15 @@ impl Arguments {
         }
 
         if let Some(filename) = &cli.filename {
-            self.filename = filename.clone();
+            self.filename = Path::new(filename);
         }
 
 
-        println!("CURRENT CONFIG:");
-        println!("\tn_thread: {}", self.n_thread);
-        println!("\tn_sample: {}", self.n_sample);
-        println!("\tmax_depth: {}", self.max_depth);
-        println!("\tfilename: {}", self.filename);
+        eprintln!("CURRENT CONFIG:");
+        eprintln!("\tn_thread: {}", self.n_thread);
+        eprintln!("\tn_sample: {}", self.n_sample);
+        eprintln!("\tmax_depth: {}", self.max_depth);
+        eprintln!("\tfilename: {:?}", self.filename);
     }
 }
 
@@ -135,7 +137,7 @@ fn main() {
 
 
 
-fn render(integrator: PathIntegrator, scene: Scene, filename: &str) {
+fn render(integrator: PathIntegrator, scene: Scene, filename: &Path) {
     let res = integrator.camera.film.resolution;
     let (width, height) = (res.x, res.y);
 

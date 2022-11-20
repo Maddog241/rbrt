@@ -15,8 +15,8 @@ use crate::texture::imagemap::{ImageTexture, Texels};
 use crate::texture::mapping::spherical::SphericalMapping;
 use crate::{light::Light, geometry::ray::Ray, spectrum::Spectrum};
 use crate::Transform;
-use super::Primitive;
-use super::geometric_primitive::GeometricPrimitive;
+use crate::primitive::Primitive;
+use crate::primitive::geometric_primitive::GeometricPrimitive;
 use cgmath::{Vector3, Point3};
 use rand::random;
 

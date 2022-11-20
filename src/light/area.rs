@@ -1,5 +1,5 @@
 use cgmath::{Point3, Point2, InnerSpace};
-use crate::{geometry::{interaction::SurfaceInteraction, ray::Ray, shape::{Shape, SampleableShape}}, spectrum::Spectrum};
+use crate::{geometry::{interaction::SurfaceInteraction, ray::Ray, shape:: SampleableShape}, spectrum::Spectrum};
 
 use super::Light;
 
