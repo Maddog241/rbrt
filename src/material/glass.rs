@@ -17,10 +17,10 @@ impl Glass {
 
 impl Material for Glass {
     fn compute_scattering(&self, isect: &crate::geometry::interaction::SurfaceInteraction) -> crate::bxdf::bsdf::Bsdf {
-        let (ss, ts) = perpendicular(isect.n);
+        let (ss, ts) = perpendicular(isect.geo.n);
         Bsdf {
-            ns: isect.n,
-            ng: isect.n,
+            ns: isect.geo.n,
+            ng: isect.geo.n,
             ss,
             ts,
             bxdfs: vec![FresnelSpecular{eta_a: self.eta_a, eta_b: self.eta_b, r: self.r, t: self.t}],

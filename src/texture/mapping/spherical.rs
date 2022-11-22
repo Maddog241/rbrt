@@ -27,7 +27,7 @@ impl SphericalMapping {
 
 impl TextureMapping2D for SphericalMapping {
     fn map(&self, isect: &crate::geometry::interaction::SurfaceInteraction) -> cgmath::Point2<f64> {
-        let st = self.sphere(isect.p);
+        let st = self.sphere(isect.geo.p);
         st
     }
 }

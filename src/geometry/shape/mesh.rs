@@ -1,26 +1,29 @@
-use crate::{primitive::Primitive, accelerator::bvh::BVH, geometry::{bound3::Bound3, interaction::SurfaceInteraction, ray::{Beam, Ray}, transform::Transform}, material::{Material, matte::Matte}, spectrum::Spectrum, texture::constant::ConstantTexture};
+use crate::geometry::{bound3::Bound3, interaction::GeometryInfo, ray::{Beam, Ray}, transform::Transform}; 
 use cgmath::{Point3, Point2, Vector3, EuclideanSpace, InnerSpace};
-use std::sync::Arc;
+use std::{sync::Arc, collections::HashMap};
 
 use tobj;
 
+use super::Shape;
+
 pub struct TriangleMesh {
-    bvh: BVH,
+    pub positions: Vec<Point3<f64>>,
+    pub texcoords: Vec<Point2<f64>>,
+    pub normals: Vec<Vector3<f64>>,
+    pub indices: Vec<usize>,
 }
 
 impl TriangleMesh {
-    pub fn new(positions: Arc<Vec<Point3<f64>>>, texcoords: Arc<Vec<Point2<f64>>>, normals: Arc<Vec<Vector3<f64>>>, indices: Vec<usize>, material: Arc<dyn Material>) -> Self {
-        let mut triangles: Vec<Box<dyn Primitive>> = Vec::new();
-        for i in 0..indices.len()/3 {
-            triangles.push(Box::new(Triangle::new(indices[3*i] as usize, indices[3*i+1] as usize, indices[3*i+2] as usize, positions.clone(), texcoords.clone(), normals.clone(), material.clone())));
-        }
-
+    pub fn new(positions: Vec<Point3<f64>>, texcoords: Vec<Point2<f64>>, normals: Vec<Vector3<f64>>, indices: Vec<usize>) -> Self {
         TriangleMesh {
-            bvh: BVH::new(triangles),
+            positions,
+            texcoords,
+            normals,
+            indices,
         }
     }
 
-    pub fn load(file_name: &str) -> Vec<TriangleMesh> {
+    pub fn load(file_name: &str) -> HashMap<String, Arc<TriangleMesh>> {
         let obj =  tobj::load_obj(
             file_name, 
             &tobj::LoadOptions{
@@ -31,16 +34,21 @@ impl TriangleMesh {
 
         match obj {
             Ok((models, _)) => {
-                let mut meshes = Vec::new();
+                let mut meshes = HashMap::new();
 
                 for m in models {
-                    println!("loading model: {}", m.name);
+                    let name = m.name;
+                    println!("loading model: {}", name);
+
                     let mesh = m.mesh;
+
+                    // check texture coordinates and normals
                     if mesh.normals.is_empty() || mesh.texcoords.is_empty() {
                         println!("Missing mesh normals or texture coordinates in {:?}", file_name);
                     }
-                    println!("{} has {} triangles", m.name, mesh.indices.len() / 3);
+                    println!("{} has {} triangles", name, mesh.indices.len() / 3);
 
+                    // 
                     let mut positions = Vec::new();
                     for chunk in mesh.positions.chunks(3) {
                         positions.push(Point3::new(chunk[0] as f64, chunk[1] as f64, chunk[2] as f64));
@@ -57,7 +65,7 @@ impl TriangleMesh {
                     }
 
                     let indices: Vec<usize> = mesh.indices.into_iter().map(|f| f as usize).collect();
-                    meshes.push(TriangleMesh::new(Arc::new(positions), Arc::new(texcoords), Arc::new(normals), indices, Arc::new(Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.2, 0.3, 0.6)))))));
+                    meshes.insert(name, Arc::new(TriangleMesh::new(positions, texcoords, normals, indices)));
                 }
 
                 meshes
@@ -69,38 +77,17 @@ impl TriangleMesh {
     }
 }
 
-impl Primitive for TriangleMesh {
-    fn intersect(&self, r: &mut crate::geometry::ray::Ray) -> Option<crate::geometry::interaction::SurfaceInteraction> {
-        self.bvh.intersect(r)
-    }
-
-    fn intersect_p(&self, r: &crate::geometry::ray::Ray) -> Option<f64> {
-        self.bvh.intersect_p(r) 
-    }
-
-    fn world_bound(&self) -> crate::geometry::bound3::Bound3 {
-        self.bvh.world_bound()
-    }
-}
-
-
 pub struct Triangle {
     a: usize,
     b: usize, 
     c: usize,
-    positions: Arc<Vec<Point3<f64>>>,
-    texcoords: Arc<Vec<Point2<f64>>>,
-    normals: Arc<Vec<Vector3<f64>>>,
-    material: Arc<dyn Material>,
+    mesh: Arc<TriangleMesh>,
     object_to_world: Transform,
 }
 
 impl Triangle {
-    pub fn new(a:usize, b:usize, c:usize, positions: Arc<Vec<Point3<f64>>>, texcoords: Arc<Vec<Point2<f64>>>, normals: Arc<Vec<Vector3<f64>>>, material: Arc<dyn Material>) -> Self {
-        Triangle { a, b, c, positions, texcoords, normals, material, 
-            // object_to_world: Transform::translate(Vector3::new(5.0, -6.0, 25.0)) * Transform::scale(3.0, 3.0, 3.0),
-            object_to_world: Transform::translate(Vector3::new(-2.0, -13.0, 22.0)) * Transform::scale(70.0, 70.0, 70.0) * Transform::rotate_y(180.0)
-        }
+    pub fn new(a:usize, b:usize, c:usize, mesh: Arc<TriangleMesh>, object_to_world: Transform) -> Self {
+        Triangle { a, b, c, mesh, object_to_world}
     }
 
     fn permute(p: Point3<f64>, kx: usize, ky: usize, kz: usize) -> Point3<f64> {
@@ -114,11 +101,11 @@ impl Triangle {
     }
 }
 
-impl Primitive for Triangle {
-    fn intersect(&self, r: &mut Ray) -> Option<SurfaceInteraction> {
-        let mut p0 = self.object_to_world.transform_point3(self.positions[self.a]);
-        let mut p1 = self.object_to_world.transform_point3(self.positions[self.b]);
-        let mut p2 = self.object_to_world.transform_point3(self.positions[self.c]);
+impl Shape for Triangle {
+    fn intersect(&self, r: &Ray) -> Option<GeometryInfo> {
+        let mut p0 = self.object_to_world.transform_point3(self.mesh.positions[self.a]);
+        let mut p1 = self.object_to_world.transform_point3(self.mesh.positions[self.b]);
+        let mut p2 = self.object_to_world.transform_point3(self.mesh.positions[self.c]);
         
         // let mut p0 = self.positions[self.a];
         // let mut p1 = self.positions[self.b];
@@ -175,37 +162,24 @@ impl Primitive for Triangle {
             return None;
         }
 
-        // update ray's t_max
-        r.t_max = t;
-        //
-
         let p = r.at(t);
         // compute normal 
-        let a = self.object_to_world.transform_point3(self.positions[self.a]);
-        let b = self.object_to_world.transform_point3(self.positions[self.b]);
-        let c = self.object_to_world.transform_point3(self.positions[self.c]);
+        let a = self.object_to_world.transform_point3(self.mesh.positions[self.a]);
+        let b = self.object_to_world.transform_point3(self.mesh.positions[self.b]);
+        let c = self.object_to_world.transform_point3(self.mesh.positions[self.c]);
         let n = (b-a).cross(c-a).normalize();
         //
+
         let wo = -r.d.normalize();
+        let geo = GeometryInfo {p, n, t, wo};
 
-        let isect = SurfaceInteraction {
-            p,
-            n,
-            t,
-            time: r.time,
-            wo,
-            material: Some(self.material.clone()),
-            hit_light: false,
-            radiance: None,
-        };
-
-        Some(isect)
+        Some(geo)
     }
 
     fn intersect_p(&self, r: &crate::geometry::ray::Ray) -> Option<f64> {
-        let mut p0 = self.object_to_world.transform_point3(self.positions[self.a]);
-        let mut p1 = self.object_to_world.transform_point3(self.positions[self.b]);
-        let mut p2 = self.object_to_world.transform_point3(self.positions[self.c]);
+        let mut p0 = self.object_to_world.transform_point3(self.mesh.positions[self.a]);
+        let mut p1 = self.object_to_world.transform_point3(self.mesh.positions[self.b]);
+        let mut p2 = self.object_to_world.transform_point3(self.mesh.positions[self.c]);
         
         // in world space
         // let mut p0 = self.positions[self.a];
@@ -267,7 +241,7 @@ impl Primitive for Triangle {
     }
 
     fn world_bound(&self) -> crate::geometry::bound3::Bound3 {
-        let mut bound = self.object_to_world.transform_bound3(&Bound3::new(self.positions[self.a], self.positions[self.b]).union_point3(self.positions[self.c]));
+        let mut bound = self.object_to_world.transform_bound3(&self.object_bound());
         let diag = bound.diagonal();
         if diag.x < 0.01 {
             bound.p_max.x += 0.005;
@@ -283,5 +257,9 @@ impl Primitive for Triangle {
         }
 
         bound
+    }
+
+    fn object_bound(&self) -> Bound3 {
+        Bound3::new(self.mesh.positions[self.a], self.mesh.positions[self.b]).union_point3(self.mesh.positions[self.c])
     }
 }

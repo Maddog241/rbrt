@@ -36,7 +36,7 @@ impl Shape for Sphere {
         self.object_to_world.transform_bound3(&self.object_bound())
     }
 
-    fn intersect(&self, r: &Ray) -> Option<SurfaceInteraction> {
+    fn intersect(&self, r: &Ray) -> Option<GeometryInfo> {
         // the incoming ray is in world space
         // transform the ray to object space
         let r = self.world_to_object.transform_ray(r);
@@ -64,20 +64,12 @@ impl Shape for Sphere {
         // got a valid solution, compute interaction parameters
         let p = r.at(t);
         let n = p.to_vec().normalize();
-        let inter = SurfaceInteraction {
-            p,
-            n,
-            t,
-            time: r.time,
-            wo: -r.d.normalize(),
-            material: None,
-            hit_light: false,
-            radiance: None,
-        };
+        let geo = GeometryInfo { p, n, t, wo: -r.d.normalize() };
+   
         // convert the interaction in the object space to world space
 
-        let inter = self.object_to_world.transform_surface_interaction(&inter);
-        Some(inter)
+        let geo = self.object_to_world.transform_geometry_info(&geo);
+        Some(geo)
     }
 
     fn intersect_p(&self, r: &Ray) -> Option<f64> {

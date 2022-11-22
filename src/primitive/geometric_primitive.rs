@@ -16,10 +16,18 @@ impl GeometricPrimitive {
 
 impl Primitive for GeometricPrimitive {
     fn intersect(&self, r: &mut Ray) -> Option<SurfaceInteraction> {
-        if let Some(mut isect) = self.shape.intersect(r) {
+        if let Some(geo) = self.shape.intersect(r) {
             // warning: here's no an infinitesimal value to avoid round-off errors. ok?
-            r.t_max = isect.t;
-            isect.material = Some(Arc::clone(&self.material));
+            r.t_max = geo.t;
+
+            let isect = SurfaceInteraction {
+                geo,
+                time: r.time,
+                material: Some(Arc::clone(&self.material)),
+                hit_light: false,
+                radiance: None,
+            };
+
             // let isect point to the primitive
             Some(isect)
         } else  {

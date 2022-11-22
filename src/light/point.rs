@@ -18,7 +18,7 @@ impl PointLight {
 impl Light for PointLight {
     fn sample_li(&self, isect: &SurfaceInteraction, _u: Point2<f64>) -> (Spectrum, Point3<f64>, f64) {
         let pdf = 1.0;
-        let distance2 = (self.p - isect.p).magnitude2();
+        let distance2 = (self.p - isect.geo.p).magnitude2();
 
         if distance2 > 0.0 {
             (self.intensity / distance2, self.p, pdf)

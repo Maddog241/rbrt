@@ -3,7 +3,6 @@ use super::interaction::*;
 use super::ray::Ray;
 use cgmath::{InnerSpace, Matrix4, Point3, SquareMatrix, Vector3, Vector4};
 use std::ops::Mul;
-use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct Transform {
@@ -67,20 +66,15 @@ impl Transform {
         new_bound
     }
 
-    pub fn transform_surface_interaction(&self, si: &SurfaceInteraction) -> SurfaceInteraction {
-        SurfaceInteraction {
-            p: self.transform_point3(si.p),
-            n: self.transform_normal(si.n),
-            t: si.t,
-            time: si.time,
-            wo: self.transform_vector3(si.wo),
-            material: if let Some(mat) = &si.material {
-                Some(Arc::clone(mat))
-            } else {
-                None
-            },
-            hit_light: si.hit_light,
-            radiance: si.radiance,
+    pub fn transform_geometry_info(&self, geo: &GeometryInfo) -> GeometryInfo {
+        let p = self.transform_point3(geo.p);
+        let n = self.transform_normal(geo.n);
+        let wo = self.transform_vector3(geo.wo);
+        GeometryInfo {
+            p,
+            n,
+            wo,
+            t: geo.t,
         }
     }
 }

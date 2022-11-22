@@ -2,7 +2,7 @@ use std::f64::consts::PI;
 
 use cgmath::{Vector3, Point3, InnerSpace, Point2};
 
-use crate::geometry::{transform::Transform, bound3::Bound3, ray::{Ray, Beam}, interaction::SurfaceInteraction};
+use crate::geometry::{transform::Transform, bound3::Bound3, ray::{Ray, Beam}, interaction::GeometryInfo};
 
 use super::{Shape, SampleableShape};
 
@@ -33,7 +33,7 @@ impl Shape for Cylinder {
         self.object_to_world.transform_bound3(&self.object_bound())
     }
 
-    fn intersect(&self, r: &Ray) -> Option<SurfaceInteraction> {
+    fn intersect(&self, r: &Ray) -> Option<GeometryInfo> {
         // transform the ray from world to object
         let r = self.world_to_object.transform_ray(r);
 
@@ -61,20 +61,12 @@ impl Shape for Cylinder {
         let p = r.at(t);
         let n = Vector3::new(p.x, p.y, 0.0);
         
-        let inter = SurfaceInteraction {
-            p,
-            n,
-            t,
-            time: r.time,
-            wo: -r.d.normalize(),
-            material: None,
-            hit_light: false,
-            radiance: None,
-        };
+        let geo = GeometryInfo { p, n, t, wo: -r.d.normalize() };
 
         // transform the interation back to the world coordinate
-        let inter = self.object_to_world.transform_surface_interaction(&inter);
-        Some(inter)
+        let geo = self.object_to_world.transform_geometry_info(&geo);
+
+        Some(geo)
     }
 
     fn intersect_p(&self, r: &Ray) -> Option<f64> {

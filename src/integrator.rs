@@ -10,9 +10,9 @@ pub trait Integrator {
 }
 
 fn visibility_test(isect: &SurfaceInteraction, sample_p: Point3<f64>, scene: &Scene) -> bool {
-        let shadow_ray = Ray::new(isect.p, sample_p-isect.p, isect.time, 1.0-0.0001);
+        let shadow_ray = Ray::new(isect.geo.p, sample_p-isect.geo.p, isect.time, 1.0-0.0001);
         // back facing surfaces do not get lit
-        if shadow_ray.d.dot(isect.n) < 0.0 { return false; }
+        if shadow_ray.d.dot(isect.geo.n) < 0.0 { return false; }
         // test intersection 
         match scene.intersect_p(&shadow_ray) {
             Some(_t) => false,

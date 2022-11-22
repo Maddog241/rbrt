@@ -17,11 +17,11 @@ impl Matte {
 
 impl Material for Matte {
     fn compute_scattering(&self, isect: &crate::geometry::interaction::SurfaceInteraction) -> crate::bxdf::bsdf::Bsdf {
-        let (ss, ts) =  perpendicular(isect.n); 
+        let (ss, ts) =  perpendicular(isect.geo.n); 
 
         let ret = Bsdf {
-            ns: isect.n,
-            ng: isect.n,
+            ns: isect.geo.n,
+            ng: isect.geo.n,
             ss,
             ts,
             bxdfs: vec![LambertianReflection{reflectance: self.kd.evaluate(isect)} ],

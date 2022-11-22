@@ -6,7 +6,7 @@ pub mod mesh;
 use cgmath::{Point2, Point3, Vector3};
 
 use super::bound3::Bound3;
-use super::interaction::SurfaceInteraction;
+use super::interaction::GeometryInfo;
 use super::ray::Ray;
 
 
@@ -14,7 +14,7 @@ use super::ray::Ray;
 pub trait Shape: Sync + Send {
     fn object_bound(&self) -> Bound3;
     fn world_bound(&self) -> Bound3;
-    fn intersect(&self, r: &Ray) -> Option<SurfaceInteraction>;
+    fn intersect(&self, r: &Ray) -> Option<GeometryInfo>;
     fn intersect_p(&self, r: &Ray) -> Option<f64>;
     
 }

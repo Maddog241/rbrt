@@ -71,7 +71,7 @@ impl<'a> Arguments<'a> {
             n_thread: 10,
             n_sample: 20,
             max_depth: 20,
-            filename: Path::new("./images/result.ppm"),
+            filename: Path::new("./images/result.png"),
         }
     }
 

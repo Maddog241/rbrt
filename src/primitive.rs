@@ -1,5 +1,5 @@
 pub mod geometric_primitive;
-
+pub mod mesh_primitive;
 
 use crate::geometry::{ray::Ray, interaction::SurfaceInteraction, bound3::Bound3};
 

@@ -2,7 +2,7 @@ use std::f64::consts::PI;
 
 use cgmath::{Point2, Vector3, Point3, InnerSpace, EuclideanSpace};
 
-use crate::geometry::{transform::Transform, bound3::Bound3, ray::{Ray, Beam}, interaction::SurfaceInteraction};
+use crate::geometry::{transform::Transform, bound3::Bound3, ray::{Ray, Beam}, interaction::GeometryInfo};
 
 use super::{Shape, SampleableShape};
 
@@ -36,7 +36,7 @@ impl Shape for Disk {
         self.object_to_world.transform_bound3(&self.object_bound())
     }
 
-    fn intersect(&self, r: &Ray) -> Option<SurfaceInteraction> {
+    fn intersect(&self, r: &Ray) -> Option<GeometryInfo> {
         let r = self.world_to_object.transform_ray(r);
 
         if r.d.z == 0.0 { return None; } // parallel to the disk
@@ -52,20 +52,11 @@ impl Shape for Disk {
 
         let n = if r.d.z > 0.0 { Vector3::new(0.0, 0.0, -1.0) } else { Vector3::new(0.0, 0.0, 1.0) };
 
-        let isect = SurfaceInteraction {
-            p, 
-            n,
-            t,
-            time: r.time,
-            wo: -r.d.normalize(),
-            material: None,
-            hit_light: false,
-            radiance: None,
-        };
+        let geo = GeometryInfo{ p, n, t, wo: -r.d.normalize() };
 
-        let isect = self.object_to_world.transform_surface_interaction(&isect);
+        let geo = self.object_to_world.transform_geometry_info(&geo);
 
-        Some(isect)
+        Some(geo)
     }
 
     fn intersect_p(&self, r: &Ray) -> Option<f64> {

@@ -56,9 +56,9 @@ impl Integrator for PathIntegrator {
                             let (incoming_r, sample_p, pdf) = light.sample_li(&isect, sample);
                             // visibility testing for wi
                             if pdf > 0.0 && !incoming_r.is_black() && visibility_test(&isect, sample_p, scene) {
-                                let wi = (sample_p - isect.p).normalize();
+                                let wi = (sample_p - isect.geo.p).normalize();
                                 let f_value = bsdf.f(-ray.d.normalize(), wi);
-                                let cosine = wi.dot(isect.n).abs();
+                                let cosine = wi.dot(isect.geo.n).abs();
 
                                 radiance += incoming_r * throughput * f_value * cosine / pdf; 
                             } 
@@ -70,9 +70,9 @@ impl Integrator for PathIntegrator {
                     let (f_value, wi, pdf) = bsdf.sample_f(-ray.d.normalize(), sample);
 
                     // update the throughput for next iteration, spawn the new ray
-                    let cosine = wi.dot(isect.n).abs();
+                    let cosine = wi.dot(isect.geo.n).abs();
                     throughput *= f_value * cosine / pdf;
-                    *ray = Ray::new(isect.p, wi, ray.time, INFINITY);
+                    *ray = Ray::new(isect.geo.p, wi, ray.time, INFINITY);
                 } else {
                     // hit the medium
                     panic!();

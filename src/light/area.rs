@@ -18,8 +18,8 @@ impl Light for AreaLight {
     fn sample_li(&self, isect: &SurfaceInteraction, u: Point2::<f64>) -> (Spectrum, Point3::<f64>, f64) {
         let (p, n, area_pdf) = self.shape.sample(u);
 
-        let distance2 = (p - isect.p).magnitude2();
-        let we = (isect.p - p).normalize();
+        let distance2 = (p - isect.geo.p).magnitude2();
+        let we = (isect.geo.p - p).normalize();
         let cosine = we.dot(n).abs();
 
         let pdf = area_pdf * distance2 / cosine;
@@ -36,9 +36,18 @@ impl Light for AreaLight {
     }
 
     fn intersect(&self, r: &mut Ray) -> Option<SurfaceInteraction> {
-        if let Some(mut isect) = self.shape.intersect(r) {
-            isect.hit_light = true;
-            isect.radiance = Some(self.le());
+        if let Some(geo) = self.shape.intersect(r) {
+            // update r.t_max 
+            r.t_max = geo.t;
+
+            let isect = SurfaceInteraction {
+                geo,
+                time: r.time,
+                material: None,
+                hit_light: true,
+                radiance: Some(self.le()),
+            };
+
             Some(isect)
         } else {
             None
