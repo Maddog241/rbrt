@@ -81,7 +81,7 @@ impl Integrator for PathIntegrator {
             } else {
                 // does not hit the scene
 
-                // radiance += Spectrum::skyblue(ray.d.y) * throughput;
+                radiance += Spectrum::skyblue(ray.d.y) * throughput;
                 break;
             }
         }

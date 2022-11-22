@@ -9,6 +9,7 @@ pub struct PointLight {
     intensity: Spectrum,
 }
 
+#[allow(dead_code)]
 impl PointLight {
     pub fn new(p: Point3<f64>, intensity: Spectrum) -> PointLight {
         PointLight { p, intensity}

@@ -38,11 +38,15 @@ impl TriangleMesh {
 
                 for m in models {
                     let (name, mesh) = (m.name, m.mesh);
-                    println!("loading model: {}", name);
+                    println!("loading model {} from file: {}", name, file_name);
 
                     // check texture coordinates and normals
-                    if mesh.normals.is_empty() || mesh.texcoords.is_empty() {
-                        println!("Missing mesh normals or texture coordinates in {:?}", file_name);
+                    if mesh.normals.is_empty() {
+                        println!("Missing mesh normals in {:?}", file_name);
+                    }
+
+                    if mesh.texcoords.is_empty() {
+                        println!("Missing texture coordinates in {:?}", file_name);
                     }
                     println!("{} has {} triangles", name, mesh.indices.len() / 3);
 
@@ -63,6 +67,9 @@ impl TriangleMesh {
                         // CAUTION: here the z value is negated to fit the obj into left-handed coordinate system
                         normals.push(Vector3::new(chunk[0] as f64, chunk[1] as f64, -chunk[2] as f64));
                     }
+                    // finish 
+
+                    eprintln!("finish loading {}", name);
 
                     let indices: Vec<usize> = mesh.indices.into_iter().map(|f| f as usize).collect();
                     meshes.insert(name, Arc::new(TriangleMesh::new(positions, texcoords, normals, indices)));
