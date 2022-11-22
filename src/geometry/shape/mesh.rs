@@ -37,10 +37,8 @@ impl TriangleMesh {
                 let mut meshes = HashMap::new();
 
                 for m in models {
-                    let name = m.name;
+                    let (name, mesh) = (m.name, m.mesh);
                     println!("loading model: {}", name);
-
-                    let mesh = m.mesh;
 
                     // check texture coordinates and normals
                     if mesh.normals.is_empty() || mesh.texcoords.is_empty() {
@@ -51,7 +49,8 @@ impl TriangleMesh {
                     // 
                     let mut positions = Vec::new();
                     for chunk in mesh.positions.chunks(3) {
-                        positions.push(Point3::new(chunk[0] as f64, chunk[1] as f64, chunk[2] as f64));
+                        // CAUTION: here the z value is negated to fit the obj into left-handed coordinate system
+                        positions.push(Point3::new(chunk[0] as f64, chunk[1] as f64, -chunk[2] as f64));
                     }
 
                     let mut texcoords = Vec::new();
@@ -61,7 +60,8 @@ impl TriangleMesh {
                     
                     let mut normals = Vec::new();
                     for chunk in mesh.normals.chunks(3) {
-                        normals.push(Vector3::new(chunk[0] as f64, chunk[1] as f64, chunk[2] as f64));
+                        // CAUTION: here the z value is negated to fit the obj into left-handed coordinate system
+                        normals.push(Vector3::new(chunk[0] as f64, chunk[1] as f64, -chunk[2] as f64));
                     }
 
                     let indices: Vec<usize> = mesh.indices.into_iter().map(|f| f as usize).collect();
@@ -103,13 +103,14 @@ impl Triangle {
 
 impl Shape for Triangle {
     fn intersect(&self, r: &Ray) -> Option<GeometryInfo> {
-        let mut p0 = self.object_to_world.transform_point3(self.mesh.positions[self.a]);
-        let mut p1 = self.object_to_world.transform_point3(self.mesh.positions[self.b]);
-        let mut p2 = self.object_to_world.transform_point3(self.mesh.positions[self.c]);
-        
-        // let mut p0 = self.positions[self.a];
-        // let mut p1 = self.positions[self.b];
-        // let mut p2 = self.positions[self.c];
+        let a = self.object_to_world.transform_point3(self.mesh.positions[self.a]);
+        let b = self.object_to_world.transform_point3(self.mesh.positions[self.b]);
+        let c = self.object_to_world.transform_point3(self.mesh.positions[self.c]);
+
+        let mut p0 = a;
+        let mut p1 = b;
+        let mut p2 = c;
+
         // first translate, let r.o in origin
         p0 -= r.o.to_vec(); 
         p1 -= r.o.to_vec();
@@ -164,11 +165,8 @@ impl Shape for Triangle {
 
         let p = r.at(t);
         // compute normal 
-        let a = self.object_to_world.transform_point3(self.mesh.positions[self.a]);
-        let b = self.object_to_world.transform_point3(self.mesh.positions[self.b]);
-        let c = self.object_to_world.transform_point3(self.mesh.positions[self.c]);
-        let n = (b-a).cross(c-a).normalize();
-        //
+        // the orientation here is very important. if the model rendered is dark, the normal may need flipping.
+        let n = (a-b).cross(c-a).normalize();
 
         let wo = -r.d.normalize();
         let geo = GeometryInfo {p, n, t, wo};
@@ -177,14 +175,11 @@ impl Shape for Triangle {
     }
 
     fn intersect_p(&self, r: &crate::geometry::ray::Ray) -> Option<f64> {
+        // in world space
         let mut p0 = self.object_to_world.transform_point3(self.mesh.positions[self.a]);
         let mut p1 = self.object_to_world.transform_point3(self.mesh.positions[self.b]);
         let mut p2 = self.object_to_world.transform_point3(self.mesh.positions[self.c]);
         
-        // in world space
-        // let mut p0 = self.positions[self.a];
-        // let mut p1 = self.positions[self.a];
-        // let mut p2 = self.positions[self.a];
         // first translate, let r.o in origin
         p0 -= r.o.to_vec(); 
         p1 -= r.o.to_vec();

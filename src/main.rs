@@ -123,7 +123,7 @@ fn main() {
         Film::new(WIDTH, HEIGHT),
     );
 
-    let scene = Scene::test_obj();
+    let scene = Scene::test_bunny();
 
     // render
     let now = std::time::Instant::now();

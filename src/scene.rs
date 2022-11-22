@@ -610,7 +610,7 @@ impl Scene {
     }   
 
 
-    pub fn test_obj() -> Scene {
+    pub fn test_bunny() -> Scene {
         let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
         let mut lights: Vec<Box<dyn Light>> = Vec::new();
 
@@ -655,12 +655,12 @@ impl Scene {
         
         let bunny_mesh = models.get("Bunny").unwrap();
         let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.5, 0.5, 0.4))));
-        let object_to_world = Transform::translate(Vector3::new(4.0, -11.5, 24.0)) * Transform::scale(50.0, 50.0, 50.0) * Transform::rotate_y(150.0);
+        let object_to_world = Transform::translate(Vector3::new(5.0, -11.5, 24.0)) * Transform::scale(50.0, 50.0, 50.0) * Transform::rotate_y(-30.0);
         let bunny = MeshPrimitive::new(bunny_mesh.clone(), Arc::new(matte_material), object_to_world);
         primitives.push(Box::new(bunny));
 
 
-        let object_to_world = Transform::translate(Vector3::new(-5.0, -11.5, 18.0)) * Transform::scale(50.0, 50.0, 50.0) * Transform::rotate_y(180.0);
+        let object_to_world = Transform::translate(Vector3::new(3.0, -11.5, 18.0)) * Transform::scale(50.0, 50.0, 50.0);
         let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(1.0, 0.5, 0.4))));
         let bunny2 = MeshPrimitive::new(bunny_mesh.clone(), Arc::new(matte_material), object_to_world);
         primitives.push(Box::new(bunny2));
