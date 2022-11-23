@@ -8,55 +8,10 @@ use std::ops::{BitOr, BitAnd};
 use crate::spectrum::Spectrum;
 use cgmath::{Point2, Vector3};
 
-pub enum Bxdf {
-    LambertianReflection {
-        reflectance: Spectrum,    
-    },
-    FresnelSpecular {
-        eta_a: f64,
-        eta_b: f64,
-        r: Spectrum,
-        t: Spectrum,
-    }
-}
-
-impl Bxdf {
-    pub fn f(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> Spectrum {
-        match self {
-            Self::LambertianReflection { reflectance:_ } => {
-                lambertian::f(self, wo, wi)
-            },
-
-            Self::FresnelSpecular { eta_a:_, eta_b:_, r:_, t:_ } => {
-            fresnel::f(self, wo, wi)
-            }
-        }
-    }
-    
-    pub fn sample_f(&self, wo: Vector3<f64>, sample: Point2<f64>) -> (Spectrum, Vector3<f64>, f64) { 
-        // return: f-value, wi, pdf 
-        match self {
-            Self::LambertianReflection { reflectance:_ } => {
-                lambertian::sample_f(self, wo, sample)
-            },
-
-            Self::FresnelSpecular { eta_a:_, eta_b:_, r:_, t:_ } => {
-                fresnel::sample_f(self, wo, sample)
-            }
-        }
-    }
-
-    pub fn types(&self) -> i32 {
-        match self {
-            Self::LambertianReflection { reflectance:_ } => {
-                lambertian::types(self)
-            },
-
-            Self::FresnelSpecular { eta_a:_, eta_b:_, r:_, t:_ } => {
-                fresnel::types(self)
-            }
-        }
-    }
+pub trait Bxdf {
+    fn f(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> Spectrum;
+    fn sample_f(&self, wo: Vector3<f64>, sample: Point2<f64>) -> (Spectrum, Vector3<f64>, f64);
+    fn types(&self) -> i32;
 }
 
 pub enum BxdfType {

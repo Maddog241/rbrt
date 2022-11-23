@@ -1,4 +1,4 @@
-use crate::{bxdf::{bsdf::Bsdf, Bxdf::FresnelSpecular}, utils::perpendicular, spectrum::Spectrum};
+use crate::{bxdf::{bsdf::Bsdf, fresnel::FresnelSpecular}, utils::perpendicular, spectrum::Spectrum};
 use super::Material;
 
 
@@ -23,7 +23,7 @@ impl Material for Glass {
             ng: isect.geo.n,
             ss,
             ts,
-            bxdfs: vec![FresnelSpecular{eta_a: self.eta_a, eta_b: self.eta_b, r: self.r, t: self.t}],
+            bxdfs: vec![Box::new(FresnelSpecular::new(self.eta_a, self.eta_b, self.r, self.t)) ],
             n_bxdfs: 1,
         }
     }

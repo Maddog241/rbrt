@@ -1,7 +1,8 @@
+use crate::bxdf::lambertian::LambertianReflection;
 use crate::spectrum::Spectrum;
 use crate::texture::Texture;
 use crate::utils::perpendicular;
-use crate::bxdf::{bsdf::Bsdf, Bxdf::LambertianReflection};
+use crate::bxdf::bsdf::Bsdf;
 
 use super::Material;
 
@@ -24,7 +25,7 @@ impl Material for Matte {
             ng: isect.geo.n,
             ss,
             ts,
-            bxdfs: vec![LambertianReflection{reflectance: self.kd.evaluate(isect)} ],
+            bxdfs: vec![Box::new(LambertianReflection::new(self.kd.evaluate(isect))) ],
             n_bxdfs: 1,
         };
 

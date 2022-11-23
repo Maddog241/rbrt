@@ -4,13 +4,28 @@ use crate::{spectrum::Spectrum, utils::cos_theta};
 
 use super::{BxdfType, Bxdf};
 
+pub struct FresnelSpecular {
+    eta_a: f64,
+    eta_b: f64,
+    r: Spectrum,
+    t: Spectrum,
+}
 
-fn evaluate(fresnel_specular: &Bxdf, wi: Vector3<f64>) -> (f64, Option<Vector3<f64>>) {
-    if let Bxdf::FresnelSpecular { eta_a, eta_b, r:_, t:_ } = fresnel_specular {
+impl FresnelSpecular {
+    pub fn new(eta_a: f64, eta_b: f64, r: Spectrum, t: Spectrum) -> Self {
+        Self {
+            eta_a,
+            eta_b,
+            r,
+            t,
+        }
+    }
+
+    fn evaluate(&self, wi: Vector3<f64>) -> (f64, Option<Vector3<f64>>) {
         // compute the fresnel term, and the refracted direction(if it exists)
         let cos_theta_i = wi.z;
         assert!(cos_theta_i >= -1.0 && cos_theta_i <= 1.0);
-        let (eta_i, eta_t) = if cos_theta_i > 0.0 { (eta_a, eta_b) } else { (eta_b, eta_a )};
+        let (eta_i, eta_t) = if cos_theta_i > 0.0 { (self.eta_a, self.eta_b) } else { (self.eta_b, self.eta_a )};
     
         let cos_theta_i = cos_theta_i.abs();
         let sin_theta_i = (1.0 - cos_theta_i * cos_theta_i).sqrt();
@@ -35,46 +50,34 @@ fn evaluate(fresnel_specular: &Bxdf, wi: Vector3<f64>) -> (f64, Option<Vector3<f
         let wi = wi_parl + wi_perp;
 
         (fresnel, Some(wi))
-    } else {
-        panic!()
     }
 }
 
-pub fn f(fresnel_specular: &Bxdf, _wo: cgmath::Vector3<f64>, _wi: cgmath::Vector3<f64>) -> Spectrum {
-    if let Bxdf::FresnelSpecular { eta_a:_, eta_b:_, r:_, t:_ } = fresnel_specular {
+impl Bxdf for FresnelSpecular {
+    fn f(&self, _wo: cgmath::Vector3<f64>, _wi: cgmath::Vector3<f64>) -> Spectrum {
         Spectrum::new(0.0, 0.0, 0.0)
-    } else {
-        panic!()
     }
-}
 
-pub fn sample_f(fresnel_specular: &Bxdf, wo: cgmath::Vector3<f64>, sample: cgmath::Point2<f64>) -> (Spectrum, cgmath::Vector3<f64>, f64) {
-    if let Bxdf::FresnelSpecular { eta_a, eta_b, r, t } = fresnel_specular {
-        let (fresnel_term, refracted)= evaluate(fresnel_specular, wo);
+    fn sample_f(&self, wo: cgmath::Vector3<f64>, sample: cgmath::Point2<f64>) -> (Spectrum, cgmath::Vector3<f64>, f64) {
+        let (fresnel_term, refracted)= self.evaluate(wo);
         if sample.x < fresnel_term {
             // reflect 
             let wi = Vector3::new(-wo.x, -wo.y, wo.z);
             let pdf = fresnel_term;
-            (r * fresnel_term / cos_theta(wi).abs() , wi, pdf)
+            (self.r * fresnel_term / cos_theta(wi).abs() , wi, pdf)
         } else {
             // refract
             let pdf = 1.0 - fresnel_term;
-            let mut ratio2 = (eta_a * eta_a) / (eta_b * eta_b);
+            let mut ratio2 = (self.eta_a * self.eta_a) / (self.eta_b * self.eta_b);
             if wo.z <= 0.0 { ratio2 = 1.0 / ratio2; }
 
             let wi = refracted.unwrap();
 
-            (t * (1.0-fresnel_term) * ratio2 / cos_theta(wi).abs(), wi, pdf)
+            (self.t * (1.0-fresnel_term) * ratio2 / cos_theta(wi).abs(), wi, pdf)
         }
-    } else {
-        panic!()
     }
-}
 
-pub fn types(fresnel_specular: &Bxdf) -> i32 {
-    if let Bxdf::FresnelSpecular { eta_a:_, eta_b:_, r:_, t:_ } = fresnel_specular {
+    fn types(&self) -> i32 {
         BxdfType::Specular | BxdfType::Reflection | BxdfType::Transmission
-    } else {
-        panic!()
     }
 }
