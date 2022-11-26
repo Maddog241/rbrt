@@ -7,35 +7,61 @@ pub fn cos_theta(w: Vector3<f64>) -> f64 {
     w.z
 }
 
-// pub fn cos_theta_square(w: Vector3<f64>) -> f64 {
-//     w.z * w.z
-// }
+pub fn cos2_theta(w: Vector3<f64>) -> f64 {
+    w.z * w.z
+}
 
-// pub fn sin_theta(w: Vector3<f64>) -> f64 {
-//     sin_theta_square(w).sqrt()
-// }
+pub fn sin2_theta(w: Vector3<f64>) -> f64 {
+    (1.0 - cos2_theta(w)).clamp(0.0, 1.0)
+}
 
-// pub fn sin_theta_square(w: Vector3<f64>) -> f64 {
-//     (1.0 - cos_theta_square(w)).clamp(0.0, 1.0)
-// }
+pub fn sin_theta(w: Vector3<f64>) -> f64 {
+    sin2_theta(w).sqrt()
+}
 
-// pub fn cos_phi(w: Vector3<f64>) -> f64 {
-//     if sin_theta_square(w) != 0.0 {
-//         w.x / sin_theta(w)
-//     } else {
-//         1.0
-//     }
-// }
+pub fn tan2_theta(w: Vector3<f64>) -> f64 {
+    if w.z == 0.0 {
+        f64::INFINITY
+    } else {
+        (w.x*w.x + w.y*w.y) / (w.z*w.z)
+    }
+}
 
-// pub fn sin_phi(w: Vector3<f64>) -> f64 {
-//     if sin_theta(w) != 0.0 {
-//         w.y / sin_theta(w)
-//     } else {
-//         0.0
-//     }
-// }
+#[allow(dead_code)]
+pub fn tan_theta(w: Vector3<f64>) -> f64 {
+    tan2_theta(w).sqrt()
+}
 
-fn is_nan(color: Vector3<f64>) -> bool {
+pub fn cos_phi(w: Vector3<f64>) -> f64 {
+    if sin2_theta(w) != 0.0 {
+        w.x / sin_theta(w)
+    } else {
+        1.0
+    }
+}
+
+pub fn sin_phi(w: Vector3<f64>) -> f64 {
+    if sin2_theta(w) != 0.0 {
+        w.y / sin_theta(w)
+    } else {
+        0.0
+    }
+}
+
+pub fn cos2_phi(w: Vector3<f64>) -> f64 {
+    cos_phi(w) * cos_phi(w)
+}
+
+pub fn sin2_phi(w: Vector3<f64>) -> f64 {
+    sin_phi(w) * sin_phi(w)
+}
+
+#[allow(dead_code)]
+pub fn tan_phi(w: Vector3<f64>) -> f64 {
+    w.y / w.x
+}
+
+pub fn is_nan(color: Vector3<f64>) -> bool {
     color.x.is_nan() || color.y.is_nan() || color.z.is_nan()
 }
 
@@ -79,11 +105,45 @@ mod tests {
     #[test]
     fn test_perpendicular() {
         for _ in 0..10 {
-            let w: Vector3<f64> = Vector3::new(random(), random(), random());
+            let w: Vector3<f64> = Vector3::new(random(), random(), random()).normalize();
             let (u, v) = perpendicular(w);
             assert!((u.dot(v)-1.0) < 1e-3);
             assert!((u.dot(w)-1.0) < 1e-3);
             assert!((v.dot(w)-1.0) < 1e-3);
+        }
+    }
+
+    #[test]
+    fn theta() {
+        for _ in 0..10 {
+            let w= Vector3::new(random(), random(), random()).normalize();
+
+            let sin2_theta = sin2_theta(w);
+            let cos2_theta = cos2_theta(w);
+            assert!((sin2_theta+cos2_theta-1.0).abs() < 0.0001);
+
+            let tan2_theta = tan2_theta(w);
+            let div = sin2_theta / cos2_theta;
+            assert!((tan2_theta-div).abs() < 0.0001);
+        }
+    }
+
+    #[test]
+    fn phi() {
+        for _ in 0..10 {
+            let w =  Vector3::new(random(), random(), random()).normalize();
+
+            let sin_phi = sin_phi(w);
+            let cos_phi = cos_phi(w);
+
+            let tan_phi = tan_phi(w);
+            assert!((sin_phi/cos_phi - tan_phi).abs() < 0.0001);
+
+            let my_sin_phi = w.y / (w.x*w.x + w.y*w.y).sqrt();
+            let my_cos_phi = w.x / (w.x*w.x + w.y*w.y).sqrt();
+
+            assert!((sin_phi - my_sin_phi).abs() < 0.0001);
+            assert!((cos_phi - my_cos_phi).abs() < 0.0001);
         }
     }
 }

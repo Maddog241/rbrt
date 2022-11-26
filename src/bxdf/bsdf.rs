@@ -37,7 +37,7 @@ impl Bsdf{
         let (u, v) = (sample.x, sample.y);
         // choose the bxdf to sample
         let index = (u * self.n_bxdfs as f64) as usize;
-        let u = (u - index as f64* self.n_bxdfs as f64) * self.n_bxdfs as f64;
+        let u = (u - index as f64 / self.n_bxdfs as f64) * self.n_bxdfs as f64;
 
         let sample = Point2::new(u, v);
 

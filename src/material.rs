@@ -2,6 +2,7 @@ use crate::{bxdf::bsdf::Bsdf, geometry::interaction::SurfaceInteraction};
 
 pub mod matte;
 pub mod glass;
+pub mod plastic;
 
 pub trait Material: Sync + Send {
     fn compute_scattering(&self, isect: &SurfaceInteraction) -> Bsdf;

@@ -1,7 +1,7 @@
 pub mod lambertian;
 pub mod bsdf;
 pub mod fresnel;
-
+pub mod microfacet;
 
 use std::ops::{BitOr, BitAnd};
 

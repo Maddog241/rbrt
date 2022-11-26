@@ -16,7 +16,6 @@ pub trait Shape: Sync + Send {
     fn world_bound(&self) -> Bound3;
     fn intersect(&self, r: &Ray) -> Option<GeometryInfo>;
     fn intersect_p(&self, r: &Ray) -> Option<f64>;
-    
 }
 
 pub trait SampleableShape: Shape {

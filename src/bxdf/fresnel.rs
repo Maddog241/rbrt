@@ -1,8 +1,12 @@
 use cgmath::{Vector3, InnerSpace};
 
-use crate::{spectrum::Spectrum, utils::cos_theta};
+use crate::{spectrum::Spectrum, utils::{cos_theta, is_nan}};
 
 use super::{BxdfType, Bxdf};
+
+pub trait Fresnel {
+    fn evaluate(&self, cos_theta_i: f64) -> (f64, f64, f64);
+}
 
 pub struct FresnelSpecular {
     eta_a: f64,
@@ -20,36 +24,19 @@ impl FresnelSpecular {
             t,
         }
     }
+    fn refract(&self, wi: Vector3<f64>, sin_theta_t: f64, cos_theta_t: f64) -> Vector3<f64> {
+        if cos_theta_t.is_nan() {
+            panic!()
+        }
+        let wo_parl = Vector3::new(-wi.x, -wi.y, 0.0).normalize() * sin_theta_t;
+        let wo_perp = Vector3::new(0.0, 0.0, -wi.z).normalize() * cos_theta_t;
+        let wo = wo_parl + wo_perp;
 
-    fn evaluate(&self, wi: Vector3<f64>) -> (f64, Option<Vector3<f64>>) {
-        // compute the fresnel term, and the refracted direction(if it exists)
-        let cos_theta_i = wi.z;
-        assert!(cos_theta_i >= -1.0 && cos_theta_i <= 1.0);
-        let (eta_i, eta_t) = if cos_theta_i > 0.0 { (self.eta_a, self.eta_b) } else { (self.eta_b, self.eta_a )};
-    
-        let cos_theta_i = cos_theta_i.abs();
-        let sin_theta_i = (1.0 - cos_theta_i * cos_theta_i).sqrt();
-        let sin_theta_t = eta_i / eta_t * sin_theta_i;
-        if sin_theta_t > 1.0 {
-            // total internal reflection
-            println!("total internal reflection");
-            return (1.0, None);
+        if is_nan(wo) {
+            panic!("refracted direction is nan")
         }
 
-        let cos_theta_t = (1.0 - sin_theta_t * sin_theta_t).sqrt();
-        assert!(cos_theta_t >= 0.0 && cos_theta_t <= 1.0);
-
-        let fresnel_parl:f64= (eta_t * cos_theta_i - eta_i * cos_theta_t)/
-                            (eta_t * cos_theta_i + eta_i * cos_theta_t);
-        let fresnel_perp:f64= (eta_i * cos_theta_i - eta_t * cos_theta_t)/
-                            (eta_i * cos_theta_i + eta_t * cos_theta_t);
-        let fresnel = (fresnel_parl * fresnel_parl + fresnel_perp * fresnel_perp) / 2.0;
-
-        let wi_parl = Vector3::new(-wi.x, -wi.y, 0.0).normalize() * sin_theta_t;
-        let wi_perp = Vector3::new(0.0, 0.0, -wi.z).normalize() * cos_theta_t;
-        let wi = wi_parl + wi_perp;
-
-        (fresnel, Some(wi))
+        wo
     }
 }
 
@@ -59,7 +46,7 @@ impl Bxdf for FresnelSpecular {
     }
 
     fn sample_f(&self, wo: cgmath::Vector3<f64>, sample: cgmath::Point2<f64>) -> (Spectrum, cgmath::Vector3<f64>, f64) {
-        let (fresnel_term, refracted)= self.evaluate(wo);
+        let (fresnel_term, sin_theta_t, cos_theta_t)= self.evaluate(cos_theta(wo));
         if sample.x < fresnel_term {
             // reflect 
             let wi = Vector3::new(-wo.x, -wo.y, wo.z);
@@ -71,7 +58,7 @@ impl Bxdf for FresnelSpecular {
             let mut ratio2 = (self.eta_a * self.eta_a) / (self.eta_b * self.eta_b);
             if wo.z <= 0.0 { ratio2 = 1.0 / ratio2; }
 
-            let wi = refracted.unwrap();
+            let wi = self.refract(wo, sin_theta_t, cos_theta_t);
 
             (self.t * (1.0-fresnel_term) * ratio2 / cos_theta(wi).abs(), wi, pdf)
         }
@@ -79,5 +66,49 @@ impl Bxdf for FresnelSpecular {
 
     fn types(&self) -> i32 {
         BxdfType::Specular | BxdfType::Reflection | BxdfType::Transmission
+    }
+}
+
+impl Fresnel for FresnelSpecular {
+    fn evaluate(&self, cos_theta_i: f64) -> (f64, f64, f64) {
+        // returns (fresnel, sin_theta_t, cos_theta_t)
+        // compute the fresnel term, and the refracted direction(if it exists)
+        assert!(cos_theta_i >= -1.0 && cos_theta_i <= 1.0);
+        let (eta_i, eta_t) = if cos_theta_i > 0.0 { (self.eta_a, self.eta_b) } else { (self.eta_b, self.eta_a )};
+    
+        let cos_theta_i = cos_theta_i.abs();
+        let sin_theta_i = (1.0 - cos_theta_i * cos_theta_i).max(0.0).sqrt();
+        let sin_theta_t = eta_i / eta_t * sin_theta_i;
+        if sin_theta_t > 1.0 {
+            // total internal reflection
+            return (1.0, sin_theta_t, f64::NAN);
+        }
+
+        let cos_theta_t = (1.0 - sin_theta_t * sin_theta_t).max(0.0).sqrt();
+        assert!(cos_theta_t >= 0.0 && cos_theta_t <= 1.0);
+
+        let fresnel_parl:f64= (eta_t * cos_theta_i - eta_i * cos_theta_t)/
+                            (eta_t * cos_theta_i + eta_i * cos_theta_t);
+        let fresnel_perp:f64= (eta_i * cos_theta_i - eta_t * cos_theta_t)/
+                            (eta_i * cos_theta_i + eta_t * cos_theta_t);
+        let fresnel = (fresnel_parl * fresnel_parl + fresnel_perp * fresnel_perp) / 2.0;
+
+        (fresnel, sin_theta_t, cos_theta_t)
+    }
+}
+
+
+pub struct FresnelNoOp { }
+
+#[allow(dead_code)]
+impl FresnelNoOp {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
+
+impl Fresnel for FresnelNoOp {
+    fn evaluate(&self, _cos_theta_i: f64) -> (f64, f64, f64) {
+        (1.0, 1.0, 0.0)
     }
 }
