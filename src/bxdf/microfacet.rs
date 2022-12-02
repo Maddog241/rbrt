@@ -14,7 +14,7 @@ pub enum MicrofacetDistribution {
 }
 
 impl MicrofacetDistribution {
-    fn d(&self, wh: Vector3<f64>) -> f64 {
+    pub fn d(&self, wh: Vector3<f64>) -> f64 {
         match self {
             Self::TrowbridgeReitz { alpha_x, alpha_y } => {
                 let tan2_theta = tan2_theta(wh);
@@ -52,7 +52,7 @@ impl MicrofacetDistribution {
         }
     }
 
-    fn g(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> f64 {
+    pub fn g(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> f64 {
         1.0 / (1.0 + self.lambda(wo) + self.lambda(wi))
     }
 
@@ -102,19 +102,8 @@ impl Bxdf for MicrofacetReflection {
         res
     }
 
-    fn sample_f(&self, wo: cgmath::Vector3<f64>, sample: cgmath::Point2<f64>) -> (crate::spectrum::Spectrum, cgmath::Vector3<f64>, f64) {
-        // here we will use uniform sampling
-        let (u, v) = (sample[0], sample[1]);
-        let phi = 2.0 * PI * u;
-        let theta = v.acos();
-
-        let x = theta.sin() * phi.cos();
-        let y = theta.sin() * phi.sin();
-        let z = theta.cos();
-
-        let wi = Vector3::new(x, y, z);
-
-        (self.f(wo, wi), wi, 1.0 / 2.0 / PI)
+    fn sample_f(&self, wo: Vector3<f64>, sample: cgmath::Point2<f64>) -> (Spectrum, Vector3<f64>, f64) {
+        
     }
 
     fn types(&self) -> i32 {
