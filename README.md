@@ -1,4 +1,6 @@
-# log
+# rbrt (WIP)
+
+a ray tracer written while reading *Physically Based Rendering*.
 
 - [x] path integrator 
 
