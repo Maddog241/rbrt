@@ -59,7 +59,7 @@ impl Integrator for PathIntegrator {
                                 let wi = (sample_p - isect.geo.p).normalize();
                                 let f_value = bsdf.f(-ray.d.normalize(), wi);
                                 let cosine = wi.dot(isect.geo.n).abs();
-
+                                
                                 radiance += incoming_r * throughput * f_value * cosine / pdf; 
                             } 
                         }

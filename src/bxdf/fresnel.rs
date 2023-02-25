@@ -5,12 +5,13 @@ use crate::{spectrum::Spectrum, utils::{cos_theta, is_nan}};
 use super::{BxdfType, Bxdf};
 
 pub trait Fresnel {
+    /// returns (f_value, sin_theta_t, cos_theta_t)
     fn evaluate(&self, cos_theta_i: f64) -> (f64, f64, f64);
 }
 
 pub struct FresnelSpecular {
-    eta_a: f64,
-    eta_b: f64,
+    eta_a: f64,  // refractive index outside 
+    eta_b: f64,  // refractive index inside
     r: Spectrum,
     t: Spectrum,
 }
@@ -110,5 +111,28 @@ impl FresnelNoOp {
 impl Fresnel for FresnelNoOp {
     fn evaluate(&self, _cos_theta_i: f64) -> (f64, f64, f64) {
         (1.0, 1.0, 0.0)
+    }
+}
+
+pub struct FresnelSchlick {
+    eta_a: f64, // outside
+    eta_b: f64 // inside
+}
+
+impl FresnelSchlick {
+    pub fn new(eta_a: f64, eta_b: f64) -> Self {
+        Self {
+            eta_a, 
+            eta_b
+        }
+    }
+}
+
+impl Fresnel for FresnelSchlick {
+    fn evaluate(&self, cos_theta_i: f64) -> (f64, f64, f64) {
+        let r0 = (self.eta_a - self.eta_b).powf(2.0) / (self.eta_a + self.eta_b).powf(2.0);
+        let r = r0 + (1.0 - r0) * (1.0 - cos_theta_i).powf(5.0);
+
+        (r, 1.0, 0.0)
     }
 }

@@ -2,7 +2,7 @@ use std::f64::consts::{PI, E};
 
 use cgmath::{InnerSpace, Vector3};
 
-use crate::{utils::{tan2_theta, sin2_phi, cos2_phi, cos2_theta}, spectrum::Spectrum};
+use crate::{utils::{tan2_theta, sin2_phi, cos2_phi, cos2_theta, cos_theta}, spectrum::Spectrum};
 
 use super::{Bxdf, BxdfType, fresnel::Fresnel};
 
@@ -88,22 +88,21 @@ impl MicrofacetReflection {
 impl Bxdf for MicrofacetReflection {
     fn f(&self, wo: cgmath::Vector3<f64>, wi: cgmath::Vector3<f64>) -> crate::spectrum::Spectrum {
         let wh = (wo + wi).normalize();
-        let cos_o = wo.dot(wh);
-        let cos_i = wi.dot(wh);
+        let cos_o = cos_theta(wo);
+        let cos_i = cos_theta(wi);
 
-        let (fresnel_term, _, _) = self.fresnel.evaluate(wo.dot(wh));
+        let (fresnel_term, _, _) = self.fresnel.evaluate(wo.normalize().dot(wh));
 
         let res = self.reflectance * fresnel_term * self.distribution.g(wo, wi) * self.distribution.d(wh) / (4.0 * cos_o * cos_i);
 
-        // println!("fresnel: {:?}", fresnel_term);
+        // if fresnel_term > 0.6 {
+        //     println!("fresnel: {:?}", fresnel_term);
+        // }
         // println!("g: {:?}", self.distribution.g(wo, wi));
         // println!("d: {:?}", self.distribution.d(wh));
+        // println!("res: {:?}", res);
 
         res
-    }
-
-    fn sample_f(&self, wo: Vector3<f64>, sample: cgmath::Point2<f64>) -> (Spectrum, Vector3<f64>, f64) {
-        
     }
 
     fn types(&self) -> i32 {

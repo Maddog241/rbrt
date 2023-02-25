@@ -2,6 +2,8 @@ use core::panic;
 
 use cgmath::{Vector3, InnerSpace};
 
+use crate::spectrum::Spectrum;
+
 // w here are supposed to be in the local coordinate system
 pub fn cos_theta(w: Vector3<f64>) -> f64 {
     w.z
@@ -80,8 +82,8 @@ pub fn perpendicular(n: Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
     else { w.z = 1.0; }
 
 
-    let u = w.cross(n).normalize();
-    let v = n.cross(u);
+    let v = w.cross(n).normalize();
+    let u = v.cross(n);
 
     if is_nan(u) || is_nan(v) {
         panic!("not a num error")
@@ -90,9 +92,26 @@ pub fn perpendicular(n: Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
     (u, v)
 }
 
-// pub fn assert_spectrum(spectrum: &Spectrum) -> bool {
-//     spectrum.r >= 0.0 && spectrum.g >= 0.0 && spectrum.b >= 0.0
-// }
+pub fn sphere_tangent(n: Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
+    // n is a normal vector
+    assert!(n.magnitude2() != 0.0);
+    let h = Vector3::new(0.0, 1.0, 0.0);
+    let v = n.cross(h);
+
+    if v.magnitude2() < 1e-3 {
+        // h and u is colinear
+        return perpendicular(n);
+    } 
+
+    let u = v.cross(n);
+
+    (u, v)
+}
+
+#[allow(unused)]
+pub fn check_spectrum(spectrum: &Spectrum) -> bool {
+    spectrum.r >= 0.0 && spectrum.g >= 0.0 && spectrum.b >= 0.0
+}
 
 // pub fn random_2d() -> Point2<f64> {
 //     Point2::new(random(), random())

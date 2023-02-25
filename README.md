@@ -29,3 +29,5 @@ a ray tracer written while reading *Physically Based Rendering*.
 1000 samples per pixel
 
   ![兔子](bunny_correct.png)
+
+  ![anisotropic](anisotropic.png)

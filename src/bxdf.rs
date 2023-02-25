@@ -1,7 +1,7 @@
 pub mod lambertian;
 pub mod bsdf;
 pub mod fresnel;
-// pub mod microfacet;
+pub mod microfacet;
 // pub mod fresnel_blend;
 
 use std::{ops::{BitOr, BitAnd}, f64::consts::PI};

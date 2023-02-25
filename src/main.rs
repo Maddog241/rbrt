@@ -107,7 +107,7 @@ fn main() {
     // scene configuration
     let s_configure = std::time::Instant::now();
 
-    let (camera, scene) = Scene::test_bunny();
+    let (camera, scene) = Scene::test_microfacet();
 
     let configure_cost = s_configure.elapsed().as_millis();
     println!("CONFIGURATION COST: {} secs", (configure_cost as f64) / 1000.0);
