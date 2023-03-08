@@ -12,7 +12,7 @@ a ray tracer written while reading *Physically Based Rendering*.
 
 - [x] image texture 
 
-- [ ] microfacet model
+- [x] microfacet model
 
 - [ ] quasi monte carlo
 
