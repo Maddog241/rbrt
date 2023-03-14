@@ -109,30 +109,31 @@ impl Scene {
         let bot_wall = GeometricPrimitive::new(Box::new(bot_wall), Arc::new(matte_material));
         primitives.push(Box::new(bot_wall));
 
-        let object_to_world = Transform::translate(Vector3::new(0.0, -6.0, 20.0));
+        let object_to_world = Transform::translate(Vector3::new(-3.0, -6.0, 20.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 3.0);
-        let matte_material = Glass::new(1.0, 1.5, Spectrum::new(0.8, 0.8, 0.8), Spectrum::new(1.0, 1.0, 1.0));
-        let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
+        let glass_material = Glass::new(1.0, 1.5, Spectrum::new(0.8, 0.8, 0.8), Spectrum::new(1.0, 1.0, 1.0));
+        let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(glass_material));
         primitives.push(Box::new(ball));
 
-        let object_to_world = Transform::translate(Vector3::new(0.0, -6.0, 20.0));
+        let object_to_world = Transform::translate(Vector3::new(2.0, -8.5, 18.5));
         let world_to_object = object_to_world.inverse();
-        let sphere = Sphere::new(object_to_world, world_to_object, 1.0);
+        let sphere = Sphere::new(object_to_world, world_to_object, 1.5);
         let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.5, 0.1, 0.1))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         primitives.push(Box::new(ball));
 
+        let object_to_world = Transform::translate(Vector3::new(5.5, -5.5, 24.0));
+        let world_to_object = object_to_world.inverse();
+        let sphere = Sphere::new(object_to_world, world_to_object, 4.5);
+        let plastic_material = Plastic::new(0.01, Spectrum::new(0.4, 0.5, 0.1), Spectrum::new(0.4, 0.5, 0.1));
+        let plastic_ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(plastic_material));
+        primitives.push(Box::new(plastic_ball));
 
-        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.9, 20.0)) * Transform::rotate_x(90.0);
+
+        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.99, 20.0)) * Transform::rotate_x(90.0);
         let world_to_object4 = object_to_world4.inverse();
         let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
-        let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
-        lights.push(Box::new(disk_light));
-
-        let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.9, 20.0)) * Transform::rotate_x(90.0);
-        let world_to_object4 = object_to_world4.inverse();
-        let disk_light = Cylinder::new(object_to_world4, world_to_object4, 3.0, 0.0, 0.3);
         let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
         lights.push(Box::new(disk_light));
 
@@ -429,10 +430,10 @@ impl Scene {
 
 
         // place objects inside the box
-        let object_to_world = Transform::translate(Vector3::new(0.0, -6.0, 20.0));
+        let object_to_world = Transform::translate(Vector3::new(0.0, -6.0, 20.0)) * Transform::rotate_x(90.0);
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 3.0);
-        let metal_material = Plastic::new(0.1, Spectrum::new(1.0, 1.0, 1.0), Spectrum::new(0.00, 0.00, 0.0));
+        let metal_material = Plastic::new(0.0, Spectrum::new(1.0, 1.0, 1.0), Spectrum::new(0.2, 0.2, 0.3));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(metal_material));
         primitives.push(Box::new(ball));
 
@@ -445,8 +446,8 @@ impl Scene {
 
         let object_to_world5 = Transform::translate(Vector3::new(3.0, -3.0, 15.0));
         let world_to_object5 = object_to_world5.inverse();
-        let sphere_light = Sphere::new(object_to_world5, world_to_object5, 1.0);
-        let sphere_light = AreaLight::new(Box::new(sphere_light), Spectrum::new(10.0, 10.0, 10.0));
+        let sphere_light = Sphere::new(object_to_world5, world_to_object5, 0.2);
+        let sphere_light = AreaLight::new(Box::new(sphere_light), Spectrum::new(50.0, 50.0, 50.0));
         lights.push(Box::new(sphere_light));
 
         let bvh = BVH::new(primitives);

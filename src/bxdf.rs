@@ -17,7 +17,8 @@ pub trait Bxdf {
         // here we will use uniform sampling
         let (u, v) = (sample[0], sample[1]);
         let phi = 2.0 * PI * u;
-        let theta = v.acos();
+        // let theta = v.acos();
+        let theta = v.asin() / 2.0;
 
         let x = theta.sin() * phi.cos();
         let y = theta.sin() * phi.sin();

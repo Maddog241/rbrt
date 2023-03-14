@@ -28,6 +28,10 @@ a ray tracer written while reading *Physically Based Rendering*.
 ### Current Result
 1000 samples per pixel
 
+  ![](cornell_box.png)
+
   ![兔子](bunny_correct.png)
 
-  ![anisotropic](anisotropic.png)
+  ![](two_bunny.png)
+
+  ![microfacet](microfacet.png)
