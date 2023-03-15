@@ -107,7 +107,7 @@ fn main() {
     // scene configuration
     let s_configure = std::time::Instant::now();
 
-    let (camera, scene) = Scene::cornell_box();
+    let (camera, scene) = Scene::test_texture();
 
     let configure_cost = s_configure.elapsed().as_millis();
     println!("CONFIGURATION COST: {} secs", (configure_cost as f64) / 1000.0);

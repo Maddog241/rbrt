@@ -35,3 +35,5 @@ a ray tracer written while reading *Physically Based Rendering*.
   ![](two_bunny.png)
 
   ![microfacet](microfacet.png)
+
+  ![](image_texture.png)

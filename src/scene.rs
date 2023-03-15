@@ -205,12 +205,12 @@ impl Scene {
         let bot_wall = GeometricPrimitive::new(Box::new(bot_wall), Arc::new(matte_material));
         primitives.push(Box::new(bot_wall));
 
-        let object_to_world = Transform::translate(Vector3::new(0.0, -4.0, 20.0));
+        let object_to_world = Transform::translate(Vector3::new(0.0, -5.0, 22.0));
         let world_to_object = object_to_world.inverse();
-        let sphere = Sphere::new(object_to_world.clone(), world_to_object, 4.0);
+        let sphere = Sphere::new(object_to_world.clone(), world_to_object, 5.0);
         let world_to_texture = (object_to_world * Transform::rotate_x(90.0)).inverse();
         let mapping = SphericalMapping::new(world_to_texture);
-        let matte_material = Matte::new(Box::new(ImageTexture::new(Box::new(mapping), Texels::new("./earthmap.jpg"))));
+        let matte_material = Matte::new(Box::new(ImageTexture::new(Box::new(mapping), Texels::new("./texture.png"))));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(matte_material));
         primitives.push(Box::new(ball));
 
