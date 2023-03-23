@@ -433,7 +433,7 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(0.0, -6.0, 20.0)) * Transform::rotate_x(90.0);
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 3.0);
-        let metal_material = Plastic::new(0.0, Spectrum::new(1.0, 1.0, 1.0), Spectrum::new(0.2, 0.2, 0.3));
+        let metal_material = Plastic::new(0.0, Spectrum::new(0.2, 0.2, 0.3), Spectrum::new(0.2, 0.2, 0.3));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(metal_material));
         primitives.push(Box::new(ball));
 
@@ -444,7 +444,8 @@ impl Scene {
         // let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
         // lights.push(Box::new(disk_light));
 
-        let object_to_world5 = Transform::translate(Vector3::new(3.0, -3.0, 15.0));
+        // let object_to_world5 = Transform::translate(Vector3::new(3.0, -3.0, 15.0));
+        let object_to_world5 = Transform::translate(Vector3::new(0.0, 2.0, 15.0));
         let world_to_object5 = object_to_world5.inverse();
         let sphere_light = Sphere::new(object_to_world5, world_to_object5, 0.2);
         let sphere_light = AreaLight::new(Box::new(sphere_light), Spectrum::new(50.0, 50.0, 50.0));
