@@ -187,12 +187,8 @@ impl BVHNode {
     }
 
     fn is_leaf(&self) -> bool {
-        if let None = self.l_child {
-            if let None = self.r_child {
-                true
-            } else {
-                false
-            }
+        if let (None, None) = (&self.l_child, &self.r_child) {
+            true
         } else {
             false
         }
@@ -200,8 +196,9 @@ impl BVHNode {
 
     fn intersect(&self, r: &mut crate::geometry::ray::Ray, primitives: &Vec<Box<dyn Primitive>>) -> Option<crate::geometry::interaction::SurfaceInteraction> {
         if let Some(_) = self.bound.intersect_p(r) {
+            // hit the bounding box
             if self.is_leaf() {
-                // check the actual objects
+                // check all objects inside the box
                 let mut res = None;
                 
                 for index in self.prim_indexes.iter() {

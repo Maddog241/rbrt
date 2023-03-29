@@ -24,7 +24,7 @@ impl Material for Plastic {
         // let (ss, ts) = perpendicular(isect.geo.n);
 
         let alpha = MicrofacetDistribution::roughness_to_alpha(self.roughness);
-        let distribution = MicrofacetDistribution::TrowbridgeReitz { alpha_x: alpha, alpha_y: alpha };
+        let distribution = MicrofacetDistribution::TrowbridgeReitz { alpha_x: alpha , alpha_y: alpha };
         // let fresnel = Box::new(FresnelSpecular::new(1.0, 1.5, Spectrum::new(1.0, 1.0, 1.0), Spectrum::new(1.0, 1.0, 1.0)));
         let fresnel = Box::new(FresnelNoOp::new());
         // let fresnel = Box::new(FresnelSchlick::new(1.0, 1.5));

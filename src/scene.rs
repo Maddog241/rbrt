@@ -476,6 +476,93 @@ impl Scene {
         (camera, scene)
     }
 
+    pub fn test_plastic() -> (PerspectiveCamera, Scene) {
+        let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
+        let mut lights: Vec<Box<dyn Light>> = Vec::new();
+
+        // init the cornell box
+        let object_to_world = Transform::translate(Vector3::new(10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
+        let world_to_object = object_to_world.inverse();
+        let right_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.65, 0.05, 0.05))));
+        let right_wall = GeometricPrimitive::new(Box::new(right_wall), Arc::new(matte_material));
+        primitives.push(Box::new(right_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(-10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
+        let world_to_object = object_to_world.inverse();
+        let left_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.12, 0.45, 0.15))));
+        let left_wall = GeometricPrimitive::new(Box::new(left_wall), Arc::new(matte_material));
+        primitives.push(Box::new(left_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, 0.0, 30.0));
+        let world_to_object = object_to_world.inverse();
+        let back_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
+        let back_wall = GeometricPrimitive::new(Box::new(back_wall), Arc::new(matte_material));
+        primitives.push(Box::new(back_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, 10.0, 0.0)) * Transform::rotate_x(90.0);
+        let world_to_object = object_to_world.inverse();
+        let upper_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.73, 0.73, 0.73))));
+        let upper_wall = GeometricPrimitive::new(Box::new(upper_wall), Arc::new(matte_material));
+        primitives.push(Box::new(upper_wall));
+
+        let object_to_world = Transform::translate(Vector3::new(0.0, -10.0, 0.0)) * Transform::rotate_x(-90.0);
+        let world_to_object = object_to_world.inverse();
+        let bot_wall = Disk::new(object_to_world, world_to_object, 150.0);
+        let matte_material = Matte::new(Box::new(ConstantTexture::new(Spectrum::new(0.8, 0.8, 0.8))));
+        let bot_wall = GeometricPrimitive::new(Box::new(bot_wall), Arc::new(matte_material));
+        primitives.push(Box::new(bot_wall));
+
+
+        // place objects inside the box
+        let object_to_world = Transform::translate(Vector3::new(0.0, -6.0, 20.0)) * Transform::rotate_x(90.0);
+        let world_to_object = object_to_world.inverse();
+        let sphere = Sphere::new(object_to_world, world_to_object, 3.0);
+        let metal_material = Plastic::new(0.02, Spectrum::new(0.2, 0.2, 0.3), Spectrum::new(0.2, 0.2, 0.3));
+        let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(metal_material));
+        primitives.push(Box::new(ball));
+
+        // lights
+        // let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.9999, 20.0)) * Transform::rotate_x(90.0);
+        // let world_to_object4 = object_to_world4.inverse();
+        // let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
+        // let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
+        // lights.push(Box::new(disk_light));
+
+        // let object_to_world5 = Transform::translate(Vector3::new(3.0, -3.0, 15.0));
+        let object_to_world5 = Transform::translate(Vector3::new(3.0, -2.0, 15.0));
+        let world_to_object5 = object_to_world5.inverse();
+        let sphere_light = Sphere::new(object_to_world5, world_to_object5, 0.2);
+        let sphere_light = AreaLight::new(Box::new(sphere_light), Spectrum::new(50.0, 50.0, 50.0));
+        lights.push(Box::new(sphere_light));
+
+        let bvh = BVH::new(primitives);
+        let scene = Scene::new(lights, Box::new(bvh));
+
+        // camera
+        const WIDTH: usize = 500;
+        const HEIGHT: usize = 500;
+        const FRAME: f64 = WIDTH as f64 / HEIGHT as f64;
+
+        let pos = Vector3::new(0.0, 0.0, 0.0);
+        let look = Vector3::new(0.0, 0.0, 1.0);
+        let up = Vector3::new(0.0, 1.0, 0.0);
+        let camera_to_world = Transform::look_at(pos, look, up).inverse();
+
+        let camera = PerspectiveCamera::new(
+            camera_to_world,
+            (Point2::new(-FRAME, -1.0), Point2::new(FRAME, 1.0)),
+            0.0,
+            1.0,
+            60.0,
+            Film::new(WIDTH, HEIGHT),
+        );
+
+        (camera, scene)
+    }
 //     pub fn test_layerd_diffuse() -> (PerspectiveCamera, Scene) {
 //         let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
 //         let mut lights: Vec<Box<dyn Light>> = Vec::new();

@@ -107,7 +107,7 @@ fn main() {
     // scene configuration
     let s_configure = std::time::Instant::now();
 
-    let (camera, scene) = Scene::test_microfacet();
+    let (camera, scene) = Scene::test_bunny();
 
     let configure_cost = s_configure.elapsed().as_millis();
     println!("CONFIGURATION COST: {} secs", (configure_cost as f64) / 1000.0);
@@ -157,7 +157,7 @@ fn render(integrator: PathIntegrator, scene: Scene, filename: &Path) {
                         let sample = CameraSample::new(Point2::new(j as f64 + random::<f64>(), i as f64 + random::<f64>()), 0.0);
                         let mut r = int.camera.generate_ray(sample);
 
-                        radiance += int.li(&mut r, &scene);
+                        radiance += int.li(&mut r, &scene).tone_mapping();
                     }
 
                     radiance /= int.n_sample as f64 * int.n_thread as f64;
