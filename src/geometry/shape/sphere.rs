@@ -107,7 +107,7 @@ impl SampleableShape for Sphere {
         4.0 * PI * self.radius * self.radius
     }
 
-    fn sample(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
+    fn uniform_sample_point(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
         let theta = (u[0] * 2.0 - 1.0).acos();
         let phi = u[1] * 2.0 * PI;
         let x = self.radius * theta.sin() * phi.cos();

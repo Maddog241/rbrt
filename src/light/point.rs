@@ -28,6 +28,10 @@ impl Light for PointLight {
         }
     }
 
+    fn uniform_sample_point(&self, u: Point2<f64>) -> Point3<f64> {
+        self.p
+    }
+
     fn le(&self) -> Spectrum {
         panic!("This method should not be called");
     }

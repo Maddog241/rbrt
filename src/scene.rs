@@ -8,6 +8,7 @@ use crate::geometry::shape::cylinder::Cylinder;
 use crate::geometry::shape::disk::Disk;
 use crate::geometry::shape::mesh::TriangleMesh;
 use crate::geometry::shape::sphere::Sphere;
+use crate::light::LightList;
 use crate::light::area::AreaLight;
 use crate::material::glass::Glass;
 use crate::material::matte::Matte;
@@ -23,15 +24,15 @@ use crate::primitive::geometric_primitive::GeometricPrimitive;
 use cgmath::{Vector3, Point2};
 
 pub struct Scene {
-    pub lights: Vec<Box<dyn Light>>,
+    pub lightlist: LightList,
     pub aggregate: Box<dyn Primitive>,
 }
 
 #[allow(dead_code)]
 impl Scene {
-    pub fn new(lights: Vec<Box<dyn Light>>, aggregate: Box<dyn Primitive>) -> Self {
+    pub fn new(lightlist: LightList, aggregate: Box<dyn Primitive>) -> Self {
         Scene {
-            lights,
+            lightlist,
             aggregate,
         }
     }
@@ -39,7 +40,7 @@ impl Scene {
     pub fn intersect(&self, r: &mut crate::geometry::ray::Ray) -> Option<crate::geometry::interaction::SurfaceInteraction> {
         let mut ret = self.aggregate.intersect(r);
 
-        for light in self.lights.iter() {
+        for light in self.lightlist.lights.iter() {
             if let Some(isect) = light.intersect(r) {
                 ret = Some(isect);
             }
@@ -55,7 +56,7 @@ impl Scene {
             t = t.min(new_t);
         }
 
-        for light in self.lights.iter() {
+        for light in self.lightlist.lights.iter() {
             if let Some(new_t) = light.intersect_p(r) {
                 t = t.min(new_t);
             }
@@ -71,7 +72,7 @@ impl Scene {
 
     pub fn cornell_box() -> (PerspectiveCamera, Scene) {
         let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
-        let mut lights: Vec<Box<dyn Light>> = Vec::new();
+        let mut lights: Vec<Arc<dyn Light>> = Vec::new();
 
         let object_to_world = Transform::translate(Vector3::new(10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
         let world_to_object = object_to_world.inverse();
@@ -112,7 +113,7 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(-3.0, -6.0, 20.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 3.0);
-        let glass_material = Glass::new(1.0, 1.5, Spectrum::new(0.8, 0.8, 0.8), Spectrum::new(1.0, 1.0, 1.0));
+        let glass_material = Glass::new(1.0, 1.5, Spectrum::new(1.0, 1.0, 1.0), Spectrum::new(1.0, 1.0, 1.0));
         let ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(glass_material));
         primitives.push(Box::new(ball));
 
@@ -134,12 +135,12 @@ impl Scene {
         let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.99, 20.0)) * Transform::rotate_x(90.0);
         let world_to_object4 = object_to_world4.inverse();
         let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
-        let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
-        lights.push(Box::new(disk_light));
+        let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(20.0, 20.0, 20.0));
+        lights.push(Arc::new(disk_light));
 
 
         let bvh = BVH::new(primitives);
-        let scene = Scene::new(lights, Box::new(bvh));
+        let scene = Scene::new(LightList::new(lights), Box::new(bvh));
 
         // camera
         const WIDTH: usize = 500;
@@ -167,7 +168,7 @@ impl Scene {
 
     pub fn test_texture() -> (PerspectiveCamera, Scene) {
         let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
-        let mut lights: Vec<Box<dyn Light>> = Vec::new();
+        let mut lights: Vec<Arc<dyn Light>> = Vec::new();
 
         let object_to_world = Transform::translate(Vector3::new(10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
         let world_to_object = object_to_world.inverse();
@@ -218,11 +219,11 @@ impl Scene {
         let world_to_object4 = object_to_world4.inverse();
         let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
         let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
-        lights.push(Box::new(disk_light));
+        lights.push(Arc::new(disk_light));
 
 
         let bvh = BVH::new(primitives);
-        let scene = Scene::new(lights, Box::new(bvh));
+        let scene = Scene::new(LightList::new(lights), Box::new(bvh));
 
         // camera
         const WIDTH: usize = 500;
@@ -248,7 +249,7 @@ impl Scene {
 
     pub fn test_bunny() -> (PerspectiveCamera, Scene) {
         let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
-        let mut lights: Vec<Box<dyn Light>> = Vec::new();
+        let mut lights: Vec<Arc<dyn Light>> = Vec::new();
 
         let object_to_world = Transform::translate(Vector3::new(10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
         let world_to_object = object_to_world.inverse();
@@ -306,11 +307,11 @@ impl Scene {
         let world_to_object4 = object_to_world4.inverse();
         let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
         let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
-        lights.push(Box::new(disk_light));
+        lights.push(Arc::new(disk_light));
 
 
         let bvh = BVH::new(primitives);
-        let scene = Scene::new(lights, Box::new(bvh));
+        let scene = Scene::new(LightList::new(lights), Box::new(bvh));
 
         // camera
         const WIDTH: usize = 1920;
@@ -336,7 +337,7 @@ impl Scene {
 
     pub fn test_dragon() -> (PerspectiveCamera, Scene) {
         let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
-        let lights: Vec<Box<dyn Light>> = Vec::new();
+        let lights: Vec<Arc<dyn Light>> = Vec::new();
 
 
         // load models 
@@ -363,7 +364,7 @@ impl Scene {
         let bvh = BVH::new(primitives);
         eprintln!("finish bvh construction");
 
-        let scene = Scene::new(lights, Box::new(bvh));
+        let scene = Scene::new(LightList::new(lights), Box::new(bvh));
 
 
         // camera 
@@ -390,7 +391,7 @@ impl Scene {
 
     pub fn test_microfacet() -> (PerspectiveCamera, Scene) {
         let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
-        let mut lights: Vec<Box<dyn Light>> = Vec::new();
+        let mut lights: Vec<Arc<dyn Light>> = Vec::new();
 
         // init the cornell box
         let object_to_world = Transform::translate(Vector3::new(10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
@@ -442,17 +443,17 @@ impl Scene {
         // let world_to_object4 = object_to_world4.inverse();
         // let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
         // let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
-        // lights.push(Box::new(disk_light));
+        // lights.push(Arc::new(disk_light));
 
         // let object_to_world5 = Transform::translate(Vector3::new(3.0, -3.0, 15.0));
         let object_to_world5 = Transform::translate(Vector3::new(0.0, 2.0, 15.0));
         let world_to_object5 = object_to_world5.inverse();
         let sphere_light = Sphere::new(object_to_world5, world_to_object5, 0.2);
         let sphere_light = AreaLight::new(Box::new(sphere_light), Spectrum::new(50.0, 50.0, 50.0));
-        lights.push(Box::new(sphere_light));
+        lights.push(Arc::new(sphere_light));
 
         let bvh = BVH::new(primitives);
-        let scene = Scene::new(lights, Box::new(bvh));
+        let scene = Scene::new(LightList::new(lights), Box::new(bvh));
 
         // camera
         const WIDTH: usize = 500;
@@ -478,7 +479,7 @@ impl Scene {
 
     pub fn test_plastic() -> (PerspectiveCamera, Scene) {
         let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
-        let mut lights: Vec<Box<dyn Light>> = Vec::new();
+        let mut lights: Vec<Arc<dyn Light>> = Vec::new();
 
         // init the cornell box
         let object_to_world = Transform::translate(Vector3::new(10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
@@ -530,17 +531,17 @@ impl Scene {
         // let world_to_object4 = object_to_world4.inverse();
         // let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
         // let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
-        // lights.push(Box::new(disk_light));
+        // lights.push(Arc::new(disk_light));
 
         // let object_to_world5 = Transform::translate(Vector3::new(3.0, -3.0, 15.0));
         let object_to_world5 = Transform::translate(Vector3::new(3.0, -2.0, 15.0));
         let world_to_object5 = object_to_world5.inverse();
         let sphere_light = Sphere::new(object_to_world5, world_to_object5, 0.2);
         let sphere_light = AreaLight::new(Box::new(sphere_light), Spectrum::new(50.0, 50.0, 50.0));
-        lights.push(Box::new(sphere_light));
+        lights.push(Arc::new(sphere_light));
 
         let bvh = BVH::new(primitives);
-        let scene = Scene::new(lights, Box::new(bvh));
+        let scene = Scene::new(LightList::new(lights), Box::new(bvh));
 
         // camera
         const WIDTH: usize = 500;
@@ -565,7 +566,7 @@ impl Scene {
     }
 //     pub fn test_layerd_diffuse() -> (PerspectiveCamera, Scene) {
 //         let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
-//         let mut lights: Vec<Box<dyn Light>> = Vec::new();
+//         let mut lights: Vec<Arc<dyn Light>> = Vec::new();
 
 //         let object_to_world = Transform::translate(Vector3::new(10.0, 0.0, 0.0)) * Transform::rotate_y(90.0);
 //         let world_to_object = object_to_world.inverse();
@@ -614,10 +615,10 @@ impl Scene {
 //         let world_to_object4 = object_to_world4.inverse();
 //         let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
 //         let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(10.0, 10.0, 10.0));
-//         lights.push(Box::new(disk_light));
+//         lights.push(Arc::new(disk_light));
 
 //         let bvh = BVH::new(primitives);
-//         let scene = Scene::new(lights, Box::new(bvh));
+//         let scene = Scene::new(LightList::new(lights), Box::new(bvh));
 
 //         // camera
 //         const WIDTH: usize = 500;

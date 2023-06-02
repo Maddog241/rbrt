@@ -105,7 +105,7 @@ impl SampleableShape for Cylinder {
         2.0 * PI * self.radius * (self.z_max - self.z_min) // only considering the outfacing side
     }
 
-    fn sample(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
+    fn uniform_sample_point(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
         let theta = u[0] * 2.0 * PI;
         let z = u[1] * (self.z_max - self.z_min) + self.z_min;
         let x = self.radius * theta.cos();

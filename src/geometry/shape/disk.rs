@@ -84,7 +84,7 @@ impl SampleableShape for Disk {
         PI * self.radius * self.radius
     }
 
-    fn sample(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
+    fn uniform_sample_point(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
         let r = self.radius * u[0].sqrt();
         let theta = u[1] * PI * 2.0;
 

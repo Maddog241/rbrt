@@ -50,7 +50,7 @@ impl Integrator for PathIntegrator {
                     let bsdf = mat.compute_scattering(&isect);
                     // sample lights to estimate the radiance value
                     if !specular {
-                        for light in scene.lights.iter() {
+                        for light in scene.lightlist.lights.iter() {
                             // sample once for each light in the scene
                             let sample: Point2<f64> = Point2::new(random(), random());
                             let (incoming_r, sample_p, pdf) = light.sample_li(&isect, sample);

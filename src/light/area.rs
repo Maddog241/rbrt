@@ -16,7 +16,7 @@ impl AreaLight {
 
 impl Light for AreaLight {
     fn sample_li(&self, isect: &SurfaceInteraction, u: Point2::<f64>) -> (Spectrum, Point3::<f64>, f64) {
-        let (p, n, area_pdf) = self.shape.sample(u);
+        let (p, n, area_pdf) = self.shape.uniform_sample_point(u);
 
         let distance2 = (p - isect.geo.p).magnitude2();
         let we = (isect.geo.p - p).normalize();
@@ -25,6 +25,10 @@ impl Light for AreaLight {
         let pdf = area_pdf * distance2 / cosine;
 
         (self.le(), p, pdf)
+    }
+
+    fn uniform_sample_point(&self, u: Point2<f64>) -> Point3<f64> {
+        self.shape.uniform_sample_point(u).0
     }
 
     fn le(&self) -> Spectrum {

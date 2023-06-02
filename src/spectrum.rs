@@ -28,6 +28,10 @@ impl RGBSpectrum {
         Pixel::new(r, g, b)
     }
 
+    pub fn sum(&self) -> f64 {
+        self.r + self.g + self.b
+    }
+
     pub fn tone_mapping(&self) -> RGBSpectrum {
         RGBSpectrum::new(
             self.r / (self.r + 1.0),
@@ -39,6 +43,7 @@ impl RGBSpectrum {
     pub fn skyblue(t: f64) -> RGBSpectrum {
         (1.0-t) * RGBSpectrum::new(1.0, 1.0, 1.0) + t * RGBSpectrum::new(0.5, 0.7, 1.0)
     }
+
 }
 
 impl Add<RGBSpectrum> for RGBSpectrum {
