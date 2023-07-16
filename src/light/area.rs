@@ -1,7 +1,7 @@
 use cgmath::{Point3, Point2, InnerSpace};
 use crate::{geometry::{interaction::SurfaceInteraction, ray::Ray, shape:: SampleableShape}, spectrum::Spectrum};
 
-use super::Light;
+use super::{Light, LightSample};
 
 pub struct AreaLight {
     shape: Box<dyn SampleableShape>,
@@ -10,7 +10,7 @@ pub struct AreaLight {
 
 impl AreaLight {
     pub fn new(shape: Box<dyn SampleableShape>, emit: Spectrum) -> AreaLight {
-        AreaLight { shape, emit}
+        AreaLight { shape, emit }
     }
 }
 
@@ -22,13 +22,21 @@ impl Light for AreaLight {
         let we = (isect.geo.p - p).normalize();
         let cosine = we.dot(n).abs();
 
+        // converts the pdf w.r.t area to pdf w.r.t. solid angle
         let pdf = area_pdf * distance2 / cosine;
 
         (self.le(), p, pdf)
     }
 
-    fn uniform_sample_point(&self, u: Point2<f64>) -> Point3<f64> {
-        self.shape.uniform_sample_point(u).0
+    fn uniform_sample_point(&self, u: Point2<f64>) -> LightSample {
+        let (p, normal, pdf) = self.shape.uniform_sample_point(u);
+
+        LightSample {
+            position: p,
+            normal,
+            le: self.emit ,
+            pdf,
+        }
     }
 
     fn le(&self) -> Spectrum {

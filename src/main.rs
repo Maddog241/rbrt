@@ -12,11 +12,14 @@ mod texture;
 mod accelerator;
 mod scene;
 
+use camera::perspective::PerspectiveCamera;
 use cgmath::Point2;
 use geometry::transform::Transform;
 use indicatif::{ProgressBar, MultiProgress, ProgressStyle};
 
+use crate::integrator::direct_integrator::DirectIntegrator;
 use crate::integrator::path_integrator::PathIntegrator;
+// use crate::integrator::wrs_direct_integrator::WRSDirectIntegrator;
 use crate::scene::Scene;
 use crate::spectrum::Spectrum;
 use crate::camera::{Camera, CameraSample};
@@ -114,8 +117,8 @@ fn main() {
 
     // render
     let s_render = std::time::Instant::now();
-    let integrator = PathIntegrator::new(camera, args.max_depth, args.n_sample, args.n_thread);
-    render(integrator, scene, &args.filename);
+    let integrator = Box::new(DirectIntegrator::new());
+    render(integrator, camera, scene, &args);
 
     let render_cost = s_render.elapsed().as_millis();
     println!("RENDER COST: {} secs", (render_cost as f64) / 1000.0);
@@ -123,8 +126,13 @@ fn main() {
 
 
 
-fn render(integrator: PathIntegrator, scene: Scene, filename: &Path) {
-    let res = integrator.camera.film.resolution;
+fn render(integrator: Box<dyn Integrator>, camera: PerspectiveCamera, scene: Scene, cmd_args: &Arguments) {
+    let filename = cmd_args.filename;
+    let n_thread = cmd_args.n_thread;
+    let n_sample = cmd_args.n_sample;
+    let camera = Arc::new(camera);
+
+    let res = camera.film.resolution;
     let (width, height) = (res.x, res.y);
 
     let integrator = Arc::new(integrator);
@@ -134,11 +142,12 @@ fn render(integrator: PathIntegrator, scene: Scene, filename: &Path) {
 
     let multi_bar = MultiProgress::new();
 
-    multi_bar.println(format!("{} threads running...", integrator.n_thread)).unwrap();
+    multi_bar.println(format!("{} threads running...", n_thread)).unwrap();
 
-    for tid in 0..integrator.n_thread {
+    for tid in 0..n_thread {
         let int = Arc::clone(&integrator);
         let scene = Arc::clone(&scene);
+        let camera = Arc::clone(&camera);
         // set the progress bar
         let bar = multi_bar.add(ProgressBar::new(height as u64));
         bar.set_message(format!("t{}", tid));
@@ -153,16 +162,16 @@ fn render(integrator: PathIntegrator, scene: Scene, filename: &Path) {
                     // first render the upper left pixel, then go rightwards and downwards
                     let mut radiance = Spectrum::new(0.0, 0.0, 0.0);
                     
-                    for _ in 0..int.n_sample {
+                    for _ in 0..n_sample {
                         let sample = CameraSample::new(Point2::new(j as f64 + random::<f64>(), i as f64 + random::<f64>()), 0.0);
-                        let mut r = int.camera.generate_ray(sample);
+                        let mut r = camera.generate_ray(sample);
 
-                        radiance += int.li(&mut r, &scene).tone_mapping();
+                        radiance += int.li(&mut r, &scene);
                     }
 
-                    radiance /= int.n_sample as f64 * int.n_thread as f64;
+                    radiance /= n_sample as f64 * n_thread as f64;
 
-                    int.camera.film.record(i, j, radiance);
+                    camera.film.record(i, j, radiance.tone_mapping());
                 }
                 bar.inc(1);
             }
@@ -177,5 +186,5 @@ fn render(integrator: PathIntegrator, scene: Scene, filename: &Path) {
         handler.join().unwrap();
     }
 
-    integrator.camera.film.write_to_image(filename);
+    camera.film.write_to_image(filename);
 }

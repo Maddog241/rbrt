@@ -127,16 +127,28 @@ impl Scene {
         let object_to_world = Transform::translate(Vector3::new(5.5, -5.5, 24.0));
         let world_to_object = object_to_world.inverse();
         let sphere = Sphere::new(object_to_world, world_to_object, 4.5);
-        let plastic_material = Plastic::new(0.01, Spectrum::new(0.4, 0.5, 0.1), Spectrum::new(0.4, 0.5, 0.1));
+        let plastic_material = Plastic::new(0.001, Spectrum::new(0.4, 0.5, 0.1), Spectrum::new(0.4, 0.5, 0.1));
         let plastic_ball = GeometricPrimitive::new(Box::new(sphere), Arc::new(plastic_material));
         primitives.push(Box::new(plastic_ball));
 
 
         let object_to_world4 = Transform::translate(Vector3::new(0.0, 9.99, 20.0)) * Transform::rotate_x(90.0);
         let world_to_object4 = object_to_world4.inverse();
-        let disk_light = Disk::new(object_to_world4, world_to_object4, 3.0);
-        let disk_light = AreaLight::new(Box::new(disk_light), Spectrum::new(20.0, 20.0, 20.0));
+        let disk = Disk::new(object_to_world4, world_to_object4, 3.0);
+        let disk_light = AreaLight::new(Box::new(disk), Spectrum::new(1.0, 1.0, 1.0));
         lights.push(Arc::new(disk_light));
+
+        // let object_to_world4 = Transform::translate(Vector3::new(7.5, 8.0, 30.0));
+        // let world_to_object4 = object_to_world4.inverse();
+        // let ball =  Sphere::new(object_to_world4, world_to_object4, 1.0);
+        // let disk_light = AreaLight::new(Box::new(ball), Spectrum::new(1.0, 1.0, 1.0));
+        // lights.push(Arc::new(disk_light));
+
+        // let object_to_world4 = Transform::translate(Vector3::new(-7.5, 8.0, 30.0));
+        // let world_to_object4 = object_to_world4.inverse();
+        // let ball =  Sphere::new(object_to_world4, world_to_object4, 1.0);
+        // let disk_light = AreaLight::new(Box::new(ball), Spectrum::new(1.0, 1.0, 1.0));
+        // lights.push(Arc::new(disk_light));
 
 
         let bvh = BVH::new(primitives);
@@ -559,6 +571,50 @@ impl Scene {
             0.0,
             1.0,
             60.0,
+            Film::new(WIDTH, HEIGHT),
+        );
+
+        (camera, scene)
+    }
+
+    pub fn many_light() -> (PerspectiveCamera, Scene) {
+        let mut primitives: Vec<Box<dyn Primitive>> = Vec::new();
+        let mut lights: Vec<Arc<dyn Light>> = Vec::new();
+
+        for i in 0..7 {
+            let object_to_world = Transform::translate(Vector3::new(-15.0 + i as f64 * 5.0, -6.0, 20.0)) * Transform::rotate_x(90.0);
+            let world_to_object = object_to_world.inverse();
+            let disk = Disk::new(object_to_world, world_to_object, 0.5 + i as f64 * 0.5);
+            let metal_material = Plastic::new(0.02, Spectrum::new(0.2, 0.2, 0.3), Spectrum::new(0.2, 0.2, 0.3));
+            let disk_primitive = GeometricPrimitive::new(Box::new(disk), Arc::new(metal_material));
+            primitives.push(Box::new(disk_primitive));
+
+            let object_to_world = Transform::translate(Vector3::new(-15.0 + i as f64 * 5.0, -5.0, 20.0)) * Transform::rotate_x(90.0);
+            let world_to_object = object_to_world.inverse();
+            let sphere = Sphere::new(object_to_world, world_to_object, 0.02 + i as f64 * 0.05);
+            let sphere_light = AreaLight::new(Box::new(sphere), Spectrum::new(1.0, 1.0, 1.0));
+            lights.push(Arc::new(sphere_light));
+        }
+
+
+        let bvh = BVH::new(primitives);
+        let scene = Scene::new(LightList::new(lights), Box::new(bvh));
+
+        const WIDTH: usize = 1000;
+        const HEIGHT: usize = 500;
+        const FRAME: f64 = WIDTH as f64 / HEIGHT as f64;
+
+        let pos = Vector3::new(0.0, 0.0, 0.0);
+        let look = Vector3::new(0.0, 0.0, 1.0);
+        let up = Vector3::new(0.0, 1.0, 0.0);
+        let camera_to_world = Transform::look_at(pos, look, up).inverse();
+
+        let camera = PerspectiveCamera::new(
+            camera_to_world,
+            (Point2::new(-FRAME, -1.0), Point2::new(FRAME, 1.0)),
+            0.0,
+            1.0,
+            45.0,
             Film::new(WIDTH, HEIGHT),
         );
 

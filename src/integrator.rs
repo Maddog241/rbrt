@@ -1,11 +1,12 @@
 pub mod path_integrator;
-// pub mod direct_integrator;
+// pub mod wrs_direct_integrator;
+pub mod direct_integrator;
 
 use cgmath::{InnerSpace, Point3};
 
 use crate::{geometry::{ray::Ray, interaction::SurfaceInteraction}, spectrum::Spectrum, scene::Scene};
 
-pub trait Integrator {
+pub trait Integrator: Sync + Send {
     fn li(&self, ray: &mut Ray, scene: &Scene) -> Spectrum;
 }
 

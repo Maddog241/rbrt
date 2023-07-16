@@ -34,9 +34,9 @@ impl RGBSpectrum {
 
     pub fn tone_mapping(&self) -> RGBSpectrum {
         RGBSpectrum::new(
-            self.r / (self.r + 1.0),
-            self.g / (self.g + 1.0),
-            self.b / (self.b + 1.0),
+            self.r ,
+            self.g ,
+            self.b ,
         )
     }
 

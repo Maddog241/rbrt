@@ -4,19 +4,16 @@ use std::f64::INFINITY;
 use cgmath::{Point2, InnerSpace};
 use rand::random;
 
-use crate::{camera::perspective::PerspectiveCamera, spectrum::Spectrum, geometry::ray::Ray, scene::Scene};
+use crate::{spectrum::Spectrum, geometry::ray::Ray, scene::Scene};
 use super::{Integrator, visibility_test};
 
 pub struct PathIntegrator {
     pub max_depth: usize,
-    pub camera: PerspectiveCamera,
-    pub n_sample: usize,
-    pub n_thread: usize,
 }
 
 impl PathIntegrator {
-    pub fn new(camera: PerspectiveCamera, max_depth: usize, n_sample: usize, n_thread: usize) -> Self {
-        PathIntegrator { max_depth, camera, n_sample, n_thread}
+    pub fn new(max_depth: usize) -> Self {
+        PathIntegrator { max_depth }
     }
 }
 
@@ -50,28 +47,26 @@ impl Integrator for PathIntegrator {
                     let bsdf = mat.compute_scattering(&isect);
                     // sample lights to estimate the radiance value
                     if !specular {
-                        for light in scene.lightlist.lights.iter() {
-                            // sample once for each light in the scene
-                            let sample: Point2<f64> = Point2::new(random(), random());
-                            let (incoming_r, sample_p, pdf) = light.sample_li(&isect, sample);
-                            // visibility testing for wi
-                            if pdf > 0.0 && !incoming_r.is_black() && visibility_test(&isect, sample_p, scene) {
-                                let wi = (sample_p - isect.geo.p).normalize();
-                                let f_value = bsdf.f(-ray.d.normalize(), wi);
-                                let cosine = wi.dot(isect.geo.n).abs();
-                                
-                                radiance += incoming_r * throughput * f_value * cosine / pdf; 
-                            } 
-                        }
+                        let light = scene.lightlist.importance_sample_light(Point2::new(random(), random())).0;
+                        // sample once for each light in the scene
+                        let (incoming_r, sample_p, pdf) = light.sample_li(&isect, Point2::new(random(), random()));
+                        // visibility testing for wi
+                        if pdf > 0.0 && !incoming_r.is_black() && visibility_test(&isect, sample_p, scene) {
+                            let wi = (sample_p - isect.geo.p).normalize();
+                            let brdf_value = bsdf.f(-ray.d.normalize(), wi);
+                            let cosine = wi.dot(isect.geo.n).abs();
+                            
+                            radiance += incoming_r * throughput * brdf_value * cosine / pdf; 
+                        } 
                     }
 
                     // sample the bsdf to get the scattered ray
                     let sample: Point2<f64> = Point2::new(random(), random());
-                    let (f_value, wi, pdf) = bsdf.sample_f(-ray.d.normalize(), sample);
+                    let (brdf_value, wi, pdf) = bsdf.sample_f(-ray.d.normalize(), sample);
 
                     // update the throughput for next iteration, spawn the new ray
                     let cosine = wi.dot(isect.geo.n).abs();
-                    throughput *= f_value * cosine / pdf;
+                    throughput *= brdf_value * cosine / pdf;
                     *ray = Ray::new(isect.geo.p, wi, ray.time, INFINITY);
                 } else {
                     // hit the medium

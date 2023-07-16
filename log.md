@@ -17,4 +17,9 @@ Target: implement RIS-WRS sampler in this renderer
   
     So maybe I need to write a .pbrt parser.
 
-    
+
+## 23.7.16
+
+- continue the previous task
+- take the camera out of the integrator struct. The integrator should be isolated from the camera.
+- when the light does not hit any object in the scene, it should return a background color, which should also be placed in the scene struct.
