@@ -4,20 +4,21 @@ use cgmath::Point2;
 
 use std::fs::File;
 use std::io::BufWriter;
-use std::path::Path;
 use std::sync::Mutex;
 
 use image::RgbImage;
 
 pub struct Film {
+    pub filename: String,
     pub resolution: Point2<usize>,
     pub radiance_map: Mutex<Vec<Spectrum>>,
 }
 
 impl Film {
-    pub fn new(width: usize, height: usize) -> Self {
+    pub fn new(path: &str, width: usize, height: usize) -> Self {
         let radiance_map = vec![Spectrum::new(0.0, 0.0, 0.0); width * height];
         Film {
+            filename: String::from(path),
             resolution: Point2::new(width, height),
             radiance_map: Mutex::new(radiance_map),
         }
@@ -28,9 +29,9 @@ impl Film {
         radiance_map[i * self.resolution.x + j] += radiance;
     }
 
-    pub fn write_to_image(&self, filename: &Path) {
+    pub fn write_to_image(&self) {
         let mut image = RgbImage::new(self.resolution.x as u32, self.resolution.y as u32);
-        let file = File::create(filename).unwrap();
+        let file = File::create(&self.filename).unwrap();
         let mut writer = BufWriter::new(file);
         
         let radiance_map = self.radiance_map.lock().unwrap();

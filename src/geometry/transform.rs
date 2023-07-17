@@ -102,7 +102,8 @@ impl Transform {
         }
     }
 
-    pub fn scale(x: f64, y: f64, z: f64) -> Transform {
+    pub fn scale(factor: Vector3<f64>) -> Transform {
+        let (x, y, z) = (factor.x, factor.y, factor.z);
         Transform {
             m: Matrix4::new(
                 x, 0.0, 0.0, 0.0,
@@ -224,7 +225,7 @@ impl Transform {
     }
 
     pub fn orthographic(n: f64, f: f64) -> Transform {
-        Transform::scale(1.0, 1.0, 1.0 / (f - n)) * Transform::translate(Vector3::new(0.0, 0.0, -n))
+        Transform::scale(Vector3::new(1.0, 1.0, 1.0 / (f - n))) * Transform::translate(Vector3::new(0.0, 0.0, -n))
     }
 
     pub fn perspective(fov: f64, n: f64, f: f64) -> Transform {
@@ -237,7 +238,7 @@ impl Transform {
 
         let fov = fov.to_radians();
         let inv_tan = 1.0 / (fov / 2.0).tan();
-        Transform::scale(inv_tan, inv_tan, 1.0) * Transform::new(persp, persp.invert().unwrap())
+        Transform::scale(Vector3::new(inv_tan, inv_tan, 1.0)) * Transform::new(persp, persp.invert().unwrap())
     }
 }
 

@@ -4,7 +4,7 @@ use std::{sync::Arc, collections::HashMap};
 
 use tobj;
 
-use super::Shape;
+use crate::geometry::shape::Shape;
 
 pub struct TriangleMesh {
     pub positions: Vec<Point3<f64>>,
@@ -263,5 +263,13 @@ impl Shape for Triangle {
 
     fn object_bound(&self) -> Bound3 {
         Bound3::new(self.mesh.positions[self.a], self.mesh.positions[self.b]).union_point3(self.mesh.positions[self.c])
+    }
+
+    fn area(&self) -> f64 {
+        unimplemented!()
+    }
+
+    fn uniform_sample_point(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
+        unimplemented!()
     }
 }

@@ -27,12 +27,12 @@ impl PerspectiveCamera {
     ) -> Self {
         // first compute screen to raster
         let res = film.resolution;
-        let screen_to_raster = Transform::scale(res.x as f64, res.y as f64, 1.0)
-            * Transform::scale(
+        let screen_to_raster = Transform::scale(Vector3::new(res.x as f64, res.y as f64, 1.0))
+            * Transform::scale(Vector3::new(
                 1.0 / (screen_window.1.x - screen_window.0.x),
                 -1.0 / (screen_window.1.y - screen_window.0.y),
                 1.0,
-            )
+            ))
             * Transform::translate(Vector3::new(-screen_window.0.x, -screen_window.1.y, 0.0));
 
         let camera_to_screen = Transform::perspective(fov, 1.0, 1e6); // the near and far plane are set arbitrarily

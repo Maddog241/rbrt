@@ -4,7 +4,7 @@ use cgmath::{Point2, Vector3, Point3, InnerSpace, EuclideanSpace};
 
 use crate::geometry::{transform::Transform, bound3::Bound3, ray::{Ray, Beam}, interaction::GeometryInfo};
 
-use super::{Shape, SampleableShape};
+use super::Shape;
 
 
 pub struct Disk {
@@ -76,10 +76,6 @@ impl Shape for Disk {
         Some(t)
     }
 
-    
-}
-
-impl SampleableShape for Disk {
     fn area(&self) -> f64 {
         PI * self.radius * self.radius
     }

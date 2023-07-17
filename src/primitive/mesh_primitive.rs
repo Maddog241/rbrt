@@ -1,6 +1,7 @@
-use crate::{geometry::{shape::mesh::{TriangleMesh, Triangle}, transform::Transform}, material::Material, accelerator::bvh::BVH};
 
 use std::sync::Arc;
+
+use crate::{mesh::{TriangleMesh, Triangle}, accelerator::bvh::BVH, material::Material, geometry::transform::Transform};
 
 use super::{geometric_primitive::GeometricPrimitive, Primitive};
 
