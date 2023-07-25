@@ -38,7 +38,7 @@ use std::thread;
 pub struct WorldSetting {
     pub n_thread: usize, 
     pub n_sample: usize,
-    pub integrator: Box<dyn Integrator>,
+    pub integrator: Arc<Box<dyn Integrator>>,
 }
 
 impl WorldSetting {
@@ -46,7 +46,7 @@ impl WorldSetting {
         Self {
             n_thread: 1, 
             n_sample: 1,
-            integrator: Box::new(DirectIntegrator::new()),
+            integrator: Arc::new(Box::new(DirectIntegrator::new())),
         }
     }
 }
@@ -62,8 +62,7 @@ fn main() {
 
     // render
     let s_render = std::time::Instant::now();
-    let integrator = Box::new(PathIntegrator::new(20));
-    render(integrator, camera, scene, &setting);
+    render(setting.integrator.clone(), camera, scene, &setting);
 
     let render_cost = s_render.elapsed().as_millis();
     println!("RENDER COST: {} secs", (render_cost as f64) / 1000.0);
@@ -71,15 +70,14 @@ fn main() {
 
 
 
-fn render(integrator: Box<dyn Integrator>, camera: PerspectiveCamera, scene: Scene, setting: &WorldSetting) {
+fn render(integrator: Arc<Box<dyn Integrator>>, camera: PerspectiveCamera, scene: Scene, setting: &WorldSetting) {
     let n_thread = setting.n_thread;
-    let n_sample = setting.n_sample;
+    // let n_sample = setting.n_sample;
     let camera = Arc::new(camera);
 
     let res = camera.film.resolution;
     let (width, height) = (res.x, res.y);
 
-    let integrator = Arc::new(integrator);
     let scene = Arc::new(scene);
 
     let mut handlers = Vec::new();
@@ -104,16 +102,11 @@ fn render(integrator: Box<dyn Integrator>, camera: PerspectiveCamera, scene: Sce
             for i in 0..height {
                 for j in 0..width {
                     // first render the upper left pixel, then go rightwards and downwards
-                    let mut radiance = Spectrum::new(0.0, 0.0, 0.0);
                     
-                    for _ in 0..n_sample {
-                        let sample = CameraSample::new(Point2::new(j as f64 + random::<f64>(), i as f64 + random::<f64>()), 0.0);
-                        let mut r = camera.generate_ray(sample);
+                    let sample = CameraSample::new(Point2::new(j as f64, i as f64), 0.0);
+                    let mut r = camera.generate_ray(sample);
 
-                        radiance += int.li(&mut r, &scene);
-                    }
-
-                    radiance /= n_sample as f64 * n_thread as f64;
+                    let radiance = int.li(&mut r, &scene);
 
                     camera.film.record(i, j, radiance.tone_mapping());
                 }

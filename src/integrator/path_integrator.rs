@@ -22,51 +22,44 @@ impl Integrator for PathIntegrator {
         let mut throughput = Spectrum::new(1.0, 1.0, 1.0);
         let mut radiance = Spectrum::new(0.0, 0.0, 0.0);
         let mut specular = false;
+        let mut count = 0;
 
         for depth in 0..self.max_depth {
             if let Some(isect) = scene.intersect(ray) {
-                // first checks if it has directly hit the light
-                if depth == 0 && isect.hit_light {
-                    radiance += isect.radiance.unwrap();
-                    break;
-                }
-
-                // hit the light
-                if specular && isect.hit_light {
-                    radiance += throughput * isect.radiance.unwrap();
-                    break;
-                }
-
+                // hit the light after shot from the camera or leaving a specular vertex
                 if isect.hit_light {
+                    if depth == 0 || specular {
+                        radiance += throughput * isect.radiance.unwrap();
+                    }
                     break;
                 }
 
-                // then check if it has hit a medium
                 if let Some(mat) = &isect.material {
+                    // check if it's specular vertex
                     specular = mat.is_specular();
                     let bsdf = mat.compute_scattering(&isect);
                     // sample lights to estimate the radiance value
                     if !specular {
                         let light = scene.lightlist.importance_sample_light(Point2::new(random(), random())).0;
-                        // sample once for each light in the scene
-                        let (incoming_r, sample_p, pdf) = light.sample_li(&isect, Point2::new(random(), random()));
+                        let (li, sample_p, pdf) = light.sample_li(&isect, Point2::new(random(), random()));
                         // visibility testing for wi
-                        if pdf > 0.0 && !incoming_r.is_black() && visibility_test(&isect, sample_p, scene) {
+                        if pdf > 0.0 && !li.is_black() && visibility_test(&isect, sample_p, scene) {
                             let wi = (sample_p - isect.geo.p).normalize();
-                            let brdf_value = bsdf.f(-ray.d.normalize(), wi);
+                            let rho = bsdf.f(-ray.d.normalize(), wi);
                             let cosine = wi.dot(isect.geo.n).abs();
                             
-                            radiance += incoming_r * throughput * brdf_value * cosine / pdf; 
+                            radiance += li * throughput * rho * cosine / pdf; 
+                            count += 1;
                         } 
                     }
 
                     // sample the bsdf to get the scattered ray
                     let sample: Point2<f64> = Point2::new(random(), random());
-                    let (brdf_value, wi, pdf) = bsdf.sample_f(-ray.d.normalize(), sample);
+                    let (rho, wi, pdf) = bsdf.sample_f(-ray.d.normalize(), sample);
 
                     // update the throughput for next iteration, spawn the new ray
                     let cosine = wi.dot(isect.geo.n).abs();
-                    throughput *= brdf_value * cosine / pdf;
+                    throughput *= rho * cosine / pdf;
                     *ray = Ray::new(isect.geo.p, wi, ray.time, INFINITY);
                 } else {
                     // hit the medium
@@ -75,13 +68,13 @@ impl Integrator for PathIntegrator {
                 
             } else {
                 // does not hit the scene
-
                 radiance += Spectrum::skyblue(ray.d.y) * throughput;
+                count += 1;
                 break;
             }
         }
 
-        radiance
+        radiance / count as f64
     }
 
 }

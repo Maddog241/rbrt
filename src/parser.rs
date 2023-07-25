@@ -479,8 +479,8 @@ fn parse_setting(sampler: JsonValue, integrator: JsonValue) -> WorldSetting {
     match integrator_tp {
         JsonValue::Short(tp) => {
             match tp.as_str() {
-                "path" => setting.integrator = Box::new(PathIntegrator::new(20)),
-                "direct" => setting.integrator = Box::new(DirectIntegrator::new()),
+                "path" => setting.integrator = Arc::new(Box::new(PathIntegrator::new(20))),
+                "direct" => setting.integrator = Arc::new(Box::new(DirectIntegrator::new())),
                 // "wrsdirect" => setting.integrator = Box::new,
                 _ => {
                     let msg = format!("no type {} for integrator", tp);

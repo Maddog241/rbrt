@@ -19,7 +19,7 @@
     },
 
     "integrator" : {
-        "type" : "path"
+        "type" : "direct"
     },
     
 
