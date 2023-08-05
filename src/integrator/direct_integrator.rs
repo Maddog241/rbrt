@@ -1,60 +1,81 @@
-
-use cgmath::Point2;
-use rand::random;
-
 use crate::spectrum::Spectrum;
 
 use super::*;
 
 pub struct DirectIntegrator {
+    max_depth: usize
 }
 
 impl DirectIntegrator {
-    pub fn new() -> Self {
+    pub fn new(depth: usize) -> Self {
         DirectIntegrator {
+            max_depth: depth
         }
     }
 }
 
 impl Integrator for DirectIntegrator {
-    fn li(&self, ray: &mut crate::geometry::ray::Ray, scene: &Scene) -> crate::spectrum::Spectrum {
-        match scene.intersect(ray) {
-            Some(isect) => {
-                if isect.hit_light {
-                    isect.radiance.unwrap()
-                } else {
-                    match &isect.material {
-                        Some(mat) => {
-                            let u = Point2::new(random::<f64>(), random::<f64>());
-                            let (light, light_pdf) = scene.lightlist.importance_sample_light(u);
-                            let p_light = light.uniform_sample_point(u);
-                            let light_pdf = light_pdf * p_light.pdf;
+    fn li(&self, ray: &mut crate::geometry::ray::Ray, scene: &Scene, sampler: &Arc<dyn Sampler>) -> crate::spectrum::Spectrum {
+        let mut lo = Spectrum::new(0.0, 0.0, 0.0);
+        let mut throughput = Spectrum::new(1.0, 1.0, 1.0);
+        let mut specular = false;
 
-                            let wi = (p_light.position - isect.geo.p).normalize();
-                            let wo = -ray.d.normalize();
-                            let cos_theta = isect.geo.n.dot(wi);
-                            let cos_alpha = wi.dot(p_light.normal).abs();
-                            let r2 = (p_light.position - isect.geo.p).magnitude2();
-                            let bsdf = mat.compute_scattering(&isect);
+        for depth in 0..self.max_depth {
+            match scene.intersect(ray) {
+                Some(isect) => {
+                    if isect.hit_light {
+                        if depth == 0 || specular {
+                            lo += isect.radiance.unwrap()
+                        } 
+                        break;
+                    } else {
+                        match &isect.material {
+                            Some(mat) => {
+                                if !mat.is_specular() {
+                                    let u = sampler.get_2d();
+                                    let (light, light_pdf) = scene.lightlist.importance_sample_light(u);
+                                    let p_light = light.uniform_sample_point(u);
+                                    let light_pdf = light_pdf * p_light.pdf;
 
-                            let mut lo = Spectrum::new(0.0, 0.0, 0.0);
-                            if light_pdf > 0.0 && !p_light.le.is_black() && visibility_test(&isect, p_light.position, scene) {
-                                lo = bsdf.f(wo, wi) * p_light.le * cos_theta * cos_alpha / (light_pdf * r2);
+                                    let wi = (p_light.position - isect.geo.p).normalize();
+                                    let wo = -ray.d.normalize();
+                                    let cos_theta = isect.geo.n.dot(wi);
+                                    let cos_alpha = wi.dot(p_light.normal).abs();
+                                    let r2 = (p_light.position - isect.geo.p).magnitude2();
+                                    let bsdf = mat.compute_scattering(&isect);
+
+                                    if light_pdf > 0.0 && !p_light.le.is_black() && visibility_test(&isect, p_light.position, scene) {
+                                        lo = throughput * bsdf.f(wo, wi) * p_light.le * cos_theta * cos_alpha / (light_pdf * r2);
+                                    }
+
+                                    break;
+                                } else {
+                                    specular = true;
+
+                                    // sample the specular bsdf
+                                    let bsdf = mat.compute_scattering(&isect);
+                                    let wo = -ray.d.normalize();
+                                    let (f, wi, pdf) = bsdf.sample_f(wo, sampler.get_2d());
+                                    throughput *= f / pdf;
+
+                                    // spawn the new ray
+                                    *ray = Ray::new(isect.geo.p, wi, ray.time, f64::INFINITY);
+                                }
+                                
                             }
-
-                            lo
-                        }
-                        None => {
-                            panic!();
+                            None => {
+                                panic!();
+                            }
                         }
                     }
+                },
+                None => {
+                    // returns the background color
+                    // Spectrum::skyblue(ray.d.y)
                 }
-            },
-            None => {
-                // returns the background color
-                // Spectrum::skyblue(ray.d.y)
-                Spectrum::new(0.0, 0.0, 0.0)
             }
         }
+
+        lo
     }
 }

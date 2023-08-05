@@ -19,6 +19,7 @@ use cgmath::Point2;
 use geometry::transform::Transform;
 use indicatif::{ProgressBar, MultiProgress, ProgressStyle};
 use integrator::direct_integrator::DirectIntegrator;
+use sampler::Sampler;
 
 // use crate::integrator::direct_integrator::DirectIntegrator;
 use crate::integrator::path_integrator::PathIntegrator;
@@ -33,29 +34,40 @@ use rand::random;
 
 use std::sync::Arc;
 use std::thread;
-
+use std::env;
 
 pub struct WorldSetting {
-    pub n_thread: usize, 
     pub n_sample: usize,
+    pub n_thread: usize, 
     pub integrator: Arc<Box<dyn Integrator>>,
+    pub sampler: Arc<dyn Sampler>,
 }
 
 impl WorldSetting {
-    pub fn new() -> WorldSetting {
+    pub fn new(n_sample: usize, n_thread: usize, integrator: Arc<Box<dyn Integrator>>, sampler: Arc<dyn Sampler>) -> WorldSetting {
         Self {
-            n_thread: 1, 
-            n_sample: 1,
-            integrator: Arc::new(Box::new(DirectIntegrator::new())),
+            n_sample,
+            n_thread,
+            integrator,
+            sampler
         }
     }
 }
 
 fn main() {
+    // parse scene filename
+    let args: Vec<String> = env::args().collect();
+    let scene_filename = if args.len() != 2 {
+        eprintln!("Usage: rbrt.exe [scene_filename]");
+        return ;
+    } else {
+        args[1].clone()
+    };
+
     // scene configuration
     let s_configure = std::time::Instant::now();
 
-    let (setting, camera, scene) = parse_scene("./example_scene.json");
+    let (setting, camera, scene) = parse_scene(&scene_filename);
 
     let configure_cost = s_configure.elapsed().as_millis();
     println!("CONFIGURATION COST: {} secs", (configure_cost as f64) / 1000.0);
@@ -72,6 +84,7 @@ fn main() {
 
 fn render(integrator: Arc<Box<dyn Integrator>>, camera: PerspectiveCamera, scene: Scene, setting: &WorldSetting) {
     let n_thread = setting.n_thread;
+    let n_sample = setting.n_sample;
     // let n_sample = setting.n_sample;
     let camera = Arc::new(camera);
 
@@ -90,6 +103,7 @@ fn render(integrator: Arc<Box<dyn Integrator>>, camera: PerspectiveCamera, scene
         let int = Arc::clone(&integrator);
         let scene = Arc::clone(&scene);
         let camera = Arc::clone(&camera);
+        let sampler = Arc::clone(&setting.sampler);
         // set the progress bar
         let bar = multi_bar.add(ProgressBar::new(height as u64));
         bar.set_message(format!("t{}", tid));
@@ -102,12 +116,17 @@ fn render(integrator: Arc<Box<dyn Integrator>>, camera: PerspectiveCamera, scene
             for i in 0..height {
                 for j in 0..width {
                     // first render the upper left pixel, then go rightwards and downwards
-                    
-                    let sample = CameraSample::new(Point2::new(j as f64, i as f64), 0.0);
-                    let mut r = camera.generate_ray(sample);
+                    let mut radiance = Spectrum::new(0.0, 0.0, 0.0);
 
-                    let radiance = int.li(&mut r, &scene);
+                    for _count in 0..n_sample {
+                        let sample = CameraSample::new(Point2::new(j as f64 + random::<f64>(), i as f64 + random::<f64>()), 0.0);
+                        
+                        let mut r = camera.generate_ray(sample);
 
+                        radiance += int.li(&mut r, &scene, &sampler);
+                    }
+
+                    radiance /= n_sample as f64;
                     camera.film.record(i, j, radiance.tone_mapping());
                 }
                 bar.inc(1);

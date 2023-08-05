@@ -23,3 +23,10 @@ Target: implement RIS-WRS sampler in this renderer
 - continue the previous task
 - take the camera out of the integrator struct. The integrator should be isolated from the camera.
 - when the light does not hit any object in the scene, it should return a background color, which should also be placed in the scene struct.
+
+
+## 23.7.23
+
+- complete the direct integrator: support specular transmission and reflection 
+- fix path integrator: the sampling seems to be wrong
+- enable nee + mis in path integrator 

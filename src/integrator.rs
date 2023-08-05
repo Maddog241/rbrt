@@ -2,12 +2,14 @@ pub mod path_integrator;
 // pub mod wrs_direct_integrator;
 pub mod direct_integrator;
 
+use std::sync::Arc;
+
 use cgmath::{InnerSpace, Point3};
 
-use crate::{geometry::{ray::Ray, interaction::SurfaceInteraction}, spectrum::Spectrum, scene::Scene};
+use crate::{geometry::{ray::Ray, interaction::SurfaceInteraction}, spectrum::Spectrum, scene::Scene, sampler::Sampler};
 
 pub trait Integrator: Sync + Send {
-    fn li(&self, ray: &mut Ray, scene: &Scene) -> Spectrum;
+    fn li(&self, ray: &mut Ray, scene: &Scene, Sampler: &Arc<dyn Sampler>) -> Spectrum;
 }
 
 fn visibility_test(isect: &SurfaceInteraction, sample_p: Point3<f64>, scene: &Scene) -> bool {

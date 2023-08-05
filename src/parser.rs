@@ -3,7 +3,7 @@ use std::{fs, sync::Arc};
 use cgmath::{Vector3, Vector4, Point2, InnerSpace};
 use json::JsonValue;
 
-use crate::{scene::Scene, camera::{perspective::PerspectiveCamera, film::Film}, geometry::{transform::Transform, shape::{Shape, disk::Disk, sphere::Sphere}}, WorldSetting, integrator::{path_integrator::PathIntegrator, direct_integrator::DirectIntegrator}, light::{LightList, Light, area::AreaLight}, accelerator::bvh::BVH, primitive::{geometric_primitive::GeometricPrimitive, Primitive}, material::{Material, matte::Matte, plastic::Plastic, glass::Glass}, spectrum::Spectrum, texture::constant::ConstantTexture, mesh::TriangleMesh};
+use crate::{scene::Scene, camera::{perspective::PerspectiveCamera, film::Film}, geometry::{transform::Transform, shape::{Shape, disk::Disk, sphere::Sphere}}, WorldSetting, integrator::{path_integrator::PathIntegrator, direct_integrator::DirectIntegrator, Integrator}, light::{LightList, Light, area::AreaLight}, accelerator::bvh::BVH, primitive::{geometric_primitive::GeometricPrimitive, Primitive}, material::{Material, matte::Matte, plastic::Plastic, glass::Glass}, spectrum::Spectrum, texture::constant::ConstantTexture, mesh::TriangleMesh, sampler::uniform_sampler::UniformSampler};
 
 macro_rules! report_parsing_error {
     ($s:expr) => {
@@ -26,6 +26,13 @@ fn get_object_property(value: JsonValue, property: &str) -> JsonValue {
     }
 }
 
+fn parse_number(number: JsonValue, debug_info: &str) -> f64 {
+    match number {
+        JsonValue::Number(num) => num.into(),
+        _ => report_parsing_error!(debug_info),
+    }
+}
+
 fn parse_vec3(scale: &Vec<JsonValue>, name: &str) -> Vector3<f64> {
     if scale.len() != 3 {
         let msg = format!("the size vector {} should be 3", name);
@@ -40,7 +47,7 @@ fn parse_vec3(scale: &Vec<JsonValue>, name: &str) -> Vector3<f64> {
     }
 }
 
-fn parse_vec4(scale: &Vec<JsonValue>, name: &str) -> Vector4<f64> {
+fn parse_rotate(scale: &Vec<JsonValue>, name: &str) -> Vector4<f64> {
     if scale.len() != 4 {
         let msg = format!("the size vector {} should be 3", name);
         report_parsing_error!(msg.as_str());
@@ -48,7 +55,13 @@ fn parse_vec4(scale: &Vec<JsonValue>, name: &str) -> Vector4<f64> {
 
     match scale[0..4] {
         [JsonValue::Number(x), JsonValue::Number(y), JsonValue::Number(z), JsonValue::Number(w)] => {
-            Vector4::new(x.into(), y.into(), z.into(), w.into())
+            let v = Vector4::new(x.into(), y.into(), z.into(), w.into());
+            if v.truncate().magnitude2() == 0.0 {
+                eprintln!("warning: the rotate axis should not be (0, 0, 0), using (1, 0, 0) instead");
+                Vector4::new(1.0, 0.0, 0.0, 0.0)
+            } else {
+                v
+            }
         }
         _ => panic!("SCENE PARSING ERROR: vector {}'s elements are not of type 'Number'", name)
     }
@@ -86,7 +99,7 @@ fn parse_disk(shape: JsonValue) -> Box<dyn Shape> {
         // rotate
         let rotate = match shape.get("rotate") {
             Some(JsonValue::Array(rotate)) => {
-                parse_vec4(rotate, "rotate")
+                parse_rotate(rotate, "rotate")
             },
             _ => panic!(),
         };
@@ -129,7 +142,7 @@ fn parse_sphere(shape: JsonValue) -> Box<dyn Shape> {
         // rotate
         let rotate = match shape.get("rotate") {
             Some(JsonValue::Array(rotate)) => {
-                parse_vec4(rotate, "rotate")
+                parse_rotate(rotate, "rotate")
             },
             _ => panic!(),
         };
@@ -432,10 +445,7 @@ fn parse_perspective(camera: JsonValue) -> PerspectiveCamera {
     let film = Film::new(&filename, width as usize, height as usize);
 
     // fov
-    let fov = match fov {
-        JsonValue::Number(fov) => fov.into(),
-        _ => report_parsing_error!("fov should be a number"),
-    };
+    let fov = parse_number(fov, "fov should be a number");
 
     let frame: f64 = width / height;
 
@@ -449,23 +459,24 @@ fn parse_perspective(camera: JsonValue) -> PerspectiveCamera {
     )
 }
 
-fn parse_setting(sampler: JsonValue, integrator: JsonValue) -> WorldSetting {
-    let mut setting = WorldSetting::new();
+fn parse_setting(setting: JsonValue) -> WorldSetting {
+    let spp = get_object_property(setting.clone(), "spp");
+    let n_thread = get_object_property(setting.clone(), "n_thread");
+    let sampler = get_object_property(setting.clone(), "sampler");
+    let integrator = get_object_property(setting, "integrator");
 
-    let sampler_tp = get_object_property(sampler.clone(), "type");
-    let integrator_tp = get_object_property(integrator, "type");
 
-    match sampler_tp {
+    let spp = parse_number(spp, "spp should be a number").max(1.0);
+    let n_thread = parse_number(n_thread, "n_thread should be a number").max(1.0) as usize;
+    let n_sample = (spp / n_thread as f64 + 1.0) as usize;
+
+    // sampler
+    let sampler_tp = get_object_property(sampler, "type");
+    let sampler = match sampler_tp {
         JsonValue::Short(tp) => {
             match tp.as_str() {
                 "uniform" => {
-                    let count = get_object_property(sampler, "count");
-                    if let JsonValue::Number(count) = count {
-                        let count: f64 = count.into();
-                        setting.n_sample = count as usize;
-                    } else {
-                        report_parsing_error!("sampler's count property should be a numebr");
-                    }
+                    UniformSampler::new()
                 },
                 _ => {
                     let msg = format!("no type {} for sampler", tp);
@@ -474,13 +485,15 @@ fn parse_setting(sampler: JsonValue, integrator: JsonValue) -> WorldSetting {
             }
         },
         _ => report_parsing_error!("sampler type should be a string"),
-    }
+    };
 
-    match integrator_tp {
+    // integrator
+    let integrator_tp = get_object_property(integrator, "type");
+    let integrator: Arc<Box<dyn Integrator>>= match integrator_tp {
         JsonValue::Short(tp) => {
             match tp.as_str() {
-                "path" => setting.integrator = Arc::new(Box::new(PathIntegrator::new(20))),
-                "direct" => setting.integrator = Arc::new(Box::new(DirectIntegrator::new())),
+                "path" => Arc::new(Box::new(PathIntegrator::new(20))),
+                "direct" => Arc::new(Box::new(DirectIntegrator::new(20))),
                 // "wrsdirect" => setting.integrator = Box::new,
                 _ => {
                     let msg = format!("no type {} for integrator", tp);
@@ -489,9 +502,14 @@ fn parse_setting(sampler: JsonValue, integrator: JsonValue) -> WorldSetting {
             }
         },
         _ => report_parsing_error!("sampler type should be a string"),
-    }
+    };
 
-    setting
+    WorldSetting::new(
+        n_sample,
+        n_thread,
+        integrator,
+        Arc::new(sampler),
+    )
 }
 
 
@@ -502,13 +520,12 @@ pub fn parse_scene(path: &str) -> (WorldSetting, PerspectiveCamera, Scene) {
     match json::parse(&file_soure) {
         Ok(config) => {
             let camera = get_object_property(config.clone(), "camera");
-            let sampler = get_object_property(config.clone(), "sampler");
-            let integrator = get_object_property(config.clone(), "integrator");
+            let setting = get_object_property(config.clone(), "setting");
             let world = get_object_property(config, "world");
 
             // world
             let camera = parse_camera(camera);
-            let setting = parse_setting(sampler, integrator);
+            let setting = parse_setting(setting);
             let scene = parse_world(world);
 
             (setting, camera, scene)

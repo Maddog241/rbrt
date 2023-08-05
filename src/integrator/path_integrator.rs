@@ -1,10 +1,10 @@
 use core::panic;
-use std::f64::INFINITY;
+use std::{f64::INFINITY, sync::Arc};
 
 use cgmath::{Point2, InnerSpace};
 use rand::random;
 
-use crate::{spectrum::Spectrum, geometry::ray::Ray, scene::Scene};
+use crate::{spectrum::Spectrum, geometry::ray::Ray, scene::Scene, sampler::Sampler};
 use super::{Integrator, visibility_test};
 
 pub struct PathIntegrator {
@@ -18,7 +18,7 @@ impl PathIntegrator {
 }
 
 impl Integrator for PathIntegrator {
-    fn li(&self, ray: &mut Ray, scene: &Scene) -> Spectrum {
+    fn li(&self, ray: &mut Ray, scene: &Scene, sampler: &Arc<dyn Sampler>) -> Spectrum {
         let mut throughput = Spectrum::new(1.0, 1.0, 1.0);
         let mut radiance = Spectrum::new(0.0, 0.0, 0.0);
         let mut specular = false;
@@ -40,7 +40,7 @@ impl Integrator for PathIntegrator {
                     let bsdf = mat.compute_scattering(&isect);
                     // sample lights to estimate the radiance value
                     if !specular {
-                        let light = scene.lightlist.importance_sample_light(Point2::new(random(), random())).0;
+                        let light = scene.lightlist.importance_sample_light(sampler.get_2d()).0;
                         let (li, sample_p, pdf) = light.sample_li(&isect, Point2::new(random(), random()));
                         // visibility testing for wi
                         if pdf > 0.0 && !li.is_black() && visibility_test(&isect, sample_p, scene) {
@@ -54,7 +54,7 @@ impl Integrator for PathIntegrator {
                     }
 
                     // sample the bsdf to get the scattered ray
-                    let sample: Point2<f64> = Point2::new(random(), random());
+                    let sample = sampler.get_2d();
                     let (rho, wi, pdf) = bsdf.sample_f(-ray.d.normalize(), sample);
 
                     // update the throughput for next iteration, spawn the new ray
