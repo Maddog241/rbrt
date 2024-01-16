@@ -20,12 +20,15 @@ impl Light for AreaLight {
 
         let distance2 = (p - isect.geo.p).magnitude2();
         let we = (isect.geo.p - p).normalize();
-        let cosine = we.dot(n).abs();
+        let cosine = we.dot(n);
 
         // converts the pdf w.r.t area to pdf w.r.t. solid angle
-        let pdf = area_pdf * distance2 / cosine;
-
-        (self.le(), p, pdf)
+        if cosine > 0.0 {
+            let pdf = area_pdf * distance2 / cosine;
+            (self.le(), p, pdf)
+        } else {
+            (Spectrum::new(0.0, 0.0, 0.0), p, 1.0)
+        }
     }
 
     fn uniform_sample_point(&self, u: Point2<f64>) -> LightSample {

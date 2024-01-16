@@ -71,25 +71,33 @@ pub fn perpendicular(n: Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
     // n is a normal vector
     assert!(n.magnitude2() != 0.0);
     let n = n.normalize();
-    let mut w = n;
 
-    w.x = w.x.abs();
-    w.y = w.y.abs();
-    w.z = w.z.abs();
-
-    if w.x <= w.y && w.x <= w.z { w.x = 1.0; }
-    else if w.y <= w.x && w.y <= w.z { w.y = 1.0; }
-    else { w.z = 1.0; }
-
-
-    let v = w.cross(n).normalize();
-    let u = v.cross(n);
-
-    if is_nan(u) || is_nan(v) {
-        panic!("not a num error")
+    if n.x != 1.0 {
+        let v = Vector3::new(0.0, -n.z, n.y).normalize();
+        let u = v.cross(n);
+        (u, v)
+    } else {
+        (Vector3::new(0.0, 1.0, 0.0), Vector3::new(0.0, 0.0, 1.0))
     }
+    // let mut w = n;
 
-    (u, v)
+    // w.x = w.x.abs();
+    // w.y = w.y.abs();
+    // w.z = w.z.abs();
+
+    // if w.x <= w.y && w.x <= w.z { w.x = 1.0; }
+    // else if w.y <= w.x && w.y <= w.z { w.y = 1.0; }
+    // else { w.z = 1.0; }
+
+
+    // let v = w.cross(n).normalize();
+    // let u = v.cross(n);
+
+    // if is_nan(u) || is_nan(v) {
+    //     panic!("not a num error")
+    // }
+
+    // (u, v)
 }
 
 pub fn sphere_tangent(n: Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
@@ -111,6 +119,10 @@ pub fn sphere_tangent(n: Vector3<f64>) -> (Vector3<f64>, Vector3<f64>) {
 #[allow(unused)]
 pub fn check_spectrum(spectrum: &Spectrum) -> bool {
     spectrum.r >= 0.0 && spectrum.g >= 0.0 && spectrum.b >= 0.0
+}
+
+pub fn reflect(wo: Vector3<f64>) -> Vector3<f64> {
+    Vector3::new(-wo.x, -wo.y, wo.z)
 }
 
 // pub fn random_2d() -> Point2<f64> {

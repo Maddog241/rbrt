@@ -21,6 +21,7 @@ impl RGBSpectrum {
     }
 
     pub fn to_pixel(&self) -> Pixel {
+        // gamma correction 2.0
         let r = self.r.sqrt();
         let g = self.g.sqrt();
         let b = self.b.sqrt();
@@ -34,9 +35,9 @@ impl RGBSpectrum {
 
     pub fn tone_mapping(&self) -> RGBSpectrum {
         RGBSpectrum::new(
-            self.r ,
-            self.g ,
-            self.b ,
+            self.r,
+            self.g,
+            self.b,
         )
     }
 

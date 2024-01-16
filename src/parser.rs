@@ -3,7 +3,7 @@ use std::{fs, sync::Arc};
 use cgmath::{Vector3, Vector4, Point2, InnerSpace};
 use json::JsonValue;
 
-use crate::{scene::Scene, camera::{perspective::PerspectiveCamera, film::Film}, geometry::{transform::Transform, shape::{Shape, disk::Disk, sphere::Sphere}}, WorldSetting, integrator::{path_integrator::PathIntegrator, direct_integrator::DirectIntegrator, Integrator}, light::{LightList, Light, area::AreaLight}, accelerator::bvh::BVH, primitive::{geometric_primitive::GeometricPrimitive, Primitive}, material::{Material, matte::Matte, plastic::Plastic, glass::Glass}, spectrum::Spectrum, texture::constant::ConstantTexture, mesh::TriangleMesh, sampler::uniform_sampler::UniformSampler};
+use crate::{scene::Scene, camera::{perspective::PerspectiveCamera, film::Film}, geometry::{transform::Transform, shape::{Shape, disk::Disk, sphere::Sphere}}, WorldSetting, integrator::{path_integrator::PathIntegrator, direct_integrator::DirectIntegrator, Integrator}, light::{LightList, Light, area::AreaLight}, accelerator::bvh::BVH, primitive::{geometric_primitive::GeometricPrimitive, Primitive}, material::{Material, matte::Matte, plastic::Plastic, glass::Glass, mirror::Mirror}, spectrum::Spectrum, texture::constant::ConstantTexture, mesh::TriangleMesh, sampler::uniform_sampler::UniformSampler};
 
 macro_rules! report_parsing_error {
     ($s:expr) => {
@@ -175,7 +175,8 @@ fn parse_material(mat: JsonValue) -> Arc<dyn Material> {
             match tp.as_str() {
                 "matte" => parse_matte(mat.clone()),
                 "plastic" => parse_plastic(mat.clone()),
-                "glass" => parse_glass(mat),
+                "glass" => parse_glass(mat.clone()),
+                "mirror" => parse_mirror(mat),
                 _ => {
                     let msg = format!("no material type named {}", tp);
                     report_parsing_error!(msg.as_str());
@@ -192,6 +193,11 @@ fn parse_matte(mat: JsonValue) -> Arc<dyn Material> {
             Some(JsonValue::Array(kd)) => {
                 parse_vec3(kd, "kd")
             },
+
+            // Some(JsonValue::Object(kd)) => {
+            //     match kd.get("type") {
+            //     }
+            // }
             _ => panic!(),
         };
 
@@ -264,6 +270,21 @@ fn parse_glass(mat: JsonValue) -> Arc<dyn Material> {
         let kt = Spectrum::new(kt.x, kt.y, kt.z);
 
         Arc::new(Glass::new(eta_a, eta_b, kr, kt))
+    } else {
+        panic!()
+    }
+}
+
+fn parse_mirror(mat: JsonValue) -> Arc<dyn Material> {
+    if let JsonValue::Object(mat) = mat {
+        let r = match mat.get("reflectance") {
+            Some(JsonValue::Array(reflectance)) => {
+                parse_vec3(reflectance, "reflectance")
+            },
+            _ => report_parsing_error!("mirror's reflectance property should be of array type"),
+        };
+
+        Arc::new(Mirror::new(Spectrum::new(r.x, r.y, r.z)))
     } else {
         panic!()
     }
@@ -460,15 +481,14 @@ fn parse_perspective(camera: JsonValue) -> PerspectiveCamera {
 }
 
 fn parse_setting(setting: JsonValue) -> WorldSetting {
-    let spp = get_object_property(setting.clone(), "spp");
+    let n_sample = get_object_property(setting.clone(), "n_sample");
     let n_thread = get_object_property(setting.clone(), "n_thread");
     let sampler = get_object_property(setting.clone(), "sampler");
     let integrator = get_object_property(setting, "integrator");
 
 
-    let spp = parse_number(spp, "spp should be a number").max(1.0);
+    let n_sample = parse_number(n_sample, "spp should be a number").max(1.0) as usize;
     let n_thread = parse_number(n_thread, "n_thread should be a number").max(1.0) as usize;
-    let n_sample = (spp / n_thread as f64 + 1.0) as usize;
 
     // sampler
     let sampler_tp = get_object_property(sampler, "type");

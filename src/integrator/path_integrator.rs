@@ -22,7 +22,6 @@ impl Integrator for PathIntegrator {
         let mut throughput = Spectrum::new(1.0, 1.0, 1.0);
         let mut radiance = Spectrum::new(0.0, 0.0, 0.0);
         let mut specular = false;
-        let mut count = 0;
 
         for depth in 0..self.max_depth {
             if let Some(isect) = scene.intersect(ray) {
@@ -41,15 +40,14 @@ impl Integrator for PathIntegrator {
                     // sample lights to estimate the radiance value
                     if !specular {
                         let light = scene.lightlist.importance_sample_light(sampler.get_2d()).0;
-                        let (li, sample_p, pdf) = light.sample_li(&isect, Point2::new(random(), random()));
+                        let (li, sample_p, pdf) = light.sample_li(&isect, sampler.get_2d());
                         // visibility testing for wi
                         if pdf > 0.0 && !li.is_black() && visibility_test(&isect, sample_p, scene) {
                             let wi = (sample_p - isect.geo.p).normalize();
                             let rho = bsdf.f(-ray.d.normalize(), wi);
                             let cosine = wi.dot(isect.geo.n).abs();
-                            
+
                             radiance += li * throughput * rho * cosine / pdf; 
-                            count += 1;
                         } 
                     }
 
@@ -62,19 +60,18 @@ impl Integrator for PathIntegrator {
                     throughput *= rho * cosine / pdf;
                     *ray = Ray::new(isect.geo.p, wi, ray.time, INFINITY);
                 } else {
-                    // hit the medium
+                    // hit the medium, currently not implemented
                     panic!();
                 }
                 
             } else {
                 // does not hit the scene
-                radiance += Spectrum::skyblue(ray.d.y) * throughput;
-                count += 1;
+                // radiance += Spectrum::skyblue(ray.d.y) * throughput;
                 break;
             }
         }
 
-        radiance / count as f64
+        radiance
     }
 
 }

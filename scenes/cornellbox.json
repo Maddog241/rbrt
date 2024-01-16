@@ -1,13 +1,13 @@
 {
     "setting" : {
-        "spp" : 200,
+        "n_sample" : 20,
         "n_thread" : 10,
         "sampler" : {
             "type" : "uniform"
         },
 
         "integrator" : {
-            "type" : "direct"
+            "type" : "path"
         }
     },
 
@@ -34,9 +34,9 @@
                     "radius" : 3.0,
                     "scale" : [1.0, 1.0, 1.0],
                     "rotate" : [1.0, 0.0, 0.0, 90.0],
-                    "translate" : [0.0, 9.99, 20.0]
+                    "translate" : [0.0, 9.5, 20.0]
                 },
-                "emit" : [1.0, 1.0, 1.0]
+                "emit" : [10.0, 10.0, 10.0]
             }
         ],
 
@@ -118,21 +118,7 @@
                     "kd" : [0.8, 0.8, 0.8]
                 }
             },
-            {
-                "type": "geometric",
-                "shape": {
-                    "type" : "sphere",
-                    "radius" : 3.0,
-                    "scale" : [1.0, 1.0, 1.0],
-                    "rotate" : [0.0, 1.0, 0.0, 90.0],
-                    "translate" : [10.0, 0.0, 0.0]
-                },
 
-                "material": {
-                    "type" : "matte",
-                    "kd" : [0.5, 0.1, 0.1]
-                }
-            },
             {
                 "type": "geometric",
                 "shape": {
@@ -145,10 +131,10 @@
 
                 "material": {
                     "type" : "glass",
-                    "eta_a" : 1.0,
-                    "eta_b" : 1.5,
-                    "kr" : [1.0, 1.0, 1.0],
-                    "kt" : [1.0, 1.0, 1.0]
+                    "eta_a": 1.0,
+                    "eta_b": 1.6,
+                    "kr": [1.0, 1.0, 1.0],
+                    "kt": [1.0, 1.0, 1.0]
                 }
             },
             {

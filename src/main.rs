@@ -111,7 +111,7 @@ fn render(integrator: Arc<Box<dyn Integrator>>, camera: PerspectiveCamera, scene
             .unwrap()
             .progress_chars("=>-"));
 
-        // create process
+        // create thread
         let handler = thread::spawn(move || {
             for i in 0..height {
                 for j in 0..width {
@@ -126,7 +126,7 @@ fn render(integrator: Arc<Box<dyn Integrator>>, camera: PerspectiveCamera, scene
                         radiance += int.li(&mut r, &scene, &sampler);
                     }
 
-                    radiance /= n_sample as f64;
+                    radiance /= n_sample as f64 * n_thread as f64;
                     camera.film.record(i, j, radiance.tone_mapping());
                 }
                 bar.inc(1);
