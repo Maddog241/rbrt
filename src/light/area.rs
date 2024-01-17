@@ -55,12 +55,18 @@ impl Light for AreaLight {
             // update r.t_max 
             r.t_max = geo.t;
 
+            let radiance = if r.d.dot(geo.n) < 0.0 {
+                self.le()
+            } else {
+                Spectrum::new(0.0, 0.0, 0.0)
+            };
+
             let isect = SurfaceInteraction {
                 geo,
                 time: r.time,
                 material: None,
                 hit_light: true,
-                radiance: Some(self.le()),
+                radiance: Some(radiance)
             };
 
             Some(isect)

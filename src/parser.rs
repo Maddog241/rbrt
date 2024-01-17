@@ -508,11 +508,26 @@ fn parse_setting(setting: JsonValue) -> WorldSetting {
     };
 
     // integrator
-    let integrator_tp = get_object_property(integrator, "type");
+    let integrator_tp = get_object_property(integrator.clone(), "type");
+    let b_mis = get_object_property(integrator, "b_mis");
+    let b_mis = match b_mis {
+        JsonValue::Short(b_mis) => {
+            match b_mis.as_str() {
+                "true" => true,
+                "false" => false,
+                _ => {
+                    let msg = format!("value of 'b_mis' should be 'true' or 'false'");
+                    report_parsing_error!(msg.as_str());
+                }
+            }
+        }
+        _ => report_parsing_error!("'b_mis' should be a string")
+    };
+
     let integrator: Arc<Box<dyn Integrator>>= match integrator_tp {
         JsonValue::Short(tp) => {
             match tp.as_str() {
-                "path" => Arc::new(Box::new(PathIntegrator::new(20))),
+                "path" => Arc::new(Box::new(PathIntegrator::new(20, b_mis))),
                 "direct" => Arc::new(Box::new(DirectIntegrator::new(20))),
                 // "wrsdirect" => setting.integrator = Box::new,
                 _ => {

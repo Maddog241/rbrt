@@ -50,7 +50,7 @@ impl Shape for Disk {
             return None;
         }
 
-        let n = if r.d.z > 0.0 { Vector3::new(0.0, 0.0, -1.0) } else { Vector3::new(0.0, 0.0, 1.0) };
+        let n = Vector3::new(0.0, 0.0, 1.0);
 
         let geo = GeometryInfo{ p, n, t, wo: -r.d.normalize() };
 
