@@ -1,13 +1,14 @@
 {
     "setting" : {
-        "n_sample" : 10,
+        "n_sample" : 1,
         "n_thread" : 10,
         "sampler" : {
             "type" : "uniform"
         },
 
         "integrator" : {
-            "type" : "direct",
+            "type" : "path",
+            "max_depth": 10,
             "b_mis" : "false"
         }
     },

@@ -569,7 +569,7 @@ fn parse_setting(setting: JsonValue) -> WorldSetting {
 
     // integrator
     let integrator_tp = get_object_property(integrator.clone(), "type");
-    let b_mis = get_object_property(integrator, "b_mis");
+    let b_mis = get_object_property(integrator.clone(), "b_mis");
     let b_mis = match b_mis {
         JsonValue::Short(b_mis) => {
             match b_mis.as_str() {
@@ -584,11 +584,15 @@ fn parse_setting(setting: JsonValue) -> WorldSetting {
         _ => report_parsing_error!("'b_mis' should be a string")
     };
 
+    let json_depth = get_object_property(integrator, "max_depth");
+    let max_depth = parse_number(json_depth, "value of 'max_depth' should be an integer") as usize;
+
+
     let integrator: Arc<Box<dyn Integrator>>= match integrator_tp {
         JsonValue::Short(tp) => {
             match tp.as_str() {
-                "path" => Arc::new(Box::new(PathIntegrator::new(20, b_mis))),
-                "direct" => Arc::new(Box::new(DirectIntegrator::new(20))),
+                "path" => Arc::new(Box::new(PathIntegrator::new(max_depth, b_mis))),
+                "direct" => Arc::new(Box::new(DirectIntegrator::new(max_depth))),
                 // "wrsdirect" => setting.integrator = Box::new,
                 _ => {
                     let msg = format!("no type {} for integrator", tp);

@@ -48,8 +48,8 @@ impl Bsdf{
         bxdf_sample.wi = self.local_to_world(bxdf_sample.wi);
 
         // compute pdf
+        let wo = self.local_to_world(wo);
         if !bxdf_sample.is_delta {
-            let wo = self.local_to_world(wo);
             bxdf_sample.pdf = self.pdf(wo, bxdf_sample.wi);
         }
         // compute brdf value in world space
