@@ -12,6 +12,8 @@ pub trait Light: Sync + Send {
     fn le(&self) -> Spectrum;
     fn intersect_p(&self, r: &Ray) -> Option<f64>;
     fn intersect(&self, r: &mut Ray) -> Option<SurfaceInteraction>;
+    // return the pdf with respect to the solid angle, p is the lit point
+    fn pdf(&self, isect_p: Point3<f64>, isect_n: Vector3<f64>, p: Point3<f64>) -> f64;
 }
 
 pub struct LightList {
@@ -59,8 +61,10 @@ impl LightSample {
         let we = (isect.geo.p - self.position).normalize();
         let cos_alpha = we.dot(self.normal);
 
-        if cos_alpha > 0.0 {
+        if cos_alpha > 0.0 && !self.is_delta {
             self.pdf * distance2 / cos_alpha
+        }  else if self.is_delta{
+            self.pdf * distance2
         } else {
             0.0 // garbage value?
         }

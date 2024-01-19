@@ -44,7 +44,9 @@ impl Scene {
         let mut ret = self.aggregate.intersect(r);
 
         for light in self.lightlist.lights.iter() {
-            if let Some(isect) = light.intersect(r) {
+            if let Some(mut isect) = light.intersect(r) {
+                // record the light that is hit
+                isect.light = Some(light.clone());
                 ret = Some(isect);
             }
         }

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use cgmath::{Point3, Vector3};
-use crate::{material::Material, spectrum::Spectrum};
+use crate::{material::Material, spectrum::Spectrum, light::Light};
 
 
 pub struct GeometryInfo {
@@ -18,4 +18,5 @@ pub struct SurfaceInteraction {
     pub material: Option<Arc<dyn Material>>,
     pub hit_light: bool,
     pub radiance: Option<Spectrum>,
+    pub light: Option<Arc<dyn Light>>,
 }

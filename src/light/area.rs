@@ -1,4 +1,4 @@
-use cgmath::{Point3, Point2, InnerSpace};
+use cgmath::{Point3, Point2, InnerSpace, Vector3};
 use crate::{geometry::{interaction::SurfaceInteraction, ray::Ray, shape::Shape}, spectrum::Spectrum};
 
 use super::{Light, LightSample};
@@ -52,12 +52,22 @@ impl Light for AreaLight {
                 time: r.time,
                 material: None,
                 hit_light: true,
-                radiance: Some(radiance)
+                radiance: Some(radiance),
+                light: None,
             };
 
             Some(isect)
         } else {
             None
         }
+    }
+
+    fn pdf(&self, isect_p: Point3<f64>, isect_n: Vector3<f64>, p: Point3<f64>) -> f64 {
+        let distance2 = (isect_p - p).magnitude2();
+        let we = (isect_p - p).normalize();
+        let cos_alpha = we.dot(isect_n).max(0.0);
+
+        let pdf_area = 1.0 / self.shape.area();
+        pdf_area * distance2 / cos_alpha
     }
 }

@@ -14,14 +14,16 @@
     },
 
     "setting" : {
-        "spp" : 100,
+        "n_sample" : 1,
         "n_thread" : 10,
         "sampler" : {
                 "type" : "uniform",
                 "count" : 20
         },
         "integrator" : {
-            "type" : "direct"
+            "type" : "path",
+            "b_mis" : "true",
+            "max_depth": 10
         }
    },
 
@@ -47,7 +49,7 @@
                     "type" : "disk",
                     "radius" : 50.0,
                     "scale" : [1.0, 1.0, 1.0],
-                    "rotate" : [0.0, 1.0, 0.0, 90.0],
+                    "rotate" : [0.0, 1.0, 0.0, 270.0],
                     "translate" : [10.0, 0.0, 0.0]
                 },
 
@@ -79,7 +81,7 @@
                     "type" : "disk",
                     "radius" : 50.0,
                     "scale" : [1.0, 1.0, 1.0],
-                    "rotate" : [0.0, 1.0, 0.0, 0.0],
+                    "rotate" : [0.0, 1.0, 0.0, 180.0],
                     "translate" : [0.0, 0.0, 30.0]
                 },
 
@@ -109,7 +111,7 @@
                     "type" : "disk",
                     "radius" : 50.0,
                     "scale" : [1.0, 1.0, 1.0],
-                    "rotate" : [1.0, 0.0, 0.0, 90.0],
+                    "rotate" : [1.0, 0.0, 0.0, 270.0],
                     "translate" : [0.0, -10.0, 0.0]
                 },
 

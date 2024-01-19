@@ -8,7 +8,8 @@
 
         "integrator" : {
             "type" : "path",
-            "b_mis" : "true"
+            "b_mis" : "true",
+            "max_depth": 10
         }
     },
 
@@ -29,14 +30,8 @@
     "world" : {
         "lights" : [
             {
-                "type" : "area",
-                "shape" : {
-                    "type" : "sphere",
-                    "radius" : 0.5,
-                    "scale" : [1.0, 1.0, 1.0],
-                    "rotate" : [1.0, 0.0, 0.0, 90.0],
-                    "translate" : [5.0, 7.5, 20.0]
-                },
+                "type" : "point",
+                "point": [0.0, 9.9, 20.0],
                 "emit" : [10.0, 10.0, 10.0]
             }
         ],

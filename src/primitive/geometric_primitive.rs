@@ -26,6 +26,7 @@ impl Primitive for GeometricPrimitive {
                 material: Some(Arc::clone(&self.material)),
                 hit_light: false,
                 radiance: None,
+                light: None,
             };
 
             // let isect point to the primitive

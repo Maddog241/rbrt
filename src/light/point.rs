@@ -43,7 +43,7 @@ impl Light for PointLight {
     }
 
     fn le(&self) -> Spectrum {
-        panic!("This method should not be called");
+        self.le
     }
 
     fn intersect_p(&self, _r: &crate::geometry::ray::Ray) -> Option<f64> {
@@ -52,5 +52,9 @@ impl Light for PointLight {
 
     fn intersect(&self, _r: &mut Ray) -> Option<SurfaceInteraction> {
         None
+    }
+
+    fn pdf(&self, _isect_p: Point3<f64>, _isect_n: Vector3<f64>, _p: Point3<f64>) -> f64 {
+        0.0
     }
 }

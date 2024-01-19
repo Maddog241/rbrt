@@ -1,7 +1,7 @@
 {
     "setting" : {
         "n_sample" : 1,
-        "n_thread" : 10,
+        "n_thread" : 1,
         "sampler" : {
             "type" : "uniform"
         },
@@ -9,7 +9,7 @@
         "integrator" : {
             "type" : "path",
             "max_depth": 10,
-            "b_mis" : "false"
+            "b_mis" : "true"
         }
     },
 
@@ -22,7 +22,7 @@
         ],
         "film" : {
             "resolution" : [500, 500],
-            "filename" : "cornellbox.png"
+            "filename" : "cornellbox-mis.png"
         },
         "fov" : 60.0
     },
