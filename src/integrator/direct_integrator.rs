@@ -55,7 +55,9 @@ impl Integrator for DirectIntegrator {
                                     // sample the specular bsdf
                                     let bsdf = mat.compute_scattering(&isect);
                                     let wo = -ray.d.normalize();
-                                    let (rho, wi, pdf) = bsdf.sample_f(wo, sampler.get_2d());
+                                    let bsdf_sample = bsdf.sample_f(wo, sampler.get_2d());
+                                    let (rho, wi, pdf) = (bsdf_sample.rho, bsdf_sample.wi, bsdf_sample.pdf);
+
                                     let cosine = wi.dot(isect.geo.n).abs();
                                     throughput *= rho * cosine / pdf;
 

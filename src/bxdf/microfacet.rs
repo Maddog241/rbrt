@@ -108,4 +108,8 @@ impl Bxdf for MicrofacetReflection {
     fn types(&self) -> i32 {
         BxdfType::Reflection | BxdfType::Glossy
     }
+
+    fn is_delta(&self) -> bool {
+        false
+    }
 }

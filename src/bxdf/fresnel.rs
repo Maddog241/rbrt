@@ -2,7 +2,7 @@ use cgmath::{Vector3, InnerSpace};
 
 use crate::{spectrum::Spectrum, utils::{cos_theta, is_nan}};
 
-use super::{BxdfType, Bxdf};
+use super::{BxdfType, Bxdf, BxdfSample};
 
 pub trait Fresnel {
     /// returns (f_value, sin_theta_t, cos_theta_t)
@@ -46,13 +46,20 @@ impl Bxdf for FresnelSpecular {
         Spectrum::new(0.0, 0.0, 0.0)
     }
 
-    fn sample_f(&self, wo: cgmath::Vector3<f64>, sample: cgmath::Point2<f64>) -> (Spectrum, cgmath::Vector3<f64>, f64) {
+    fn sample_f(&self, wo: cgmath::Vector3<f64>, sample: cgmath::Point2<f64>) -> BxdfSample {
         let (fresnel_term, sin_theta_t, cos_theta_t)= self.evaluate(cos_theta(wo));
         if sample.x < fresnel_term {
             // reflect 
             let wi = Vector3::new(-wo.x, -wo.y, wo.z);
             let pdf = fresnel_term;
-            (self.r * fresnel_term / cos_theta(wi).abs() , wi, pdf)
+            let rho = self.r * fresnel_term / cos_theta(wi).abs();
+
+            BxdfSample {
+                rho,
+                wi,
+                pdf,
+                is_delta: self.is_delta()
+            }
         } else {
             // refract
             let pdf = 1.0 - fresnel_term;
@@ -61,12 +68,27 @@ impl Bxdf for FresnelSpecular {
 
             let wi = self.refract(wo, sin_theta_t, cos_theta_t);
 
-            (self.t * (1.0-fresnel_term) * ratio2 / cos_theta(wi).abs(), wi, pdf)
+            let rho = self.t * (1.0-fresnel_term) * ratio2 / cos_theta(wi).abs();
+
+            BxdfSample {
+                rho,
+                wi,
+                pdf, 
+                is_delta: self.is_delta()
+            }
         }
+    }
+
+    fn pdf(&self, _wo: Vector3<f64>, _wi: Vector3<f64>) -> f64 {
+        0.0
     }
 
     fn types(&self) -> i32 {
         BxdfType::Specular | BxdfType::Reflection | BxdfType::Transmission
+    }
+
+    fn is_delta(&self) -> bool {
+        true
     }
 }
 

@@ -8,13 +8,20 @@ pub mod perfect_specular;
 use std::{ops::{BitOr, BitAnd}, f64::consts::PI};
 
 use crate::spectrum::Spectrum;
-use cgmath::{Point2, Vector3};
+use cgmath::{Point2, Vector3, Point3};
 
 const INV_PI: f64 = 1.0 / PI;
 
+pub struct BxdfSample {
+    pub rho: Spectrum,
+    pub wi: Vector3<f64>,
+    pub pdf: f64,
+    pub is_delta: bool
+}
+
 pub trait Bxdf {
     fn f(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> Spectrum;
-    fn sample_f(&self, wo: Vector3<f64>, sample: Point2<f64>) -> (Spectrum, Vector3<f64>, f64) {
+    fn sample_f(&self, wo: Vector3<f64>, sample: Point2<f64>) -> BxdfSample {
         // here we will use uniform sampling
         let (u, v) = (sample[0], sample[1]);
         let phi = 2.0 * PI * u;
@@ -36,9 +43,20 @@ pub trait Bxdf {
             eprintln!("Warning: Bxdf that is both reflecsive and transmissive should not use the default sample method");
         }
 
-        (self.f(wo, wi), wi, INV_PI / 2.0)
+        let rho = self.f(wo, wi);
+
+        BxdfSample {
+            rho,
+            wi,
+            pdf: self.pdf(wo, wi),
+            is_delta: self.is_delta()
+        }
+    }
+    fn pdf(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> f64 {
+        INV_PI / 2.0
     }
     fn types(&self) -> i32;
+    fn is_delta(&self) -> bool;
 }
 
 pub enum BxdfType {

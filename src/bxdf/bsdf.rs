@@ -1,4 +1,4 @@
-use super::{Bxdf, BxdfType, Spectrum};
+use super::{Bxdf, BxdfType, Spectrum, BxdfSample};
 use cgmath::{Vector3, InnerSpace, Point2};
 
 pub struct Bsdf {
@@ -33,7 +33,7 @@ impl Bsdf {
 }
 
 impl Bsdf{
-    pub fn sample_f(&self, wo: Vector3<f64>, sample: Point2<f64>) -> (Spectrum, Vector3<f64>, f64) {
+    pub fn sample_f(&self, wo: Vector3<f64>, sample: Point2<f64>) -> BxdfSample {
         let (u, v) = (sample.x, sample.y);
         // choose the bxdf to sample
         let index = (u * self.n_bxdfs as f64) as usize;
@@ -41,10 +41,23 @@ impl Bsdf{
 
         let sample = Point2::new(u, v);
 
-        let wo = self.world_to_local(wo);
-        let (f_value, wi, pdf) =  self.bxdfs[index].sample_f(wo, sample);
-        let wi = self.local_to_world(wi);
-        (f_value, wi, pdf)
+        let wo: Vector3<f64> = self.world_to_local(wo);
+        let mut bxdf_sample =  self.bxdfs[index].sample_f(wo, sample);
+
+        // transform wi to world space
+        bxdf_sample.wi = self.local_to_world(bxdf_sample.wi);
+
+        // compute pdf
+        if !bxdf_sample.is_delta {
+            let wo = self.local_to_world(wo);
+            bxdf_sample.pdf = self.pdf(wo, bxdf_sample.wi);
+        }
+        // compute brdf value in world space
+        if !bxdf_sample.is_delta {
+            bxdf_sample.rho = self.f(wo, bxdf_sample.wi);
+        }
+
+        bxdf_sample
     }
 
     pub fn f(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> Spectrum {
@@ -64,6 +77,20 @@ impl Bsdf{
         }
 
         ans
+    }
+
+    // receive world coordinates for wo and wi
+    pub fn pdf(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> f64 {
+        let mut pdf = 0.0;
+
+        let wo = self.world_to_local(wo);
+        let wi = self.world_to_local(wi);
+
+        for i in 0..self.n_bxdfs {
+            pdf += self.bxdfs[i].pdf(wo, wi);
+        }
+
+        pdf / self.n_bxdfs as f64
     }
 }
 

@@ -1,4 +1,4 @@
-use super::{Bxdf, BxdfType};
+use super::{Bxdf, BxdfType, BxdfSample};
 use super::Spectrum;
 use cgmath::{Vector3, Point2};
 use std::f64::consts::PI;
@@ -22,7 +22,7 @@ impl Bxdf for LambertianReflection {
         self.reflectance * INV_PI
     }
 
-    fn sample_f(&self, _wo: Vector3<f64>, sample: Point2<f64>) -> (Spectrum, Vector3<f64>, f64) {
+    fn sample_f(&self, _wo: Vector3<f64>, sample: Point2<f64>) -> BxdfSample {
             let pdf = INV_PI / 2.0;
 
             let theta = sample[0].acos();
@@ -32,10 +32,26 @@ impl Bxdf for LambertianReflection {
             if wi[0].is_nan() || wi[1].is_nan() || wi[2].is_nan() {
                 println!("Not a Number in lambertian");
             }
-            (self.reflectance *  INV_PI, wi, pdf)
+
+            let rho = self.reflectance * INV_PI;
+
+            BxdfSample {
+                rho,
+                wi,
+                pdf,
+                is_delta: self.is_delta()
+            }
+    }
+
+    fn pdf(&self, _wo: Vector3<f64>, _wi: Vector3<f64>) -> f64 {
+        INV_PI / 2.0
     }
 
     fn types(&self) -> i32 {
         BxdfType::Diffuse | BxdfType::Reflection
+    }
+
+    fn is_delta(&self) -> bool {
+        false
     }
 }
