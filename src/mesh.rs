@@ -269,7 +269,7 @@ impl Shape for Triangle {
         unimplemented!()
     }
 
-    fn uniform_sample_point(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
+    fn uniform_sample_point(&self, _u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64) {
         unimplemented!()
     }
 }

@@ -16,15 +16,10 @@ mod parser;
 
 use camera::perspective::PerspectiveCamera;
 use cgmath::Point2;
-use geometry::transform::Transform;
 use indicatif::{ProgressBar, MultiProgress, ProgressStyle};
-use integrator::direct_integrator::DirectIntegrator;
 use sampler::Sampler;
 
-// use crate::integrator::direct_integrator::DirectIntegrator;
-use crate::integrator::path_integrator::PathIntegrator;
 use crate::parser::parse_scene;
-// use crate::integrator::wrs_direct_integrator::WRSDirectIntegrator;
 use crate::scene::Scene;
 use crate::spectrum::Spectrum;
 use crate::camera::{Camera, CameraSample};

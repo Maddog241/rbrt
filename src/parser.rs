@@ -1,8 +1,7 @@
 use core::panic;
 use std::{fs, sync::Arc};
 use cgmath::{Vector3, Vector4, Point2, InnerSpace, Point3};
-use json::{JsonValue, object};
-use tobj::Mesh;
+use json::JsonValue;
 
 use crate::{scene::Scene, camera::{perspective::PerspectiveCamera, film::Film}, geometry::{transform::Transform, shape::{Shape, disk::Disk, sphere::Sphere}}, WorldSetting, integrator::{path_integrator::PathIntegrator, direct_integrator::DirectIntegrator, Integrator}, light::{LightList, Light, area::AreaLight, point::PointLight}, accelerator::bvh::BVH, primitive::{geometric_primitive::GeometricPrimitive, Primitive, mesh_primitive::MeshPrimitive}, material::{Material, matte::Matte, plastic::Plastic, glass::Glass, mirror::Mirror}, spectrum::Spectrum, texture::constant::ConstantTexture, mesh::TriangleMesh, sampler::uniform_sampler::UniformSampler};
 

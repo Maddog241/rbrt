@@ -1,27 +1,28 @@
 use std::f64::INFINITY;
-use std::sync::Arc;
+// use std::sync::Arc;
 
-use crate::accelerator::bvh::BVH;
-use crate::camera::film::Film;
-use crate::camera::perspective::PerspectiveCamera;
-use crate::geometry::shape::cylinder::Cylinder;
-use crate::geometry::shape::disk::Disk;
-use crate::mesh::TriangleMesh;
-use crate::geometry::shape::sphere::Sphere;
+// use crate::accelerator::bvh::BVH;
+// use crate::camera::film::Film;
+// use crate::camera::perspective::PerspectiveCamera;
+// use crate::geometry::shape::cylinder::Cylinder;
+// use crate::geometry::shape::disk::Disk;
+// use crate::mesh::TriangleMesh;
+// // use crate::geometry::shape::sphere::Sphere;
 use crate::light::LightList;
-use crate::light::area::AreaLight;
-use crate::material::glass::Glass;
-use crate::material::matte::Matte;
-use crate::material::plastic::Plastic;
-use crate::primitive::mesh_primitive::MeshPrimitive;
-use crate::texture::constant::ConstantTexture;
-use crate::texture::imagemap::{ImageTexture, Texels};
-use crate::texture::mapping::spherical::SphericalMapping;
-use crate::{light::Light, geometry::ray::Ray, spectrum::Spectrum};
-use crate::Transform;
+// use crate::light::area::AreaLight;
+// use crate::material::glass::Glass;
+// use crate::material::matte::Matte;
+// use crate::material::plastic::Plastic;
+// use crate::primitive::mesh_primitive::MeshPrimitive;
+// use crate::texture::constant::ConstantTexture;
+// use crate::texture::imagemap::{ImageTexture, Texels};
+// use crate::texture::mapping::spherical::SphericalMapping;
+// use crate::{light::Light, geometry::ray::Ray, spectrum::Spectrum};
+use crate::geometry::ray::Ray;
+// use crate::Transform;
 use crate::primitive::Primitive;
-use crate::primitive::geometric_primitive::GeometricPrimitive;
-use cgmath::{Vector3, Point2};
+// use crate::primitive::geometric_primitive::GeometricPrimitive;
+// use cgmath::{Vector3, Point2};
 
 
 

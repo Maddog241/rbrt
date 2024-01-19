@@ -1,5 +1,3 @@
-use core::panic;
-
 use cgmath::{Vector3, InnerSpace};
 
 use crate::spectrum::Spectrum;
