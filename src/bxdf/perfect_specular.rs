@@ -16,7 +16,7 @@ impl PerfectSpecular {
 
 impl Bxdf for PerfectSpecular {
     fn f(&self, _wo: cgmath::Vector3<f64>, _wi: cgmath::Vector3<f64>) -> Spectrum {
-        Spectrum::new(0.0, 0.0, 0.0)
+        Spectrum::black()
     }
 
     fn sample_f(&self, wo: cgmath::Vector3<f64>, _sample: cgmath::Point2<f64>) -> (Spectrum, cgmath::Vector3<f64>, f64) {

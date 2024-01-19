@@ -1,9 +1,10 @@
 use core::panic;
 use std::{fs, sync::Arc};
-use cgmath::{Vector3, Vector4, Point2, InnerSpace};
-use json::JsonValue;
+use cgmath::{Vector3, Vector4, Point2, InnerSpace, Point3};
+use json::{JsonValue, object};
+use tobj::Mesh;
 
-use crate::{scene::Scene, camera::{perspective::PerspectiveCamera, film::Film}, geometry::{transform::Transform, shape::{Shape, disk::Disk, sphere::Sphere}}, WorldSetting, integrator::{path_integrator::PathIntegrator, direct_integrator::DirectIntegrator, Integrator}, light::{LightList, Light, area::AreaLight}, accelerator::bvh::BVH, primitive::{geometric_primitive::GeometricPrimitive, Primitive}, material::{Material, matte::Matte, plastic::Plastic, glass::Glass, mirror::Mirror}, spectrum::Spectrum, texture::constant::ConstantTexture, mesh::TriangleMesh, sampler::uniform_sampler::UniformSampler};
+use crate::{scene::Scene, camera::{perspective::PerspectiveCamera, film::Film}, geometry::{transform::Transform, shape::{Shape, disk::Disk, sphere::Sphere}}, WorldSetting, integrator::{path_integrator::PathIntegrator, direct_integrator::DirectIntegrator, Integrator}, light::{LightList, Light, area::AreaLight, point::PointLight}, accelerator::bvh::BVH, primitive::{geometric_primitive::GeometricPrimitive, Primitive, mesh_primitive::MeshPrimitive}, material::{Material, matte::Matte, plastic::Plastic, glass::Glass, mirror::Mirror}, spectrum::Spectrum, texture::constant::ConstantTexture, mesh::TriangleMesh, sampler::uniform_sampler::UniformSampler};
 
 macro_rules! report_parsing_error {
     ($s:expr) => {
@@ -298,6 +299,7 @@ fn parse_primitive(primi: JsonValue) -> Box<dyn Primitive> {
             match tp.as_str() {
                 "geometric" => parse_geometric(primi),
                 // "mesh" => parse_mesh(primi),
+                "mesh" => parse_mesh(primi),
                 _ => {
                     let msg = format!("no primitive type named {}", tp);
                     report_parsing_error!(msg.as_str());
@@ -316,6 +318,53 @@ fn parse_geometric(primi: JsonValue) -> Box<dyn Primitive> {
     let mat = parse_material(mat);
 
     Box::new(GeometricPrimitive::new(shape, mat))
+}
+
+fn parse_mesh(primi: JsonValue) -> Box<dyn Primitive> {
+    // path and mesh
+    let json_path = get_object_property(primi.clone(), "path");
+    let path = parse_string(json_path);
+
+    let meshes = TriangleMesh::load(&path);
+    let mesh = meshes.values().next().unwrap();
+
+    // scale
+    let json_scale = get_object_property(primi.clone(), "scale");
+    let scale = match json_scale {
+        JsonValue::Array(scale) => {
+            parse_vec3(&scale, "scale")
+        },
+        _ => panic!(),
+    };
+
+    let json_rotate = get_object_property(primi.clone(), "rotate");
+    let rotate = match json_rotate {
+        JsonValue::Array(rotate) => {
+            parse_rotate(&rotate, "rotate")
+        },
+        _ => panic!(),
+    };
+
+    let json_translate = get_object_property(primi.clone(), "translate");
+    let translate = match json_translate{
+        JsonValue::Array(translate) => {
+            parse_vec3(&translate, "translate")
+        },
+        _ => panic!(),
+    };
+
+    // object to world
+    let object_to_world = 
+        Transform::translate(translate) * 
+        Transform::rotate(rotate.w, rotate.truncate().normalize()) * 
+        Transform::scale(scale);
+
+    // material 
+    let json_material = get_object_property(primi.clone(), "material");
+    let material = parse_material(json_material);
+
+
+    Box::new(MeshPrimitive::new(mesh.clone(), material, object_to_world))
 }
 
 fn parse_string(s: JsonValue) -> String {
@@ -361,8 +410,20 @@ fn parse_area(light: JsonValue) -> Arc<dyn Light> {
     }
 }
 
-fn parse_point(_light: JsonValue) -> Arc<dyn Light> {
-    unimplemented!()
+fn parse_point(light: JsonValue) -> Arc<dyn Light> {
+    let point = get_object_property(light.clone(), "point");
+    let emit = get_object_property(light, "emit");
+
+    match (point, emit) {
+        (JsonValue::Array(point), JsonValue::Array(emit)) => {
+            let p = parse_vec3(&point, "point");
+            let e = parse_vec3(&emit, "emit");
+            let point = Point3::new(p.x, p.y, p.z);
+            let le = Spectrum::new(e.x, e.y, e.z);
+            Arc::new(PointLight::new(point, le))
+        },
+        _ => report_parsing_error!("point light's 'point' and 'emit' should both be vec3")
+    }
 }
 
 fn parse_world(world: JsonValue) -> Scene {

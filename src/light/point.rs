@@ -24,7 +24,7 @@ impl Light for PointLight {
         if distance2 > 0.0 {
             (self.le, self.p, pdf)
         } else {
-            (Spectrum::new(0.0, 0.0, 0.0), Point3::new(0.0, 0.0, 0.0), pdf)
+            (Spectrum::black(), Point3::new(0.0, 0.0, 0.0), pdf)
         }
     }
 

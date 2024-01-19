@@ -17,7 +17,7 @@ impl PathIntegrator {
     }
 }
 
-fn multiple_importance_sampling(radiance: &mut Spectrum, scene: &Scene, sampler: &Arc<dyn Sampler>, bsdf: &Bsdf, isect: &SurfaceInteraction, ray: &Ray, throughput: Spectrum) {
+fn multiple_importance_sampling(scene: &Scene, sampler: &Arc<dyn Sampler>, bsdf: &Bsdf, isect: &SurfaceInteraction, ray: &Ray, throughput: Spectrum) -> Spectrum {
     let (light, light_pdf) = scene.lightlist.importance_sample_light(sampler.get_2d());
 
     // sample light
@@ -30,7 +30,7 @@ fn multiple_importance_sampling(radiance: &mut Spectrum, scene: &Scene, sampler:
 
         li * throughput * rho * cosine / l_pdf
     } else {
-        Spectrum::new(0.0, 0.0, 0.0)
+        Spectrum::black()
     };
 
     // sample bsdf 
@@ -40,23 +40,23 @@ fn multiple_importance_sampling(radiance: &mut Spectrum, scene: &Scene, sampler:
         if inter.hit_light {
             inter.radiance.unwrap()
         } else {
-            Spectrum::new(0.0, 0.0, 0.0)
+            Spectrum::black()
         }
     } else {
-        Spectrum::new(0.0, 0.0, 0.0)
+        Spectrum::black()
     };
 
     let b_radiance = if b_pdf > 0.0 && !li.is_black() {
         let cosine = wi.dot(isect.geo.n).abs();
         li * throughput * rho * cosine / b_pdf
     } else {
-        Spectrum::new(0.0, 0.0, 0.0)
+        Spectrum::black()
     };
 
-    *radiance += (l_pdf) / (l_pdf + b_pdf) * l_radiance + (b_pdf) / (l_pdf + b_pdf) * b_radiance;
+    (l_pdf) / (l_pdf + b_pdf) * l_radiance + (b_pdf) / (l_pdf + b_pdf) * b_radiance
 }
 
-fn sample_one_light(radiance: &mut Spectrum, scene: &Scene, sampler: &Arc<dyn Sampler>, bsdf: &Bsdf, isect: &SurfaceInteraction, ray: &Ray, throughput: Spectrum) {
+fn sample_one_light(scene: &Scene, sampler: &Arc<dyn Sampler>, bsdf: &Bsdf, isect: &SurfaceInteraction, ray: &Ray, throughput: Spectrum) -> Spectrum {
     let (light, light_pdf) = scene.lightlist.importance_sample_light(sampler.get_2d());
     let (li, sample_p, pdf) = light.sample_li(&isect, sampler.get_2d());
     let l_pdf = pdf * light_pdf;
@@ -65,8 +65,10 @@ fn sample_one_light(radiance: &mut Spectrum, scene: &Scene, sampler: &Arc<dyn Sa
         let rho = bsdf.f(-ray.d.normalize(), wi);
         let cosine = wi.dot(isect.geo.n).abs();
 
-        *radiance += li * throughput * rho * cosine / l_pdf
-    };
+        li * throughput * rho * cosine / l_pdf
+    } else {
+        Spectrum::black()
+    }
 }
 
 impl Integrator for PathIntegrator {
@@ -90,10 +92,11 @@ impl Integrator for PathIntegrator {
                     specular = mat.is_specular();
                     let bsdf = mat.compute_scattering(&isect);
                     // sample lights to estimate the radiance value
-                    if !specular && self.b_mis {
-                        multiple_importance_sampling(&mut radiance, scene, sampler, &bsdf, &isect, ray, throughput); 
+                    // if !specular && self.b_mis {
+                    if self.b_mis {
+                        radiance += multiple_importance_sampling(scene, sampler, &bsdf, &isect, ray, throughput); 
                     } else {
-                        sample_one_light(&mut radiance, scene, sampler, &bsdf, &isect, ray, throughput)
+                        radiance += sample_one_light(scene, sampler, &bsdf, &isect, ray, throughput)
                     }
 
                     // sample the bsdf to get the scattered ray

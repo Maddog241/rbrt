@@ -53,7 +53,7 @@ impl Bsdf{
         let wo = self.world_to_local(wo);
         let wi = self.world_to_local(wi);
 
-        let mut ans = Spectrum::new(0.0, 0.0, 0.0);
+        let mut ans = Spectrum::black();
 
         for i in 0..self.n_bxdfs {
             if (reflect && (self.bxdfs[i].types() & BxdfType::Reflection as i32) != 0) || 

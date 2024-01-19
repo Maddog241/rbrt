@@ -16,6 +16,10 @@ impl RGBSpectrum {
         RGBSpectrum { r, g, b }
     }
 
+    pub fn black() -> RGBSpectrum {
+        RGBSpectrum::new(0.0, 0.0, 0.0)
+    }
+
     pub fn is_black(&self) -> bool {
         self.r == 0.0 && self.g == 0.0 && self.b == 0.0
     }

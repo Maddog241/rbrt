@@ -27,7 +27,7 @@ impl Light for AreaLight {
             let pdf = area_pdf * distance2 / cosine;
             (self.le(), p, pdf)
         } else {
-            (Spectrum::new(0.0, 0.0, 0.0), p, 1.0)
+            (Spectrum::black(), p, 1.0)
         }
     }
 
@@ -58,7 +58,7 @@ impl Light for AreaLight {
             let radiance = if r.d.dot(geo.n) < 0.0 {
                 self.le()
             } else {
-                Spectrum::new(0.0, 0.0, 0.0)
+                Spectrum::black()
             };
 
             let isect = SurfaceInteraction {
