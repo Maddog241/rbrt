@@ -34,13 +34,13 @@ impl Integrator for DirectIntegrator {
                                 if !mat.is_specular() {
                                     let u = sampler.get_2d();
                                     let (light, light_pdf) = scene.lightlist.importance_sample_light(u);
-                                    let p_light = light.uniform_sample_point(u);
+                                    let p_light = light.sample_li(&isect, u);
                                     let light_pdf = light_pdf * p_light.pdf;
 
                                     let wi = (p_light.position - isect.geo.p).normalize();
                                     let wo = -ray.d.normalize();
                                     let cos_theta = isect.geo.n.dot(wi);
-                                    let cos_alpha = wi.dot(p_light.normal).abs();
+                                    let cos_alpha = wi.dot(-p_light.normal).max(0.0);
                                     let r2 = (p_light.position - isect.geo.p).magnitude2();
                                     let bsdf = mat.compute_scattering(&isect);
 
@@ -55,8 +55,9 @@ impl Integrator for DirectIntegrator {
                                     // sample the specular bsdf
                                     let bsdf = mat.compute_scattering(&isect);
                                     let wo = -ray.d.normalize();
-                                    let (f, wi, pdf) = bsdf.sample_f(wo, sampler.get_2d());
-                                    throughput *= f / pdf;
+                                    let (rho, wi, pdf) = bsdf.sample_f(wo, sampler.get_2d());
+                                    let cosine = wi.dot(isect.geo.n).abs();
+                                    throughput *= rho * cosine / pdf;
 
                                     // spawn the new ray
                                     *ray = Ray::new(isect.geo.p, wi, ray.time, f64::INFINITY);

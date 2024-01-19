@@ -15,30 +15,16 @@ impl AreaLight {
 }
 
 impl Light for AreaLight {
-    fn sample_li(&self, isect: &SurfaceInteraction, u: Point2::<f64>) -> (Spectrum, Point3::<f64>, f64) {
-        let (p, n, area_pdf) = self.shape.uniform_sample_point(u);
-
-        let distance2 = (p - isect.geo.p).magnitude2();
-        let we = (isect.geo.p - p).normalize();
-        let cosine = we.dot(n);
-
-        // converts the pdf w.r.t area to pdf w.r.t. solid angle
-        if cosine > 0.0 {
-            let pdf = area_pdf * distance2 / cosine;
-            (self.le(), p, pdf)
-        } else {
-            (Spectrum::black(), p, 1.0)
-        }
-    }
-
-    fn uniform_sample_point(&self, u: Point2<f64>) -> LightSample {
-        let (p, normal, pdf) = self.shape.uniform_sample_point(u);
+    fn sample_li(&self, isect: &SurfaceInteraction, u: Point2::<f64>) -> LightSample {
+        let (p, n, pdf_area) = self.shape.uniform_sample_point(u);
 
         LightSample {
             position: p,
-            normal,
-            le: self.emit ,
-            pdf,
+            normal: n,
+            le: self.le(),
+            dir: (isect.geo.p - p).normalize(),
+            pdf: pdf_area, 
+            is_delta: false,
         }
     }
 

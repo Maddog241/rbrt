@@ -80,7 +80,6 @@ fn main() {
 fn render(integrator: Arc<Box<dyn Integrator>>, camera: PerspectiveCamera, scene: Scene, setting: &WorldSetting) {
     let n_thread = setting.n_thread;
     let n_sample = setting.n_sample;
-    // let n_sample = setting.n_sample;
     let camera = Arc::new(camera);
 
     let res = camera.film.resolution;

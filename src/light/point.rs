@@ -17,23 +17,28 @@ impl PointLight {
 }
 
 impl Light for PointLight {
-    fn sample_li(&self, isect: &SurfaceInteraction, _u: Point2<f64>) -> (Spectrum, Point3<f64>, f64) {
-        let pdf = 1.0;
+    fn sample_li(&self, isect: &SurfaceInteraction, _u: Point2<f64>) -> LightSample {
         let distance2 = (self.p - isect.geo.p).magnitude2();
+        let dir = (isect.geo.p - self.p).normalize();
 
         if distance2 > 0.0 {
-            (self.le, self.p, pdf)
+            LightSample {
+                position: self.p,
+                normal: Vector3::new(1.0, 0.0, 0.0),
+                dir,
+                le: self.le,
+                pdf: 1.0,
+                is_delta: true,
+            }
         } else {
-            (Spectrum::black(), Point3::new(0.0, 0.0, 0.0), pdf)
-        }
-    }
-
-    fn uniform_sample_point(&self, _u: Point2<f64>) -> LightSample {
-        LightSample {
-            position: self.p,
-            normal: Vector3::new(0.0, 0.0, 0.0), // problem?
-            le: self.le,
-            pdf: 1.0,
+            LightSample {
+                position: self.p,
+                normal: Vector3::new(1.0, 0.0, 0.0),
+                dir,
+                le: Spectrum::black(),
+                pdf: 1.0,
+                is_delta: true,
+            }
         }
     }
 

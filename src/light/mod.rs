@@ -4,13 +4,11 @@ pub mod area;
 use std::sync::Arc;
 
 use crate::{spectrum::Spectrum, geometry::{interaction::SurfaceInteraction, ray::Ray}, sampler::wrs::Reservoir};
-use cgmath::{Point2, Point3, Vector3};
+use cgmath::{Point2, Point3, Vector3, InnerSpace};
 
 pub trait Light: Sync + Send {
-    fn sample_li(&self, isect: &SurfaceInteraction, u: Point2<f64>) -> (Spectrum, Point3<f64>, f64);
+    fn sample_li(&self, isect: &SurfaceInteraction, u: Point2<f64>) -> LightSample;
 
-    /// uniformly sample a point on the light
-    fn uniform_sample_point(&self, u: Point2<f64>) -> LightSample;
     fn le(&self) -> Spectrum;
     fn intersect_p(&self, r: &Ray) -> Option<f64>;
     fn intersect(&self, r: &mut Ray) -> Option<SurfaceInteraction>;
@@ -50,5 +48,21 @@ pub struct LightSample {
     pub position: Point3<f64>,
     pub normal: Vector3<f64>,
     pub le: Spectrum,
+    pub dir: Vector3<f64>, // direction
     pub pdf: f64, // pdf in area
+    pub is_delta: bool
+}
+
+impl LightSample {
+    pub fn pdf_area_to_solid(&self, isect: &SurfaceInteraction) -> f64 {
+        let distance2 = (isect.geo.p - self.position).magnitude2();
+        let we = (isect.geo.p - self.position).normalize();
+        let cos_alpha = we.dot(self.normal);
+
+        if cos_alpha > 0.0 {
+            self.pdf * distance2 / cos_alpha
+        } else {
+            0.0 // garbage value?
+        }
+    }
 }

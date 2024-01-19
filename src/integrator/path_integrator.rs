@@ -21,10 +21,12 @@ fn multiple_importance_sampling(scene: &Scene, sampler: &Arc<dyn Sampler>, bsdf:
     let (light, light_pdf) = scene.lightlist.importance_sample_light(sampler.get_2d());
 
     // sample light
-    let (li, sample_p, pdf) = light.sample_li(&isect, sampler.get_2d());
-    let l_pdf = pdf * light_pdf;
-    let l_radiance = if l_pdf > 0.0 && !li.is_black() && visibility_test(&isect, sample_p, scene) {
-        let wi = (sample_p - isect.geo.p).normalize();
+    let light_sample = light.sample_li(&isect, sampler.get_2d());
+    let l_pdf = light_sample.pdf_area_to_solid(&isect) * light_pdf;
+    let li = light_sample.le;
+
+    let l_radiance = if l_pdf > 0.0 && !li.is_black() && visibility_test(&isect, light_sample.position, scene) {
+        let wi = -light_sample.dir;
         let rho = bsdf.f(-ray.d.normalize(), wi);
         let cosine = wi.dot(isect.geo.n).abs();
 
@@ -58,10 +60,12 @@ fn multiple_importance_sampling(scene: &Scene, sampler: &Arc<dyn Sampler>, bsdf:
 
 fn sample_one_light(scene: &Scene, sampler: &Arc<dyn Sampler>, bsdf: &Bsdf, isect: &SurfaceInteraction, ray: &Ray, throughput: Spectrum) -> Spectrum {
     let (light, light_pdf) = scene.lightlist.importance_sample_light(sampler.get_2d());
-    let (li, sample_p, pdf) = light.sample_li(&isect, sampler.get_2d());
-    let l_pdf = pdf * light_pdf;
-    if l_pdf > 0.0 && !li.is_black() && visibility_test(&isect, sample_p, scene) {
-        let wi = (sample_p - isect.geo.p).normalize();
+    let light_sample = light.sample_li(&isect, sampler.get_2d());
+    let l_pdf = light_sample.pdf_area_to_solid(&isect) * light_pdf;
+    let li = light_sample.le;
+
+    if l_pdf > 0.0 && !li.is_black() && visibility_test(&isect, light_sample.position, scene) {
+        let wi = -light_sample.dir;
         let rho = bsdf.f(-ray.d.normalize(), wi);
         let cosine = wi.dot(isect.geo.n).abs();
 
