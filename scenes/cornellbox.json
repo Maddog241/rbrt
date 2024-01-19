@@ -1,6 +1,6 @@
 {
     "setting" : {
-        "n_sample" : 100,
+        "n_sample" : 1,
         "n_thread" : 10,
         "sampler" : {
             "type" : "uniform"
@@ -8,7 +8,7 @@
 
         "integrator" : {
             "type" : "path",
-            "b_mis" : "true"
+            "b_mis" : "false"
         }
     },
 
