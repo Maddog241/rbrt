@@ -1,6 +1,7 @@
 pub mod disk;
 pub mod sphere;
 pub mod cylinder;
+pub mod cuboid;
 
 use cgmath::{Point2, Point3, Vector3};
 
@@ -16,5 +17,7 @@ pub trait Shape: Sync + Send {
     fn intersect(&self, r: &Ray) -> Option<GeometryInfo>;
     fn intersect_p(&self, r: &Ray) -> Option<f64>;
     fn area(&self) -> f64 ;
+
+    // return point and vector in world space
     fn uniform_sample_point(&self, u: Point2<f64>) -> (Point3<f64>, Vector3<f64>, f64);
 }

@@ -30,3 +30,12 @@ Target: implement RIS-WRS sampler in this renderer
 - complete the direct integrator: support specular transmission and reflection 
 - fix path integrator: the sampling seems to be wrong
 - enable nee + mis in path integrator 
+
+## 24.1.19
+- Now mis is implemented, but not well tested. In order to test it, I need a glossy material, which is not implemented yet. So the next step is to fix the current microfacet implementation, and then test if mis is implemented correctly and excel at reducing noise.
+
+- another problem is that the parser (actually it is not a parser, just a evaluator of the AST, but I do not want to change its name) is incomplete, and its error messages are not friendly to the user. So I may need to change its error handling strategy. Maybe using a crate (such as 'anyhow')?
+
+- after the above 2 tasks, I need to write some test scene files in order to test the current functions of the ray tracer.
+
+- the last is to support rendering the medium, which is difficult for me.

@@ -1,4 +1,4 @@
-use std::f64::consts::{PI, E};
+use std::f64::consts::PI;
 
 use cgmath::{InnerSpace, Vector3};
 
@@ -62,7 +62,7 @@ impl MicrofacetDistribution {
 
     pub fn roughness_to_alpha(roughness: f64) -> f64 {
         let roughness = roughness.max(1e-3);
-        let x = roughness.log(E);
+        let x = roughness.ln();
         1.62142 + 0.819955 * x + 0.1734 * x * x + 0.0171201 * x * x * x + 0.000640711 * x * x * x * x
     }
 }
@@ -91,7 +91,7 @@ impl Bxdf for MicrofacetReflection {
         let cos_o = cos_theta(wo);
         let cos_i = cos_theta(wi);
 
-        let (fresnel_term, _, _) = self.fresnel.evaluate(wo.normalize().dot(wh));
+        let (fresnel_term, _, _) = self.fresnel.evaluate(wo.dot(wh));
 
         let res = self.reflectance * fresnel_term * self.distribution.g(wo, wi) * self.distribution.d(wh) / (4.0 * cos_o * cos_i);
 

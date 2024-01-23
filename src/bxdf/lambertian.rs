@@ -1,6 +1,8 @@
-use super::{Bxdf, BxdfType, BxdfSample};
+use crate::utils::cos_theta;
+
+use super::{cosine_sample_hemisphere, Bxdf, BxdfSample, BxdfType};
 use super::Spectrum;
-use cgmath::{Vector3, Point2};
+use cgmath::{EuclideanSpace, Point2, Vector3};
 use std::f64::consts::PI;
 
 const INV_PI: f64 = 1.0 / PI;
@@ -23,17 +25,15 @@ impl Bxdf for LambertianReflection {
     }
 
     fn sample_f(&self, _wo: Vector3<f64>, sample: Point2<f64>) -> BxdfSample {
-            let pdf = INV_PI / 2.0;
-
-            let theta = sample[0].acos();
-            let phi = sample[1] * 2.0 * PI;
-            let wi = Vector3::new(theta.sin() * phi.cos(), theta.sin() * phi.sin(), theta.cos());
+            let p = cosine_sample_hemisphere(sample);
+            let wi = p.to_vec();
 
             if wi[0].is_nan() || wi[1].is_nan() || wi[2].is_nan() {
                 println!("Not a Number in lambertian");
             }
 
             let rho = self.reflectance * INV_PI;
+            let pdf = INV_PI * cos_theta(wi);
 
             BxdfSample {
                 rho,
@@ -43,8 +43,8 @@ impl Bxdf for LambertianReflection {
             }
     }
 
-    fn pdf(&self, _wo: Vector3<f64>, _wi: Vector3<f64>) -> f64 {
-        INV_PI / 2.0
+    fn pdf(&self, _wo: Vector3<f64>, wi: Vector3<f64>) -> f64 {
+        INV_PI * cos_theta(wi)
     }
 
     fn types(&self) -> i32 {

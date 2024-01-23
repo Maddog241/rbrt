@@ -3,7 +3,7 @@ use std::{fs, sync::Arc};
 use cgmath::{Vector3, Vector4, Point2, InnerSpace, Point3};
 use json::JsonValue;
 
-use crate::{scene::Scene, camera::{perspective::PerspectiveCamera, film::Film}, geometry::{transform::Transform, shape::{Shape, disk::Disk, sphere::Sphere}}, WorldSetting, integrator::{path_integrator::PathIntegrator, direct_integrator::DirectIntegrator, Integrator}, light::{LightList, Light, area::AreaLight, point::PointLight}, accelerator::bvh::BVH, primitive::{geometric_primitive::GeometricPrimitive, Primitive, mesh_primitive::MeshPrimitive}, material::{Material, matte::Matte, plastic::Plastic, glass::Glass, mirror::Mirror}, spectrum::Spectrum, texture::constant::ConstantTexture, mesh::TriangleMesh, sampler::uniform_sampler::UniformSampler};
+use crate::{scene::Scene, camera::{perspective::PerspectiveCamera, film::Film}, geometry::{transform::Transform, shape::{cuboid::Cuboid, disk::Disk, sphere::Sphere, Shape}}, WorldSetting, integrator::{path_integrator::PathIntegrator, direct_integrator::DirectIntegrator, Integrator}, light::{LightList, Light, area::AreaLight, point::PointLight}, accelerator::bvh::BVH, primitive::{geometric_primitive::GeometricPrimitive, Primitive, mesh_primitive::MeshPrimitive}, material::{Material, matte::Matte, plastic::Plastic, glass::Glass, mirror::Mirror}, spectrum::Spectrum, texture::constant::ConstantTexture, mesh::TriangleMesh, sampler::uniform_sampler::UniformSampler};
 
 macro_rules! report_parsing_error {
     ($s:expr) => {
@@ -73,8 +73,9 @@ fn parse_shape(shape: JsonValue) -> Box<dyn Shape> {
         JsonValue::Short(tp) => {
             match tp.as_str() {
                 "disk" => parse_disk(shape.clone()),
-                "sphere" => parse_sphere(shape),
+                "sphere" => parse_sphere(shape.clone()),
                 // "cylinder" => parse_cylinder(shape),
+                "cuboid" => parse_cuboid(shape),
                 _ => panic!(""),
             }
         },
@@ -168,6 +169,57 @@ fn parse_sphere(shape: JsonValue) -> Box<dyn Shape> {
     }
 }
 
+fn parse_cuboid(shape: JsonValue) -> Box<dyn Shape> {
+    if let JsonValue::Object(shape) = shape {
+        // radius
+        let half_x: f64 = match shape.get("x") {
+            Some(JsonValue::Number(x)) => x.clone().into(),
+            _ => panic!(),
+        };
+
+        let half_y: f64 = match shape.get("y") {
+            Some(JsonValue::Number(y)) => y.clone().into(),
+            _ => panic!(),
+        };
+
+        let half_z: f64 = match shape.get("z") {
+            Some(JsonValue::Number(z)) => z.clone().into(),
+            _ => panic!(),
+        };
+        // scale
+        let scale = match shape.get("scale") {
+            Some(JsonValue::Array(scale)) => {
+                parse_vec3(scale, "scale")
+            },
+            _ => panic!(),
+        };
+        // rotate
+        let rotate = match shape.get("rotate") {
+            Some(JsonValue::Array(rotate)) => {
+                parse_rotate(rotate, "rotate")
+            },
+            _ => panic!(),
+        };
+
+        // shift
+        let trans = match shape.get("translate") {
+            Some(JsonValue::Array(shift)) => {
+                parse_vec3(shift, "translate")
+            },
+            _ => panic!(),
+        };
+
+        let object_to_world = 
+            Transform::translate(trans) * 
+            Transform::rotate(rotate.w, rotate.truncate().normalize()) * 
+            Transform::scale(scale);
+        
+        Box::new(Cuboid::new(half_x, half_y, half_z, object_to_world))
+    } else {
+        panic!()
+    }
+}
+
 fn parse_material(mat: JsonValue) -> Arc<dyn Material> {
     let tp = get_object_property(mat.clone(), "type");
     match tp {
@@ -189,6 +241,7 @@ fn parse_material(mat: JsonValue) -> Arc<dyn Material> {
 
 fn parse_matte(mat: JsonValue) -> Arc<dyn Material> {
     if let JsonValue::Object(mat) = mat {
+        println!("{:?}", mat);
         let kd = match mat.get("kd") {
             Some(JsonValue::Array(kd)) => {
                 parse_vec3(kd, "kd")

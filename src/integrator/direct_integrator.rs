@@ -45,7 +45,7 @@ impl Integrator for DirectIntegrator {
                                     let bsdf = mat.compute_scattering(&isect);
 
                                     if light_pdf > 0.0 && !p_light.le.is_black() && visibility_test(&isect, p_light.position, scene) {
-                                        lo = throughput * bsdf.f(wo, wi) * p_light.le * cos_theta * cos_alpha / (light_pdf * r2);
+                                        lo += throughput * bsdf.f(wo, wi) * p_light.le * cos_theta * cos_alpha / (light_pdf * r2);
                                     }
 
                                     break;
@@ -74,7 +74,7 @@ impl Integrator for DirectIntegrator {
                 },
                 None => {
                     // returns the background color
-                    // Spectrum::skyblue(ray.d.y)
+                    // lo += Spectrum::skyblue(ray.d.y) * throughput
                 }
             }
         }
