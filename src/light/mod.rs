@@ -28,10 +28,18 @@ impl LightList {
         }
     }
 
+    pub fn uniform_pick_light(&self, u: f64) -> (Arc<dyn Light>, f64) {
+        let i = (u * self.lights.len() as f64) as usize;
+        let light = self.lights[i].clone();
+        let light_pdf = 1.0 / self.lights.len() as f64;
+
+        (light, light_pdf)
+    }
+
     /// sampling the lights with respect to their power
     /// 
     /// returns the ptr to the light and its sampling probability
-    pub fn importance_sample_light(&self, u: Point2<f64>) -> (Arc<dyn Light>, f64) {
+    pub fn importance_sample_light(&self, _u: Point2<f64>) -> (Arc<dyn Light>, f64) {
         // sample the light 
         assert!(!self.lights.is_empty());
         let mut r = Reservoir::new();

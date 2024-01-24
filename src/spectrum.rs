@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul, Div, AddAssign, MulAssign, DivAssign};
+use std::{ops::{Add, Sub, Mul, Div, AddAssign, MulAssign, DivAssign}, process::exit};
 
 use crate::camera::pixel::Pixel;
 
@@ -25,6 +25,7 @@ impl RGBSpectrum {
     }
 
     pub fn to_pixel(&self) -> Pixel {
+        check_invalid(self);
         // gamma correction 2.0
         let r = self.r.sqrt();
         let g = self.g.sqrt();
@@ -49,6 +50,24 @@ impl RGBSpectrum {
         (1.0-t) * RGBSpectrum::new(1.0, 1.0, 1.0) + t * RGBSpectrum::new(0.5, 0.7, 1.0)
     }
 
+    pub fn contain_nan(&self) -> bool {
+        for elem in [self.r, self.g, self.b] {
+            if elem.is_nan() {
+                return true;
+            }
+        }
+
+        false
+    }
+}
+
+fn check_invalid(radiance: &Spectrum) {
+    for elem in [radiance.r, radiance.g, radiance.b] {
+        if elem.is_nan() || elem < 0.0 {
+            println!("error: invalid radiance value {:?}", radiance);
+            exit(1);
+        }
+    }
 }
 
 impl Add<RGBSpectrum> for RGBSpectrum {

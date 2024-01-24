@@ -1,3 +1,5 @@
+use cgmath::Vector3;
+
 use crate::{spectrum::Spectrum, utils::reflect};
 
 use super::{Bxdf, BxdfType, BxdfSample};
@@ -20,7 +22,7 @@ impl Bxdf for PerfectSpecular {
     }
 
     fn sample_f(&self, wo: cgmath::Vector3<f64>, _sample: cgmath::Point2<f64>) -> BxdfSample {
-        let wi = reflect(wo);
+        let wi = reflect(wo, Vector3::new(0.0, 0.0, 1.0));
 
         let rho = self.reflectance / wo.z.abs();
 

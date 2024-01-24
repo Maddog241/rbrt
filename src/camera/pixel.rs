@@ -9,9 +9,15 @@ pub struct Pixel {
 impl Pixel {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         // allow x, y, z to be greater than 1.0 for HDR
-        assert!(0.0 <= x); 
-        assert!(0.0 <= y);
-        assert!(0.0 <= z);
+        // assert!(0.0 <= x); 
+        // assert!(0.0 <= y);
+        // assert!(0.0 <= z);
+        if x.is_nan() || y.is_nan() || z.is_nan() {
+            return Pixel {
+                rgb: Vector3::new(1.0, 0.0, 0.0)
+            };
+        }
+
         Pixel {
             rgb: Vector3::new(x, y, z),
         }

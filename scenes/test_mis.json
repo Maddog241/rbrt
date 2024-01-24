@@ -8,13 +8,13 @@
         ],
         "film" : {
             "resolution" : [500, 500],
-            "filename" : "test_cuboid.png"
+            "filename" : "plastic.png"
         },
-        "fov" : 90.0
+        "fov" : 60.0
     },
 
     "setting" : {
-        "n_sample" : 1,
+        "n_sample" : 100,
         "n_thread" : 10,
         "sampler" : {
                 "type" : "uniform",
@@ -33,12 +33,12 @@
                 "type" : "area",
                 "shape" : {
                     "type" : "disk",
-                    "radius" : 1.0,
+                    "radius" : 3.0,
                     "scale" : [1.0, 1.0, 1.0],
                     "rotate" : [1.0, 0.0, 0.0, 90.0],
-                    "translate" : [3.0, 9.99, 20.0]
+                    "translate" : [0.0, 9.99, 20.0]
                 },
-                "emit" : [1.0, 1.0, 1.0]
+                "emit" : [4.0, 4.0, 4.0]
             }
         ],
 
@@ -120,25 +120,24 @@
                     "kd" : [0.8, 0.8, 0.8]
                 }
             },
-            
+
             {
                 "type": "geometric",
                 "shape": {
-                    "type" : "cuboid",
-                    "x": 5.0,
-                    "y": 0.1,
-                    "z": 3.0,
+                    "type" : "sphere",
+                    "radius" : 3.0,
                     "scale" : [1.0, 1.0, 1.0],
-                    "rotate" : [1.0, 0.0, 0.0, -45.0],
-                    "translate" : [0.0, -5.0, 20.0]
+                    "rotate" : [1.0, 0.0, 0.0, 270.0],
+                    "translate" : [0.0, -6.0, 20.0]
                 },
 
-                "material" : {
+                "material": {
                     "type" : "plastic",
-                    "roughness" : 0.01,
-                    "ks" : [0.5, 0.5, 0.5],
-                    "kd" : [0.0, 0.0, 0.0]
+                    "roughness": 0.05,
+                    "kd" : [0.8, 0.8, 0.8],
+                    "ks" : [0.5, 0.5, 0.5]
                 }
+                
             }
         ]
     }

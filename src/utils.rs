@@ -4,7 +4,7 @@ use crate::spectrum::Spectrum;
 
 // w here are supposed to be in the local coordinate system
 pub fn cos_theta(w: Vector3<f64>) -> f64 {
-    w.z
+    w.z.abs()
 }
 
 pub fn cos2_theta(w: Vector3<f64>) -> f64 {
@@ -119,13 +119,22 @@ pub fn check_spectrum(spectrum: &Spectrum) -> bool {
     spectrum.r >= 0.0 && spectrum.g >= 0.0 && spectrum.b >= 0.0
 }
 
-pub fn reflect(wo: Vector3<f64>) -> Vector3<f64> {
-    Vector3::new(-wo.x, -wo.y, wo.z)
+pub fn reflect(wo: Vector3<f64>, n: Vector3<f64>) -> Vector3<f64> {
+    let cosine = wo.dot(n);
+
+    -wo + 2.0 * n * cosine
 }
 
 // pub fn random_2d() -> Point2<f64> {
 //     Point2::new(random(), random())
 // }
+
+pub fn spherical_direction(sin_theta: f64, cos_theta: f64, phi: f64) -> Vector3<f64> {
+    let x = sin_theta * phi.cos();
+    let y = sin_theta * phi.sin();
+    let z = cos_theta;
+    Vector3::new(x, y, z)
+}
 
 #[cfg(test)]
 mod tests {

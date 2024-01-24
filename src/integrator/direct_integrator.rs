@@ -33,7 +33,9 @@ impl Integrator for DirectIntegrator {
                             Some(mat) => {
                                 if !mat.is_specular() {
                                     let u = sampler.get_2d();
-                                    let (light, light_pdf) = scene.lightlist.importance_sample_light(u);
+                                    // let (light, light_pdf) = scene.lightlist.importance_sample_light(u);
+                                    let (light, light_pdf) = scene.lightlist.uniform_pick_light(sampler.get_2d().x);
+
                                     let p_light = light.sample_li(&isect, u);
                                     let light_pdf = light_pdf * p_light.pdf;
 
@@ -44,7 +46,7 @@ impl Integrator for DirectIntegrator {
                                     let r2 = (p_light.position - isect.geo.p).magnitude2();
                                     let bsdf = mat.compute_scattering(&isect);
 
-                                    if light_pdf > 0.0 && !p_light.le.is_black() && visibility_test(&isect, p_light.position, scene) {
+                                    if r2 > 0.0 && light_pdf > 0.0 && !p_light.le.is_black() && visibility_test(&isect, p_light.position, scene) {
                                         lo += throughput * bsdf.f(wo, wi) * p_light.le * cos_theta * cos_alpha / (light_pdf * r2);
                                     }
 

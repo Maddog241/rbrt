@@ -1,10 +1,10 @@
 use std::f64::consts::PI;
 
-use cgmath::{InnerSpace, Vector3};
+use cgmath::{InnerSpace, Point2, Vector3};
 
-use crate::{utils::{tan2_theta, sin2_phi, cos2_phi, cos2_theta, cos_theta}, spectrum::Spectrum};
+use crate::{utils::{cos2_phi, cos2_theta, cos_theta, reflect, sin2_phi, spherical_direction, tan2_theta}, spectrum::Spectrum};
 
-use super::{Bxdf, BxdfType, fresnel::Fresnel};
+use super::{fresnel::Fresnel, Bxdf, BxdfSample, BxdfType};
 
 pub enum MicrofacetDistribution {
     TrowbridgeReitz {
@@ -56,14 +56,55 @@ impl MicrofacetDistribution {
         1.0 / (1.0 + self.lambda(wo) + self.lambda(wi))
     }
 
-    // fn sample_wh(&self, wo: Vector3<f64>, sample: Point2<f64>) -> Vector3<f64> {
-
-    // }
 
     pub fn roughness_to_alpha(roughness: f64) -> f64 {
-        let roughness = roughness.max(1e-3);
+        let roughness = roughness.max(1e-5);
         let x = roughness.ln();
-        1.62142 + 0.819955 * x + 0.1734 * x * x + 0.0171201 * x * x * x + 0.000640711 * x * x * x * x
+        // 1.62142 + 0.819955 * x + 0.1734 * x * x + 0.0171201 * x * x * x + 0.000640711 * x * x * x * x
+        roughness
+    }
+
+    // sample the Distribution function
+    pub fn sample_wh(&self, wo: Vector3<f64>, u: Point2<f64>) -> Vector3<f64> {
+        match self {
+            Self::TrowbridgeReitz { alpha_x, alpha_y } => {
+                let cos_theta;
+                let mut phi;
+
+                if alpha_x == alpha_y {
+                    // isotropic
+                    let tan_theta2 = alpha_x * alpha_x * u[0] / (1.0 - u[0]);
+                    cos_theta = 1.0 / (1.0 + tan_theta2).sqrt();
+                    phi = 2.0 * PI * u[1];
+                } else {
+                    // anisotropic
+                    phi = (alpha_y / alpha_x * (2.0 * PI * u[1] + 0.5 * PI).tan()).atan();
+                    if u[1] > 0.5 {
+                        phi += PI;
+                    }
+
+                    let sin_phi = phi.sin();
+                    let cos_phi = phi.cos();
+                    let alpha_x2 = alpha_x * alpha_x;
+                    let alpha_y2 = alpha_y * alpha_y;
+                    let alpha2 = 1.0 / (cos_phi * cos_phi / alpha_x2 + sin_phi * sin_phi / alpha_y2);
+
+                    let tan_theta2 = alpha2 * u[0] / (1.0 - u[0]);
+                    cos_theta = 1.0 / (1.0 + tan_theta2).sqrt();
+                }
+
+                let sin_theta = (1.0 - cos_theta * cos_theta).clamp(0.0, 1.0).sqrt();
+                let wh = spherical_direction(sin_theta, cos_theta, phi);
+
+                wh
+            }
+        }
+    }
+
+
+    // return the pdf of sampling wh
+    pub fn pdf(&self, wh: Vector3<f64>) -> f64  {
+        self.d(wh) * cos_theta(wh).abs()
     }
 }
 
@@ -103,6 +144,43 @@ impl Bxdf for MicrofacetReflection {
         // println!("res: {:?}", res);
 
         res
+    }
+
+    fn sample_f(&self, wo: Vector3<f64>, sample: Point2<f64>) -> super::BxdfSample {
+        let wh = self.distribution.sample_wh(wo, sample);
+        let wi = reflect(wo, wh);
+
+        // lie in the same hemisphere
+        if wo.z * wi.z > 0.0 {
+            let rho = self.f(wo, wi);
+
+            BxdfSample {
+                rho,
+                wi,
+                pdf: self.pdf(wo, wi),
+                is_delta: false,
+            }
+        } else {
+            // blocked 
+            BxdfSample {
+                rho: Spectrum::black(),
+                wi,
+                pdf: 1.0,
+                is_delta: false,
+            }
+        }
+    }
+
+    fn pdf(&self, wo: Vector3<f64>, wi: Vector3<f64>) -> f64 {
+        if wo.z * wi.z < 0.0 {
+            // not in the same hemisphere
+            return 0.0;
+        }
+
+        let wh = (wo + wi).normalize();
+        let pdf_wh = self.distribution.pdf(wh);
+
+        pdf_wh / (4.0 * wo.dot(wh).max(1e-3))
     }
 
     fn types(&self) -> i32 {

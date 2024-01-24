@@ -241,7 +241,6 @@ fn parse_material(mat: JsonValue) -> Arc<dyn Material> {
 
 fn parse_matte(mat: JsonValue) -> Arc<dyn Material> {
     if let JsonValue::Object(mat) = mat {
-        println!("{:?}", mat);
         let kd = match mat.get("kd") {
             Some(JsonValue::Array(kd)) => {
                 parse_vec3(kd, "kd")

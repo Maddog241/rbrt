@@ -1,4 +1,4 @@
-use crate::{bxdf::{bsdf::Bsdf, microfacet::{MicrofacetDistribution, MicrofacetReflection}, fresnel::{FresnelSpecular, FresnelNoOp, FresnelSchlick}, lambertian::LambertianReflection}, utils::{perpendicular, sphere_tangent}, spectrum::Spectrum};
+use crate::{bxdf::{bsdf::Bsdf, microfacet::{MicrofacetDistribution, MicrofacetReflection}, fresnel::FresnelNoOp, lambertian::LambertianReflection}, utils::sphere_tangent, spectrum::Spectrum};
 
 use super::Material;
 

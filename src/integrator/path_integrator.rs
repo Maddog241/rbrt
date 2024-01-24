@@ -3,7 +3,7 @@ use std::{f64::INFINITY, sync::Arc};
 
 use cgmath::InnerSpace;
 
-use crate::{spectrum::Spectrum, geometry::{ray::Ray, interaction::SurfaceInteraction}, scene::Scene, sampler::Sampler, bxdf::bsdf::Bsdf, light::LightSample};
+use crate::{spectrum::Spectrum, geometry::{ray::Ray, interaction::SurfaceInteraction}, scene::Scene, sampler::Sampler, bxdf::bsdf::Bsdf};
 use super::{Integrator, visibility_test};
 
 pub struct PathIntegrator {
@@ -27,7 +27,8 @@ fn multiple_importance_sampling(scene: &Scene, sampler: &Arc<dyn Sampler>, bsdf:
     let mut res = Spectrum::black();
 
     {
-        let (light, light_pdf) = scene.lightlist.importance_sample_light(sampler.get_2d());
+        // let (light, light_pdf) = scene.lightlist.importance_sample_light(sampler.get_2d());
+        let (light, light_pdf) = scene.lightlist.uniform_pick_light(sampler.get_2d().x);
 
         // sample light
         let light_sample = light.sample_li(&isect, sampler.get_2d());
@@ -35,7 +36,7 @@ fn multiple_importance_sampling(scene: &Scene, sampler: &Arc<dyn Sampler>, bsdf:
         let li = light_sample.le;
 
         res += if l_pdf > 0.0 && !li.is_black() && visibility_test(&isect, light_sample.position, scene) {
-            let wi = -light_sample.dir;
+            let wi = -light_sample.dir.normalize();
             let wo = -ray.d.normalize();
             let rho = bsdf.f(wo, wi);
             let b_pdf = bsdf.pdf(wo, wi);
@@ -94,7 +95,10 @@ fn multiple_importance_sampling(scene: &Scene, sampler: &Arc<dyn Sampler>, bsdf:
 }
 
 fn sample_one_light(scene: &Scene, sampler: &Arc<dyn Sampler>, bsdf: &Bsdf, isect: &SurfaceInteraction, ray: &Ray, throughput: Spectrum) -> Spectrum {
-    let (light, light_pdf) = scene.lightlist.importance_sample_light(sampler.get_2d());
+    // let (light, light_pdf) = scene.lightlist.importance_sample_light(sampler.get_2d());
+    
+    let (light, light_pdf) = scene.lightlist.uniform_pick_light(sampler.get_2d().x);
+
     let light_sample = light.sample_li(&isect, sampler.get_2d());
 
     let l_pdf = light_sample.pdf_area_to_solid(&isect) * light_pdf;
