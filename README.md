@@ -28,14 +28,14 @@ a ray tracer written while reading *Physically Based Rendering*.
 ### Current Result
 1000 samples per pixel
 
-  ![](two_bunny.png)
+  ![](assets/two_bunny.png)
 
-  ![](cornell_box.png)
+  ![](assets/cornell_box.png)
 
-  ![microfacet](microfacet2.png)
+  ![microfacet](assets/microfacet2.png)
 
-  ![microfacet](microfacet.png)
+  ![microfacet](assets/microfacet.png)
 
-  ![](image_texture.png)
+  ![](assets/image_texture.png)
   
-  ![](plastic.png)
+  ![](assets/plastic.png)
